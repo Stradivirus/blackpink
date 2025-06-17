@@ -1,5 +1,5 @@
 import React from "react";
-import PostDetail from "../components/PostDetail";
+import PostDetail from "../../components/CustomerBoard/PostDetail";
 
 const PostPage: React.FC = () => <PostDetail />;
 

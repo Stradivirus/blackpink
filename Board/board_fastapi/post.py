@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Body
 from datetime import date, time, datetime
 from bson.objectid import ObjectId
 from db import board_collection, member_collection
@@ -121,3 +121,34 @@ def delete_post(id: str):
         }}
     )
     return {"message": "삭제되었습니다."}
+
+@router.put("/api/posts/{id}", response_model=BoardResponse)
+def update_post(id: str, req: BoardCreateRequest = Body(...)):
+    b = board_collection.find_one({"_id": ObjectId(id)})
+    if not b or b.get("deleted"):
+        raise HTTPException(404, "게시글을 찾을 수 없습니다.")
+    member = member_collection.find_one({"userId": req.userId})
+    if not member:
+        raise HTTPException(400, "존재하지 않는 사용자입니다.")
+    board_collection.update_one(
+        {"_id": ObjectId(id)},
+        {"$set": {
+            "title": req.title,
+            "content": req.content,
+            # 필요하다면 수정일시 필드도 추가 가능
+        }}
+    )
+    updated = board_collection.find_one({"_id": ObjectId(id)})
+    return BoardResponse(
+        id=str(updated["_id"]),
+        title=updated["title"],
+        content=updated["content"],
+        writerId=updated["writerId"],
+        writerNickname=updated["writerNickname"],
+        viewCount=updated["viewCount"],
+        createdDate=date.fromisoformat(updated["createdDate"]),
+        createdTime=time.fromisoformat(updated["createdTime"]),
+        deleted=updated.get("deleted", False),
+        deletedDate=date.fromisoformat(updated["deletedDate"]) if updated.get("deletedDate") else None,
+        deletedTime=time.fromisoformat(updated["deletedTime"]) if updated.get("deletedTime") else None
+    )

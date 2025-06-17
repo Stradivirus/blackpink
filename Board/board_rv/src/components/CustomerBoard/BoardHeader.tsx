@@ -1,8 +1,8 @@
 import React, {useState} from "react";
-import "../styles/Board.css";
-import Modal from "./Modal";
-import AuthForm from "./AuthForm";
-import {useAuth} from "../context/AuthContext";
+import "../../styles/Board.css";
+import Modal from "../Modal";
+import AuthForm from "../AuthForm";
+import {useAuth} from "../../context/AuthContext";
 
 const BoardHeader: React.FC = () => {
     const {isLoggedIn, user, logout} = useAuth();
