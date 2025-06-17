@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { API_URLS } from "../api/urls";
-import type { Comment } from "../types/Comment";
-import { useAuth } from "../context/AuthContext";
-import "../styles/comment.css";
+import { API_URLS } from "../../api/urls";
+import type { Comment } from "../../types/Comment";
+import { useAuth } from "../../context/AuthContext";
+import "../../styles/comment.css";
 
 const CommentList: React.FC<{ postId: string }> = ({ postId }) => {
     const [comments, setComments] = useState<Comment[]>([]);
@@ -72,7 +72,7 @@ const CommentList: React.FC<{ postId: string }> = ({ postId }) => {
                             <div className="comment-meta">
                                 <b>{c.writerNickname}</b>
                                 <span style={{ color: "#888", marginLeft: 8 }}>{c.createdDate} {c.createdTime}</span>
-                                {user && user.id === c.writerId && (
+                                {user && String(user.id) === String(c.writerId) && (
                                     <button
                                         className="comment-delete-btn"
                                         onClick={() => handleDelete(c.id)}

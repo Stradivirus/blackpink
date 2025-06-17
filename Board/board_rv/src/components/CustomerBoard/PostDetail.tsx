@@ -1,12 +1,12 @@
 import React, {useEffect, useState} from "react";
 import {useParams, Link, useNavigate} from "react-router-dom";
-import type {Post} from "../types/Post";
-import {API_URLS} from "../api/urls";
-import {formatDate} from "../utils/formatDate";
-import {useAuth} from "../context/AuthContext";
+import type {Post} from "../../types/Post";
+import {API_URLS} from "../../api/urls";
+import {formatDate} from "../../utils/formatDate";
+import {useAuth} from "../../context/AuthContext";
 import CommentList from "./CommentList";
-import "../styles/Board.css";
-import "../styles/modal.css";
+import "../../styles/Board.css";
+import "../../styles/modal.css";
 
 const RecentPostList: React.FC<{ excludeId?: string }> = ({excludeId}) => {
     const [posts, setPosts] = useState<Post[]>([]);
@@ -127,7 +127,7 @@ const PostDetail: React.FC = () => {
         try {
             const res = await fetch(API_URLS.POST(id), {method: "DELETE"});
             if (!res.ok) throw new Error("삭제에 실패했습니다.");
-            navigate("/");
+            navigate("/postpage");
         } catch (err: any) {
             setError(err?.message || "삭제 중 오류가 발생했습니다.");
         } finally {
@@ -149,7 +149,7 @@ const PostDetail: React.FC = () => {
                 <div className="board-detail-container">
                     <div className="error-message">{error}</div>
                     <div className="board-detail-btn-group board-detail-btn-group-right">
-                        <Link to="/" className="board-btn cancel">목록으로</Link>
+                        <Link to="/postpage" className="board-btn cancel">목록으로</Link>
                     </div>
                 </div>
             </>
@@ -184,20 +184,30 @@ const PostDetail: React.FC = () => {
                         <Link to={`/posts/${post.id}/edit`}>
                             <button className="board-btn">수정</button>
                         </Link>
-                        <button
-                            className="board-btn"
-                            onClick={handleDeleteClick}
-                            disabled={isDeleting}
-                        >
-                            {isDeleting ? "삭제 중..." : "삭제"}
-                        </button>
-                        <Link to="/" className="board-btn cancel">목록으로</Link>
-                    </div>
-                ) : (
-                    <div className="board-detail-btn-group board-detail-btn-group-right">
-                        <Link to="/" className="board-btn cancel">목록으로</Link>
-                    </div>
-                )}
+                <button
+                    className="board-btn"
+                    onClick={handleDeleteClick}
+                    disabled={isDeleting}
+                >
+                    {isDeleting ? "삭제 중..." : "삭제"}
+                </button>
+                <Link to="/postpage" className="board-btn cancel">목록으로</Link>
+            </div>
+        ) : (
+            <div className="board-detail-btn-group board-detail-btn-group-right">
+                <Link to="/postpage" className="board-btn cancel">목록으로</Link>
+            </div>
+        )}
+                <ConfirmModal
+                    open={showConfirm}
+                    x={modalPos.x}
+                    y={modalPos.y}
+                    onConfirm={() => {
+                        setShowConfirm(false);
+                        handleDelete();
+                    }}
+                    onCancel={() => setShowConfirm(false)}
+                />
             </main>
             <CommentList postId={post.id} />
             <RecentPostList excludeId={String(post.id)}/>

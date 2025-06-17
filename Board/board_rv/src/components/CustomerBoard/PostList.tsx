@@ -1,10 +1,10 @@
 import React, {useEffect, useState} from "react";
 import {Link} from "react-router-dom";
-import type {Post} from "../types/Post";
-import {API_URLS} from "../api/urls";
-import {formatDate} from "../utils/formatDate";
-import {useAuth} from "../context/AuthContext";
-import "../styles/Board.css";
+import type {Post} from "../../types/Post";
+import {API_URLS} from "../../api/urls";
+import {formatDate} from "../../utils/formatDate";
+import {useAuth} from "../../context/AuthContext";
+import "../../styles/Board.css";
 
 const PAGE_SIZE = 30;
 

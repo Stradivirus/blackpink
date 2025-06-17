@@ -1,26 +1,39 @@
 import React from "react";
-import {BrowserRouter, Routes, Route} from "react-router-dom";
-import BoardHeader from "./components/BoardHeader";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import BoardHeader from "./components/CustomerBoard/BoardHeader";
 import Home from "./pages/Home";
-import PostPage from "./pages/PostPage";
-import PostNewPage from "./pages/PostNewPage";
-import PostForm from "./components/PostForm";
-import { AuthProvider } from "./context/AuthContext"; // 추가
+import PostPage from "./pages/CustomerBoard/PostPage";
+import PostNewPage from "./pages/CustomerBoard/PostNewPage";
+import PostForm from "./components/CustomerBoard/PostForm";
+import { AuthProvider } from "./context/AuthContext";
+import PostList from "./components/CustomerBoard/PostList"; 
+
+const AppContent: React.FC = () => {
+  const location = useLocation();
+  const isHome = location.pathname === "/";
+
+  return (
+    <>
+      {!isHome && <BoardHeader />}
+      <main>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/postpage" element={<PostList />} />
+          <Route path="/posts/:id" element={<PostPage />} />
+          <Route path="/posts/:id/edit" element={<PostForm isEdit={true} />} />
+          <Route path="/new" element={<PostNewPage />} />
+        </Routes>
+      </main>
+    </>
+  );
+};
 
 const App: React.FC = () => (
-    <AuthProvider> {/* 추가 */}
-        <BrowserRouter>
-            <BoardHeader/>
-            <main>
-                <Routes>
-                    <Route path="/" element={<Home/>}/>
-                    <Route path="/posts/:id" element={<PostPage/>}/>
-                    <Route path="/posts/:id/edit" element={<PostForm isEdit={true}/>}/>
-                    <Route path="/new" element={<PostNewPage/>}/>
-                </Routes>
-            </main>
-        </BrowserRouter>
-    </AuthProvider>
+  <AuthProvider>
+    <BrowserRouter>
+      <AppContent />
+    </BrowserRouter>
+  </AuthProvider>
 );
 
 export default App;

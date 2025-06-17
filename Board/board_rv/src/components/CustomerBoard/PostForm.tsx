@@ -1,8 +1,8 @@
 import React, {useState, useEffect} from "react";
 import {useNavigate, useParams, Link} from "react-router-dom";
-import {API_URLS} from "../api/urls";
-import {useAuth} from "../context/AuthContext";
-import "../styles/Board.css";
+import {API_URLS} from "../../api/urls";
+import {useAuth} from "../../context/AuthContext";
+import "../../styles/Board.css";
 
 interface PostFormState {
     title: string;
@@ -36,7 +36,8 @@ const PostForm: React.FC<Props> = ({isEdit}) => {
     useEffect(() => {
         if (isEdit && id && user) {
             setError(null);
-            fetch(`${API_URLS.POST(id)}/edit`)
+            // 수정: /edit이 아니라 그냥 상세조회 API로!
+            fetch(API_URLS.POST(id))
                 .then(res => {
                     if (!res.ok) throw new Error("글 정보를 불러오지 못했습니다.");
                     return res.json();
@@ -85,11 +86,16 @@ const PostForm: React.FC<Props> = ({isEdit}) => {
             }
             if (!res.ok) {
                 const data = await res.json().catch(() => ({}));
-                throw new Error(data.message || "저장에 실패했습니다.");
+                throw new Error(data.detail || data.message || "저장에 실패했습니다.");
             }
-            navigate("/");
+            // 수정: 글 작성/수정 후 게시판 목록으로 이동
+            navigate("/postpage");
         } catch (err) {
-            setError((err as Error).message || "저장 중 오류가 발생했습니다.");
+            let msg = (err as Error).message || "저장 중 오류가 발생했습니다.";
+            if (msg.includes("동일한 내용의 글이 이미 등록되어 있습니다")) {
+                msg = "중복입니다: 동일한 내용의 글이 이미 등록되어 있습니다.";
+            }
+            setError(msg);
         } finally {
             setIsSubmitting(false);
         }

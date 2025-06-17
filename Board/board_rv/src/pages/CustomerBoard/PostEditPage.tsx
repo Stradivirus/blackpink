@@ -1,5 +1,5 @@
 import React from "react";
-import PostForm from "../components/PostForm";
+import PostForm from "../../components/CustomerBoard/PostForm";
 
 const PostEditPage: React.FC = () => <PostForm isEdit={true} />;
 
