@@ -101,7 +101,7 @@ const AuthForm: React.FC<AuthFormProps> = ({mode, onSuccess}) => {
         setResult("로딩 중...");
         setLoginError(""); // 로그인 에러 초기화
         try {
-            const url = mode === "login" ? API_URLS.MEMBER_LOGIN : API_URLS.MEMBER_JOIN;
+            const url = mode === "login" ? API_URLS.LOGIN : API_URLS.MEMBER_JOIN;
             const payload = mode === "login"
                 ? {userId: form.userId, password: form.password}
                 : form;

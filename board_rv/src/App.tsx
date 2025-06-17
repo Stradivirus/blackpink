@@ -7,14 +7,17 @@ import PostNewPage from "./pages/CustomerBoard/PostNewPage";
 import PostForm from "./components/CustomerBoard/PostForm";
 import { AuthProvider } from "./context/AuthContext";
 import PostList from "./components/CustomerBoard/PostList"; 
+import AdminDashboard from "./pages/Admin/AdminDashboard";
 
 const AppContent: React.FC = () => {
   const location = useLocation();
   const isHome = location.pathname === "/";
+  const isAdmin = location.pathname.startsWith("/admin");
 
   return (
     <>
-      {!isHome && <BoardHeader />}
+      {/* 홈, 관리자 페이지에서는 BoardHeader 숨김 */}
+      {!isHome && !isAdmin && <BoardHeader />}
       <main>
         <Routes>
           <Route path="/" element={<Home />} />
@@ -22,6 +25,7 @@ const AppContent: React.FC = () => {
           <Route path="/posts/:id" element={<PostPage />} />
           <Route path="/posts/:id/edit" element={<PostForm isEdit={true} />} />
           <Route path="/new" element={<PostNewPage />} />
+          <Route path="/admin" element={<AdminDashboard />} />
         </Routes>
       </main>
     </>

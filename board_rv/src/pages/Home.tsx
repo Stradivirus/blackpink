@@ -7,9 +7,13 @@ const Home: React.FC = () => {
   const [authMode, setAuthMode] = useState<"login" | "register" | null>(null);
 
   // 로그인/회원가입 성공 시 게시판으로 이동
-  const handleAuthSuccess = () => {
+  const handleAuthSuccess = (user: any) => {
     setAuthMode(null);
-    navigate("/postpage");
+    if (user.type === "admin") {
+      navigate("/admin");
+    } else {
+      navigate("/postpage");
+    }
   };
 
   return (

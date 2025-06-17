@@ -33,19 +33,6 @@ def join(req: MemberJoinRequest):
         joinedAt=date.fromisoformat(member["joinedAt"])
     )
 
-@router.post("/api/member/login", response_model=MemberResponse)
-def login(req: MemberLoginRequest):
-    member = member_collection.find_one({"userId": req.userId})
-    if not member or not bcrypt.checkpw(req.password.encode("utf-8"), member["password"].encode("utf-8")):
-        raise HTTPException(401, "아이디 또는 비밀번호가 올바르지 않습니다.")
-    return MemberResponse(
-        id=str(member["_id"]),
-        userId=member["userId"],
-        nickname=member["nickname"],
-        email=member["email"],
-        joinedAt=date.fromisoformat(member["joinedAt"])
-    )
-
 @router.get("/api/member/check/{field}")
 def check_duplicate(field: str, value: str = Query(...)):
     if field not in ("userId", "nickname", "email"):

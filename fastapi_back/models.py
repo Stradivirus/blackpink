@@ -53,3 +53,17 @@ class CommentResponse(BaseModel):
     deleted: Optional[bool] = False
     deletedDate: Optional[date] = None
     deletedTime: Optional[time] = None
+
+class AdminCreateRequest(BaseModel):
+    userId: str
+    password: str
+    nickname: str
+
+class AdminLoginRequest(BaseModel):
+    userId: str
+    password: str
+
+class AdminResponse(BaseModel):
+    id: str
+    userId: str
+    nickname: str
