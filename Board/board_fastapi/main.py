@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from member import router as member_router
 from post import router as post_router
+from comment import router as comment_router
 
 app = FastAPI()
 
@@ -15,6 +16,7 @@ app.add_middleware(
 
 app.include_router(member_router)
 app.include_router(post_router)
+app.include_router(comment_router)
 
 if __name__ == "__main__":
     import uvicorn

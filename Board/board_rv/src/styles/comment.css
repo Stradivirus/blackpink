@@ -1,0 +1,117 @@
+/* ===== 댓글 영역 ===== */
+.comment-section {
+    max-width: 1000px;
+    margin: 36px auto 0 auto; /* board-detail-container와 margin-top 맞춤 */
+    background: #fff;         /* board-detail-container와 동일하게 */
+    border-radius: 12px;
+    padding: 36px 44px 44px 44px; /* board-detail-container와 동일하게 */
+    box-shadow: 0 4px 16px rgba(40,60,120,0.10); /* board-detail-container와 동일하게 */
+}
+
+.comment-section h4 {
+    margin-top: 0;
+    margin-bottom: 18px;
+    font-size: 1.25rem;
+    color: #2563eb;
+    font-weight: 700;
+}
+
+.comment-form {
+    border-top: 1px solid #0055ff;
+    padding-top: 16px;
+    margin-top: 18px;
+}
+
+.comment-form textarea {
+    width: 100%;
+    min-height: 60px;
+    border: 1px solid #d1d1d6;
+    border-radius: 5px;
+    font-size: 1rem;
+    padding: 10px;
+    margin-bottom: 8px;
+    background: #fff;
+    resize: vertical;
+}
+
+.comment-form button {
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 7px 18px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.18s;
+}
+
+.comment-form button:disabled {
+    background: #e5e7eb;
+    color: #b1b5c0;
+    cursor: not-allowed;
+}
+
+.comment-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 18px 0; /* 아래에 여백 */
+    min-height: 40px;
+    /* 필요시 max-height, overflow-y 추가 */
+}
+
+.comment-list li {
+    border-bottom: 1px solid #e5e7eb;
+    padding: 10px 0;
+}
+
+.comment-list li:last-child {
+    border-bottom: none;
+}
+
+.comment-meta {
+    color: #6b7280;
+    font-size: 0.98rem;
+    margin-bottom: 4px;
+}
+
+.comment-content {
+    font-size: 1.08rem;
+    color: #22223b;
+    margin-bottom: 2px;
+}
+
+.comment-delete-btn {
+    margin-left: 8px;
+    color: #ef4444;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.98rem;
+    padding: 0 4px;
+}
+
+/* ===== 반응형 ===== */
+@media (max-width: 900px) {
+    .board-header,
+    .board-main,
+    .board-form-container {
+        width: 98%;
+        padding-left: 4px;
+        padding-right: 4px;
+    }
+}
+
+@media (max-width: 700px) {
+    .board-header, .board-main, .board-form-container {
+        padding: 14px 4px 14px 4px;
+    }
+}
+
+@media (max-width: 700px) {
+    .board-container, .board-detail-container, .board-form-container {
+        padding: 18px 4px 22px 4px;
+    }
+    .board-form-container {
+        padding: 16px 4px 22px 4px;
+    }
+}
