@@ -3,11 +3,13 @@ import { useNavigate } from "react-router-dom";
 import "../../styles/Board.css";
 import Modal from "../Modal";
 import AuthForm from "../AuthForm";
+import ChangePasswordForm from "../ChangePasswordForm"; // 추가
 import { useAuth } from "../../context/AuthContext";
 
 const BoardHeader: React.FC = () => {
     const { isLoggedIn, user, logout } = useAuth();
     const [modalOpen, setModalOpen] = useState(false);
+    const [pwModalOpen, setPwModalOpen] = useState(false); // 추가
     const navigate = useNavigate();
 
     const openModal = () => {
@@ -51,6 +53,14 @@ const BoardHeader: React.FC = () => {
                         >
                             {user?.nickname}님
                         </button>
+                        {/* 비밀번호 변경 버튼 추가 */}
+                        <button
+                            className="board-btn"
+                            style={{ marginRight: 12 }}
+                            onClick={() => setPwModalOpen(true)}
+                        >
+                            비밀번호 변경
+                        </button>
                         <button className="board-btn" onClick={handleLogout}>
                             로그아웃
                         </button>
@@ -69,6 +79,10 @@ const BoardHeader: React.FC = () => {
             </div>
             <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
                 <AuthForm onSuccess={() => setModalOpen(false)} />
+            </Modal>
+            {/* 비밀번호 변경 모달 */}
+            <Modal open={pwModalOpen} onClose={() => setPwModalOpen(false)}>
+                <ChangePasswordForm onSuccess={() => setPwModalOpen(false)} />
             </Modal>
         </header>
     );
