@@ -16,7 +16,6 @@ const AppContent: React.FC = () => {
 
   return (
     <>
-      {/* 홈, 관리자 페이지에서는 BoardHeader 숨김 */}
       {!isHome && !isAdmin && <BoardHeader />}
       <main>
         <Routes>

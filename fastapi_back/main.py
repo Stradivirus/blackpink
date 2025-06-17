@@ -1,6 +1,5 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from customer.member import router as member_router
 from customer.post import router as post_router
 from admin.admin import router as admin_router
 from login import router as login_router
@@ -16,7 +15,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(member_router)
 app.include_router(post_router)
 app.include_router(comment_router)
 app.include_router(admin_router)

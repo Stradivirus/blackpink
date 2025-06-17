@@ -14,7 +14,7 @@ def universal_login(req: MemberLoginRequest):
             "id": str(member["_id"]),
             "userId": member["userId"],
             "nickname": member["nickname"],
-            "type": "user"
+            "type": "member"  # 여기만 "member"로 변경
         }
     # 2. 관리자 조회
     admin = admin_collection.find_one({"userId": req.userId})

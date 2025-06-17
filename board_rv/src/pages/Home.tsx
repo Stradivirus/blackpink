@@ -1,12 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import AuthForm from "../components/AuthForm"; // 실제 경로에 맞게 import
+import AuthForm from "../components/AuthForm";
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
-  const [authMode, setAuthMode] = useState<"login" | "register" | null>(null);
+  const [authMode, setAuthMode] = useState<"login" | null>(null);
 
-  // 로그인/회원가입 성공 시 게시판으로 이동
   const handleAuthSuccess = (user: any) => {
     setAuthMode(null);
     if (user.type === "admin") {
@@ -32,22 +31,13 @@ const Home: React.FC = () => {
       </p>
       <div style={{ marginBottom: "1rem" }}>
         <button onClick={() => setAuthMode("login")}>로그인</button>
-        <button style={{ marginLeft: "1rem" }} onClick={() => setAuthMode("register")}>
-          회원가입
-        </button>
         <button style={{ marginLeft: "1rem" }} onClick={() => navigate("/postpage")}>
           고객 게시판으로 이동
         </button>
       </div>
-      {/* 로그인/회원가입 폼이 아래에 표시 */}
       {authMode === "login" && (
         <div style={{ margin: "2rem auto", maxWidth: 400 }}>
-          <AuthForm mode="login" onSuccess={handleAuthSuccess} />
-        </div>
-      )}
-      {authMode === "register" && (
-        <div style={{ margin: "2rem auto", maxWidth: 400 }}>
-          <AuthForm mode="register" onSuccess={handleAuthSuccess} />
+          <AuthForm onSuccess={handleAuthSuccess} />
         </div>
       )}
     </div>
