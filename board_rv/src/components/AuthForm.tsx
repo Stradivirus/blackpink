@@ -1,203 +1,92 @@
 import React, {useState} from "react";
-import type {Member} from "../types/Member";
 import {useAuth} from "../context/AuthContext";
 import {API_URLS} from "../api/urls";
 import "../styles/modal.css";
 
 interface AuthFormProps {
-    mode: "login" | "register";
-    onSuccess?: (member: Member) => void;
+    onSuccess?: (data: { token: string; id: number; userId: string; nickname: string }) => void;
 }
 
-const AuthForm: React.FC<AuthFormProps> = ({mode, onSuccess}) => {
+const AuthForm: React.FC<AuthFormProps> = ({ onSuccess }) => {
     const {login} = useAuth();
     const [form, setForm] = useState({
         userId: "",
-        nickname: "",
         password: "",
-        email: "",
-    });
-    const [passwordConfirm, setPasswordConfirm] = useState("");
-    const [result, setResult] = useState<string>("");
-    const [validation, setValidation] = useState({
-        userId: "",
-        nickname: "",
-        email: "",
-        passwordConfirm: "",
     });
     const [loginError, setLoginError] = useState<string>("");
 
     // 입력값 변경 핸들러
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const {name, value} = e.target;
-        if (name === "passwordConfirm") {
-            setPasswordConfirm(value);
-            setValidation((prev) => ({
-                ...prev,
-                passwordConfirm: value !== form.password ? "비밀번호가 일치하지 않습니다" : "",
-            }));
-        } else {
-            setForm({...form, [name]: value});
-        }
+        setForm({...form, [name]: value});
     };
-
-    // 입력 필드 포커스 아웃 시 중복/유효성 체크
-    const handleBlur = async (e: React.FocusEvent<HTMLInputElement>) => {
-        const {name, value} = e.target;
-
-        if (name === "passwordConfirm") {
-            setValidation((prev) => ({
-                ...prev,
-                passwordConfirm: value !== form.password ? "비밀번호가 일치하지 않습니다" : "",
-            }));
-            return;
-        }
-
-        if (mode !== "register") return;
-
-        if (["userId", "nickname", "email"].includes(name)) {
-            if (value.trim() === "") {
-                setValidation((prev) => ({
-                    ...prev,
-                    [name]: "",
-                }));
-                return;
-            }
-            try {
-                const res = await fetch(`${API_URLS.MEMBER_CHECK}/${name}?value=${value}`);
-                if (res.ok) {
-                    const isDuplicate = await res.json();
-                    setValidation((prev) => ({
-                        ...prev,
-                        [name]: isDuplicate
-                            ? "이미 사용 중입니다"
-                            : "사용 가능합니다",
-                    }));
-                } else {
-                    setValidation((prev) => ({
-                        ...prev,
-                        [name]: "확인 실패",
-                    }));
-                }
-            } catch {
-                setValidation((prev) => ({
-                    ...prev,
-                    [name]: "오류 발생",
-                }));
-            }
-        }
-    };
-
-    // 1초 대기 함수
-    const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
     // 폼 제출 핸들러
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (mode === "register" && form.password !== passwordConfirm) {
-            setResult("비밀번호가 일치하지 않습니다.");
-            return;
-        }
-        setResult("로딩 중...");
-        setLoginError(""); // 로그인 에러 초기화
+        setLoginError("");
         try {
-            const url = mode === "login" ? API_URLS.LOGIN : API_URLS.MEMBER_JOIN;
-            const payload = mode === "login"
-                ? {userId: form.userId, password: form.password}
-                : form;
-            const res = await fetch(url, {
+            const res = await fetch(API_URLS.LOGIN, {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
-                body: JSON.stringify(payload),
+                body: JSON.stringify({userId: form.userId, password: form.password}),
             });
             if (res.ok) {
                 const data = await res.json();
-                setResult(`${mode === "login" ? "로그인" : "회원가입"} 성공!`);
-                await delay(1000);
-
+                // postpage에서만 member 로그인 허용
+                if (window.location.pathname === "/postpage" && data.type !== "member") {
+                    setLoginError("회원만 로그인할 수 있습니다.");
+                    return;
+                }
                 login(
                     data.token || "dummy-token",
-                    {id: data.id, userId: data.userId, nickname: data.nickname}
+                    {id: data.id, userId: data.userId, nickname: data.nickname, type: data.type}
                 );
-
                 if (onSuccess) onSuccess(data);
             } else {
-                const error = await res.text();
-                if (mode === "login") {
-                    setLoginError("아이디 또는 비밀번호가 올바르지 않습니다.");
-                    setResult("");
-                } else {
-                    setResult(`회원가입 실패: ${error}`);
-                }
+                setLoginError("아이디 또는 비밀번호가 올바르지 않습니다.");
             }
         } catch (err) {
-            setResult(
-                `${mode === "login" ? "로그인" : "회원가입"} 오류: ${(err as Error).message}`
-            );
+            setLoginError("로그인 오류가 발생했습니다.");
         }
     };
-
-    // 입력 필드 렌더링 함수
-    const renderInput = (
-        name: string,
-        type: string,
-        placeholder: string,
-        value: string,
-        required = true,
-        minLength?: number
-    ) => (
-        <div>
-            <input
-                className="modal-input"
-                name={name}
-                type={type}
-                placeholder={placeholder}
-                value={value}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                required={required}
-                minLength={minLength}
-            />
-            {validation[name as keyof typeof validation] && (
-                <div
-                    className={`validation ${
-                        validation[name as keyof typeof validation] === "사용 가능합니다"
-                            ? "valid"
-                            : "invalid"
-                    }`}
-                    style={{
-                        color:
-                            validation[name as keyof typeof validation] === "사용 가능합니다"
-                                ? "green"
-                                : "red",
-                    }}
-                >
-                    {validation[name as keyof typeof validation]}
-                </div>
-            )}
-        </div>
-    );
 
     return (
         <form className="modal-form" onSubmit={handleSubmit}>
             <h3 className="modal-message" style={{marginBottom: 12}}>
-                {mode === "login" ? "로그인" : "회원가입"}
+                로그인
             </h3>
-            {renderInput("userId", "text", "아이디", form.userId)}
-            {mode === "register" && renderInput("nickname", "text", "닉네임", form.nickname)}
-            {renderInput("password", "password", "비밀번호", form.password, true, 8)}
-            {/* 로그인 모드에서만 비밀번호 아래에 에러 표시 */}
-            {mode === "login" && loginError && (
+            <div>
+                <input
+                    className="modal-input"
+                    name="userId"
+                    type="text"
+                    placeholder="아이디"
+                    value={form.userId}
+                    onChange={handleChange}
+                    required
+                />
+            </div>
+            <div>
+                <input
+                    className="modal-input"
+                    name="password"
+                    type="password"
+                    placeholder="비밀번호"
+                    value={form.password}
+                    onChange={handleChange}
+                    required
+                    minLength={8}
+                />
+            </div>
+            {loginError && (
                 <div className="validation invalid" style={{color: "red", marginBottom: 8}}>
                     {loginError}
                 </div>
             )}
-            {mode === "register" && renderInput("passwordConfirm", "password", "비밀번호 확인", passwordConfirm, true, 8)}
-            {mode === "register" && renderInput("email", "email", "이메일", form.email)}
             <button className="board-btn" type="submit">
-                {mode === "login" ? "로그인" : "회원가입"}
+                로그인
             </button>
-            <div className="modal-result">{result}</div>
         </form>
     );
 };

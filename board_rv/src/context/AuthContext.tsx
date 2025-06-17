@@ -4,6 +4,7 @@ interface AuthUser {
     id: number;
     userId: string;
     nickname: string;
+    type: string;
 }
 
 interface AuthContextType {

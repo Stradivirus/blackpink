@@ -4,8 +4,6 @@ export const API_URLS = {
     POSTS: `${API_BASE}/posts`,
     POST: (id: string) => `${API_BASE}/posts/${id}`,
     LOGIN: `${API_BASE}/login`,
-    MEMBER_JOIN: `${API_BASE}/member/join`,
-    MEMBER_CHECK: `${API_BASE}/member/check`,
     COMMENTS: (postId: string) => `${API_BASE}/comments/${postId}`,
     COMMENT_CREATE: `${API_BASE}/comments`,
     COMMENT_DELETE: (id: string) => `${API_BASE}/comments/${id}`,
