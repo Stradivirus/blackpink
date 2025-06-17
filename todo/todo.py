@@ -1,87 +1,41 @@
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from typing import List
-from pymongo import MongoClient
-from bson import ObjectId
-from fastapi.middleware.cors import CORSMiddleware
-from datetime import datetime
+# FastAPI, 예외 처리, 데이터 모델, 타입 힌트 등 필요한 라이브러리 임포트
+from fastapi import FastAPI, HTTPException  # FastAPI 앱 생성 및 HTTP 예외 처리를 위한 모듈
+from pydantic import BaseModel              # 데이터 검증 및 직렬화를 위한 Pydantic의 BaseModel
+from typing import List                     # 타입 힌트: 리스트 타입 지정
+from pymongo import MongoClient             # MongoDB 연결을 위한 PyMongo 클라이언트
+from bson import ObjectId                   # MongoDB의 ObjectId 타입 사용을 위한 모듈
+from fastapi.middleware.cors import CORSMiddleware  # CORS 미들웨어
+from datetime import datetime               # 현재 시간 저장용
 
+# FastAPI 애플리케이션 인스턴스 생성
 app = FastAPI()
 
-# CORS 설정 추가
+# ------------------ CORS 설정 ------------------
+# CORS(Cross-Origin Resource Sharing) 허용 설정
+# 프론트엔드(React, Vue 등)와 연동 시 필요한 설정
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=["*"],            # 모든 도메인에서 접근 허용 (운영 환경에서는 제한 권장)
+    allow_credentials=True,         # 인증 정보(쿠키 등) 허용
+    allow_methods=["*"],            # 모든 HTTP 메서드 허용 (GET, POST, PUT, DELETE 등)
+    allow_headers=["*"],            # 모든 헤더 허용
 )
 
-# MongoDB 연결 설정
-client = MongoClient("mongodb+srv://stradivirus:1q2w3e4r@cluster0.e7rvfpz.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
-db = client["Todo"]
-collection = db["todo"]
+# ------------------ MongoDB 연결 ------------------
+# MongoDB Atlas 클러스터에 연결 (URI는 보안상 환경변수 사용 권장)
+client = MongoClient(
+    "mongodb+srv://stradivirus:1q2w3e4r@cluster0.e7rvfpz.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+)
+db = client["Todo"]           # 'Todo' 데이터베이스 선택
+collection = db["todo"]       # 'todo' 컬렉션 선택
 
-# Pydantic 모델 정의
+# ------------------ 데이터 모델 정의 ------------------
+# 클라이언트로부터 입력받거나 반환할 데이터의 구조를 Pydantic 모델로 정의
+
 class Todo(BaseModel):
-    title: str
-    description: str = ""
-    completed: bool = False
-    due_date: str = ""  # 기한 필드 추가
-    status: str = "등록됨"  # 상태 필드 추가
-    created_at: str = ""  # 등록일 필드 추가
-
-class TodoInDB(Todo):
-    id: str
-
-def build_todoindb_from_item(item) -> 'TodoInDB':
-    return TodoInDB(
-        id=str(item["_id"]),
-        title=item["title"],
-        description=item.get("description", ""),
-        completed=item.get("completed", False),
-        due_date=item.get("due_date", ""),
-        status=item.get("status", "등록됨"),
-        created_at=item.get("created_at", "")
-    )
-
-# 할 일 등록
-@app.post("/todo/", response_model=TodoInDB)
-def create_todo(todo: Todo):
-    todo_dict = todo.dict()
-    todo_dict["created_at"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    result = collection.insert_one(todo_dict)
-    return TodoInDB(id=str(result.inserted_id), **todo_dict)
-
-# 할 일 전체 조회
-@app.get("/todo/", response_model=List[TodoInDB])
-def read_todos():
-    todos = []
-    for item in collection.find():
-        todos.append(build_todoindb_from_item(item))
-    return todos
-
-# 할 일 단일 조회
-@app.get("/todo/{todo_id}", response_model=TodoInDB)
-def read_todo(todo_id: str):
-    item = collection.find_one({"_id": ObjectId(todo_id)})
-    if not item:
-        raise HTTPException(status_code=404, detail="Todo not found")
-    return build_todoindb_from_item(item)
-
-# 할 일 완료 상태 변경
-@app.put("/todo/{todo_id}", response_model=TodoInDB)
-def update_todo(todo_id: str, todo: Todo):
-    result = collection.update_one({"_id": ObjectId(todo_id)}, {"$set": todo.dict()})
-    if result.matched_count == 0:
-        raise HTTPException(status_code=404, detail="Todo not found")
-    item = collection.find_one({"_id": ObjectId(todo_id)})
-    return build_todoindb_from_item(item)
-
-# 할 일 삭제
-@app.delete("/todo/{todo_id}")
-def delete_todo(todo_id: str):
-    result = collection.delete_one({"_id": ObjectId(todo_id)})
-    if result.deleted_count == 0:
-        raise HTTPException(status_code=404, detail="Todo not found")
-    return {"message": "Todo deleted"}
+    title: str                        # 할 일 제목 (필수)
+    description: str = ""             # 할 일 설명 (선택, 기본값: "")
+    completed: bool = False           # 완료 여부 (기본값: False)
+    due_date: str = ""                # 마감 기한 (문자열, 기본값: "")
+    status: str = "등록됨"             # 상태 (등록됨, 진행중 등, 기본값: "등록됨")
+    created_at: str = ""              # 등록일시 (문자열, 기본

@@ -1,5 +1,5 @@
-const API_BASE = "http://141.147.144.151:8001/api";
-
+// const API_BASE = "http://141.147.144.151:8001/api";
+const API_BASE = "http://localhost:8000/api";
 export const API_URLS = {
     POSTS: `${API_BASE}/posts`,
     POST: (id: string) => `${API_BASE}/posts/${id}`,
