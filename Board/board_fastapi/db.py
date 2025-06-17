@@ -1,6 +1,10 @@
 from pymongo import MongoClient
 
-client = MongoClient("mongodb+srv://stradivirus:1q2w3e4r@cluster0.e7rvfpz.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+# 직접 입력
+uri = "mongodb+srv://stradivirus:1q2w3e4r@cluster0.e7rvfpz.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+client = MongoClient(uri)
+
 db = client["Board"]
 board_collection = db["board"]
 member_collection = db["member"]
+comment_collection = db["comment"]

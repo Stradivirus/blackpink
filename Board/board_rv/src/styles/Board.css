@@ -365,29 +365,3 @@ body {
 .board-pagination button:not(:disabled):hover {
     background: #1e429f;
 }
-
-/* ===== 반응형 ===== */
-@media (max-width: 900px) {
-    .board-header,
-    .board-main,
-    .board-form-container {
-        width: 98%;
-        padding-left: 4px;
-        padding-right: 4px;
-    }
-}
-
-@media (max-width: 700px) {
-    .board-header, .board-main, .board-form-container {
-        padding: 14px 4px 14px 4px;
-    }
-}
-
-@media (max-width: 700px) {
-    .board-container, .board-detail-container, .board-form-container {
-        padding: 18px 4px 22px 4px;
-    }
-    .board-form-container {
-        padding: 16px 4px 22px 4px;
-    }
-}

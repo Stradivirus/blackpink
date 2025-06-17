@@ -36,3 +36,20 @@ class BoardResponse(BaseModel):
     deleted: Optional[bool] = False
     deletedDate: Optional[date] = None
     deletedTime: Optional[time] = None
+
+class CommentCreateRequest(BaseModel):
+    postId: str
+    writerId: str
+    content: str
+
+class CommentResponse(BaseModel):
+    id: str
+    postId: str
+    writerId: str
+    writerNickname: str
+    content: str
+    createdDate: date
+    createdTime: time
+    deleted: Optional[bool] = False
+    deletedDate: Optional[date] = None
+    deletedTime: Optional[time] = None

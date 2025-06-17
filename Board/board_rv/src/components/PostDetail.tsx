@@ -4,6 +4,7 @@ import type {Post} from "../types/Post";
 import {API_URLS} from "../api/urls";
 import {formatDate} from "../utils/formatDate";
 import {useAuth} from "../context/AuthContext";
+import CommentList from "./CommentList";
 import "../styles/Board.css";
 import "../styles/modal.css";
 
@@ -198,16 +199,7 @@ const PostDetail: React.FC = () => {
                     </div>
                 )}
             </main>
-            <ConfirmModal
-                open={showConfirm}
-                x={modalPos.x}
-                y={modalPos.y}
-                onConfirm={() => {
-                    setShowConfirm(false);
-                    handleDelete();
-                }}
-                onCancel={() => setShowConfirm(false)}
-            />
+            <CommentList postId={post.id} />
             <RecentPostList excludeId={String(post.id)}/>
         </>
     );
