@@ -8,3 +8,4 @@ db = client["blackpink"]  # 데이터베이스 이름을 "blackpink"로 설정
 board_collection = db["board"]
 member_collection = db["member"]
 comment_collection = db["comment"]
+admin_collection = db["admins"]
