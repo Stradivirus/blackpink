@@ -7,4 +7,6 @@ export const API_URLS = {
     COMMENTS: (postId: string) => `${API_BASE}/comments/${postId}`,
     COMMENT_CREATE: `${API_BASE}/comments`,
     COMMENT_DELETE: (id: string) => `${API_BASE}/comments/${id}`,
+    MEMBER_INVITE: `${API_BASE}/admin/member-invite`,
+    CHANGE_PASSWORD: `${API_BASE}/member/change-password`, // 추가
 };
