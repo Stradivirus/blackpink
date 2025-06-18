@@ -11,3 +11,5 @@ export const API_URLS = {
     CHANGE_PASSWORD: `${API_BASE}/member/change-password`, // 추가
     CHECK_DUPLICATE: `${API_BASE}/admin/check-duplicate`,
 };
+
+export const GRAPH_API = "http://localhost:8000/graph"; // 그래프 이미지 API 엔드포인트
