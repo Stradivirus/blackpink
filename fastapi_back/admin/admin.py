@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Body
-from db import admin_collection
+from db import member_collection, admin_collection
 from passlib.hash import bcrypt
 from bson.objectid import ObjectId
 from models import AdminCreateRequest, AdminLoginRequest, AdminResponse
@@ -34,13 +34,22 @@ def admin_list():
 def admin_member_invite(
     userId: str = Body(...),
     nickname: str = Body(...),
-    email: str = Body(...)
+    email: str = Body(...),
+    accountType: str = Body("member")  # 기본값 "member"
 ):
     try:
-        member = create_member(userId, nickname, email)
+        member = create_member(userId, nickname, email, accountType)  # accountType 전달
         return {"message": "임시 비밀번호가 이메일로 발송되었습니다.", "userId": userId}
     except ValueError as e:
         raise HTTPException(400, str(e))
     except Exception as e:
-        traceback.print_exc()  # 에러 전체 로그를 터미널에 출력
+        traceback.print_exc()
         raise HTTPException(500, f"회원 생성 또는 이메일 발송에 실패했습니다: {e}")
+
+@router.get("/api/admin/check-duplicate")
+def check_duplicate(field: str, value: str, accountType: str = "member"):
+    if field not in ["userId", "nickname"]:
+        raise HTTPException(400, "허용되지 않는 필드입니다.")
+    collection = admin_collection if accountType == "admin" else member_collection
+    exists = collection.find_one({field: value})
+    return {"exists": bool(exists)}

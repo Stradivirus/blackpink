@@ -9,4 +9,5 @@ export const API_URLS = {
     COMMENT_DELETE: (id: string) => `${API_BASE}/comments/${id}`,
     MEMBER_INVITE: `${API_BASE}/admin/member-invite`,
     CHANGE_PASSWORD: `${API_BASE}/member/change-password`, // 추가
+    CHECK_DUPLICATE: `${API_BASE}/admin/check-duplicate`,
 };

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import { API_URLS } from "../api/urls";
 import { useAuth } from "../context/AuthContext";
 
@@ -6,13 +6,30 @@ const ChangePasswordForm: React.FC<{ onSuccess?: () => void }> = ({ onSuccess })
     const { user, logout } = useAuth();
     const [oldPassword, setOldPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState(""); // 추가
     const [message, setMessage] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+    const [showMatch, setShowMatch] = useState(false);
+
+    // 새 비밀번호, 확인 비밀번호 입력 시 일치 여부 체크
+    useEffect(() => {
+        if (newPassword && confirmPassword && newPassword === confirmPassword) {
+            setShowMatch(true);
+        } else {
+            setShowMatch(false);
+        }
+    }, [newPassword, confirmPassword]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setLoading(true);
         setMessage(null);
+
+        if (newPassword !== confirmPassword) {
+            setMessage("새 비밀번호가 일치하지 않습니다.");
+            return;
+        }
+
+        setLoading(true);
         try {
             const res = await fetch(API_URLS.CHANGE_PASSWORD, {
                 method: "POST",
@@ -63,6 +80,24 @@ const ChangePasswordForm: React.FC<{ onSuccess?: () => void }> = ({ onSuccess })
                     minLength={8}
                     style={{ width: "100%", marginBottom: 8, padding: 8 }}
                 />
+            </div>
+            <div>
+                <input
+                    type="password"
+                    placeholder="새 비밀번호 확인"
+                    value={confirmPassword}
+                    onChange={e => setConfirmPassword(e.target.value)}
+                    required
+                    minLength={8}
+                    style={{ width: "100%", marginBottom: 8, padding: 8 }}
+                />
+                {confirmPassword && (
+                    <div style={{ marginTop: 4, color: showMatch ? "green" : "red", fontSize: 13 }}>
+                        {showMatch
+                            ? "비밀번호가 일치합니다."
+                            : "비밀번호가 일치하지 않습니다."}
+                    </div>
+                )}
             </div>
             <button type="submit" disabled={loading} style={{ width: "100%", padding: 8 }}>
                 {loading ? "변경 중..." : "비밀번호 변경"}
