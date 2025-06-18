@@ -1,6 +1,6 @@
 from pydantic import BaseModel, EmailStr
 from datetime import date, time
-from typing import Optional
+from typing import Optional, List
 
 class MemberJoinRequest(BaseModel):
     userId: str
@@ -67,3 +67,18 @@ class AdminResponse(BaseModel):
     id: str
     userId: str
     nickname: str
+
+class Incident(BaseModel):
+    incident_no: int
+    company_id: str
+    threat_type: str
+    risk_level: str
+    server_type: str
+    incident_date: date
+    handled_date: Optional[date] = None
+    status: str
+    action: str
+    handler_count: int
+
+class IncidentListResponse(BaseModel):
+    incidents: List[Incident]
