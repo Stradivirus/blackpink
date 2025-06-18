@@ -5,7 +5,9 @@ from admin.admin import router as admin_router
 from login import router as login_router
 from customer.comment import router as comment_router
 from admin.generate_member import create_member
-from customer.password import router as change_password_router  # 추가
+from customer.password import router as change_password_router
+from admin.graph import router as graph_router
+# main.py
 
 app = FastAPI()
 
@@ -21,7 +23,8 @@ app.include_router(post_router)
 app.include_router(comment_router)
 app.include_router(admin_router)
 app.include_router(login_router)
-app.include_router(change_password_router)  # 추가
+app.include_router(change_password_router)
+app.include_router(graph_router)
 
 if __name__ == "__main__":
     import uvicorn
