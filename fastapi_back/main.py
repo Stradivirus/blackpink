@@ -7,6 +7,7 @@ from customer.comment import router as comment_router
 from admin.generate_member import create_member
 from customer.password import router as change_password_router
 from admin.graph import router as graph_router
+from admin.incident import router as incident_router
 # main.py
 
 app = FastAPI()
@@ -25,6 +26,7 @@ app.include_router(admin_router)
 app.include_router(login_router)
 app.include_router(change_password_router)
 app.include_router(graph_router)
+app.include_router(incident_router)
 
 if __name__ == "__main__":
     import uvicorn

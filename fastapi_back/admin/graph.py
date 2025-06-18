@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Response
+from models import Incident, IncidentListResponse
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -21,14 +22,25 @@ def set_plot_style():
 
 def get_dataframe():
     data = list(collection.find())
-    if data:
-        df = pd.DataFrame(data).drop(columns=['_id'], errors='ignore')
-        df['incident_date'] = pd.to_datetime(df['incident_date'])
-        df['year'] = df['incident_date'].dt.year
-        df['month'] = df['incident_date'].dt.month
-        return df
-    else:
+    if not data:
         return pd.DataFrame()
+    # Pydantic 모델로 검증
+    incidents = []
+    for d in data:
+        try:
+            # _id 등 불필요한 필드는 제거
+            d.pop('_id', None)
+            incident = Incident(**d)
+            incidents.append(incident.dict())
+        except Exception as e:
+            continue  # 검증 실패시 무시
+    if not incidents:
+        return pd.DataFrame()
+    df = pd.DataFrame(incidents)
+    df['incident_date'] = pd.to_datetime(df['incident_date'])
+    df['year'] = df['incident_date'].dt.year
+    df['month'] = df['incident_date'].dt.month
+    return df
 
 def create_plot(graph_type):
     df = get_dataframe()

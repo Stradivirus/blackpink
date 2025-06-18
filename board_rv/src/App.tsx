@@ -10,6 +10,7 @@ import PostList from "./components/CustomerBoard/PostList";
 import AdminLayout from "./pages/Admin/AdminLayout";
 import AdminDashboard from "./pages/Admin/AdminDashboard";
 import MemberInvitePage from "./pages/Admin/MemberInvitePage";
+import AdminDataPage from "./pages/Admin/AdminDataPage"; // 추가
 
 const AppContent: React.FC = () => {
   const location = useLocation();
@@ -29,6 +30,7 @@ const AppContent: React.FC = () => {
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminDashboard />} />
             <Route path="invite" element={<MemberInvitePage />} />
+            <Route path="data" element={<AdminDataPage />} /> {/* 추가 */}
           </Route>
         </Routes>
       </main>
