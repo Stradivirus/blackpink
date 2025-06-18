@@ -26,7 +26,6 @@ const MemberInviteForm: React.FC = () => {
         if (field === "nickname") setNicknameError(null);
       }
     } catch {
-      // 에러 무시
     }
   };
 
