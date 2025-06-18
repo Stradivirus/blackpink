@@ -1,7 +1,7 @@
 import random
 import string
 from datetime import datetime  # 수정: date → datetime
-from db import member_collection
+from db import member_collection, admin_collection
 import smtplib
 from email.mime.text import MIMEText
 from passlib.hash import bcrypt
@@ -28,7 +28,7 @@ def send_email(to_email: str, user_id: str, temp_password: str):
         server.login(smtp_user, smtp_password)
         server.sendmail(smtp_user, to_email, msg.as_string())
 
-def create_member(userId: str, nickname: str, email: str):
+def create_member(userId: str, nickname: str, email: str, accountType: str = "member"):
     temp_password = generate_temp_password()
     hashed_password = bcrypt.hash(temp_password)  # 비밀번호 해시
     member = {
@@ -38,8 +38,12 @@ def create_member(userId: str, nickname: str, email: str):
         "email": email,
         "joinedAt": datetime.now()  # 수정: date.today() → datetime.now()
     }
-    if member_collection.find_one({"userId": userId}):
+    if accountType == "admin":
+        collection = admin_collection
+    else:
+        collection = member_collection
+    if collection.find_one({"userId": userId}):
         raise ValueError("이미 존재하는 아이디입니다.")
-    member_collection.insert_one(member)
+    collection.insert_one(member)
     send_email(email, userId, temp_password)
     return member

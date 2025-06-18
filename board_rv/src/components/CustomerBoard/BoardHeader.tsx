@@ -1,15 +1,15 @@
-import React, { useState } from "react";
+import { useState } from "react";
+import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import "../../styles/Board.css";
 import Modal from "../Modal";
 import AuthForm from "../AuthForm";
 import ChangePasswordForm from "../ChangePasswordForm"; // 추가
-import { useAuth } from "../../context/AuthContext";
 
-const BoardHeader: React.FC = () => {
+const BoardHeader = () => {
     const { isLoggedIn, user, logout } = useAuth();
     const [modalOpen, setModalOpen] = useState(false);
-    const [pwModalOpen, setPwModalOpen] = useState(false); // 추가
+    const [pwModalOpen, setPwModalOpen] = useState(false);
     const navigate = useNavigate();
 
     const openModal = () => {
@@ -43,7 +43,17 @@ const BoardHeader: React.FC = () => {
                     자유롭게 글을 작성하고 소통하는 공간입니다.
                 </p>
             </div>
-            <div className="board-header__profile">
+            <div className="board-header__profile" style={{ display: "flex", alignItems: "center" }}>
+                {/* 어드민이면 대시보드로 버튼 노출 */}
+                {isLoggedIn && user?.type === "admin" && (
+                    <button
+                        className="board-btn"
+                        style={{ marginRight: 12, background: "#1976d2", color: "#fff" }}
+                        onClick={() => navigate("/admin")}
+                    >
+                        대시보드로
+                    </button>
+                )}
                 {isLoggedIn ? (
                     <>
                         <button
@@ -53,7 +63,6 @@ const BoardHeader: React.FC = () => {
                         >
                             {user?.nickname}님
                         </button>
-                        {/* 비밀번호 변경 버튼 추가 */}
                         <button
                             className="board-btn"
                             style={{ marginRight: 12 }}
@@ -80,7 +89,6 @@ const BoardHeader: React.FC = () => {
             <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
                 <AuthForm onSuccess={() => setModalOpen(false)} />
             </Modal>
-            {/* 비밀번호 변경 모달 */}
             <Modal open={pwModalOpen} onClose={() => setPwModalOpen(false)}>
                 <ChangePasswordForm onSuccess={() => setPwModalOpen(false)} />
             </Modal>
