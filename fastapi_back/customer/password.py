@@ -11,10 +11,8 @@ def change_password(
     new_password: str = Body(...)
 ):
     member = member_collection.find_one({"userId": userId})
-    if not member:
-        raise HTTPException(404, "존재하지 않는 회원입니다.")
-    if not bcrypt.verify(old_password, member["password"]):
-        raise HTTPException(400, "기존 비밀번호가 일치하지 않습니다.")
+    if not member or not bcrypt.verify(old_password, member["password"]):
+        raise HTTPException(400, "아이디 또는 비밀번호가 올바르지 않습니다.")
     hashed_new = bcrypt.hash(new_password)
     member_collection.update_one(
         {"userId": userId},
