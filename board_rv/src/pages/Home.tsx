@@ -1,6 +1,54 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import styled from "styled-components";
 import AuthForm from "../components/AuthForm";
+
+const Container = styled.div`
+  min-height: 100vh;
+  background: linear-gradient(135deg, #101820 60%, #2d3a4a 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+`;
+
+const Title = styled.h1`
+  color: #00ffe7;
+  font-size: 3rem;
+  font-weight: bold;
+  letter-spacing: 2px;
+  text-shadow: 0 0 10px #00ffe7, 0 0 20px #0ff;
+  margin-bottom: 1.5rem;
+`;
+
+const Card = styled.div`
+  background: rgba(30, 40, 55, 0.95);
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.7);
+  padding: 2rem 3rem;
+  min-width: 350px;
+  border: 1.5px solid #00ffe7;
+  margin-bottom: 2rem;
+`;
+
+export const Button = styled.button`
+  width: 100%;
+  background: #00ffe7;
+  color: #101820;
+  font-weight: bold;
+  border: none;
+  border-radius: 6px;
+  padding: 0.8rem 2rem;
+  font-size: 1.1rem;
+  box-shadow: 0 0 8px #00ffe7;
+  cursor: pointer;
+  margin-bottom: 1rem;
+  transition: background 0.2s, color 0.2s;
+  &:hover {
+    background: #0ff;
+    color: #222;
+  }
+`;
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
@@ -16,31 +64,21 @@ const Home: React.FC = () => {
   };
 
   return (
-    <div style={{ padding: "2rem", textAlign: "center" }}>
-      <h1>보안회사에 오신 것을 환영합니다!</h1>
-      <p>
-        저희는 최신 IT 기술과 전문 인력을 바탕으로
-        <br />
-        기업과 개인의 소중한 정보를 안전하게 지키는
-        <br />
-        종합 보안 솔루션 기업입니다.
-        <br />
-        신뢰할 수 있는 보안 파트너,
-        <br />
-        여러분의 안전한 디지털 생활을 위해 항상 함께하겠습니다.
-      </p>
-      <div style={{ marginBottom: "1rem" }}>
-        <button onClick={() => setAuthMode("login")}>로그인</button>
-        <button style={{ marginLeft: "1rem" }} onClick={() => navigate("/postpage")}>
-          고객 게시판으로 이동
-        </button>
-      </div>
-      {authMode === "login" && (
-        <div style={{ margin: "2rem auto", maxWidth: 400 }}>
-          <AuthForm onSuccess={handleAuthSuccess} />
-        </div>
-      )}
-    </div>
+    <Container>
+      <Title>SECURE BOARD</Title>
+      <Card>
+        <p style={{ color: "#fff", fontSize: "1.2rem", marginBottom: "1.5rem" }}>
+          신뢰와 안전을 최우선으로 하는 보안 게시판에 오신 것을 환영합니다.
+        </p>
+        <Button onClick={() => setAuthMode("login")}>로그인</Button>
+        <Button onClick={() => navigate("/postpage")}>고객 게시판</Button>
+        {authMode === "login" && (
+          <div style={{ margin: "2rem auto", maxWidth: 400 }}>
+            <AuthForm onSuccess={handleAuthSuccess} />
+          </div>
+        )}
+      </Card>
+    </Container>
   );
 };
 
