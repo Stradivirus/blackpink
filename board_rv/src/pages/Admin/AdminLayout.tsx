@@ -3,6 +3,7 @@ import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 
 const menuItems = [
   { label: "대시보드", path: "/admin" },
+  { label: "데이터", path: "/admin/data" }, // 추가
   { label: "신규 계정 발급", path: "/admin/invite" },
   { label: "고객 게시판", path: "/postpage" },
 ];

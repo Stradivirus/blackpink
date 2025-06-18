@@ -179,8 +179,7 @@ const Home: React.FC = () => {
         </button>
         {authMode === "login" && (
           <div style={{ margin: "2rem auto", maxWidth: 400 }}>
-            {/* AuthForm은 그대로 유지 */}
-            {/* <AuthForm onSuccess={handleAuthSuccess} /> */}
+            <AuthForm onSuccess={handleAuthSuccess} />
           </div>
         )}
         {loginError && (
