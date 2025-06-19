@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import type { Incident } from "../../types/Incident";
 import { API_URLS } from "../../api/urls"; // 수정
 
+
 const AdminDataPage: React.FC = () => {
   const [data, setData] = useState<Incident[]>([]);
   const [loading, setLoading] = useState(true);
