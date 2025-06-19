@@ -9,7 +9,6 @@ import { AuthProvider } from "./context/AuthContext";
 import PostList from "./components/CustomerBoard/PostList"; 
 import AdminDashboard from "./pages/Admin/AdminDashboard";
 import MemberInvitePage from "./pages/Admin/MemberInvitePage";
-import CompanyTable from "./components/Admin/Company";
 import AdminLayout from "./pages/Admin/AdminLayout";
 import AdminDataPage from "./pages/Admin/AdminDataPage";
 
@@ -31,8 +30,7 @@ const AppContent: React.FC = () => {
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminDashboard />} />
             <Route path="invite" element={<MemberInvitePage />} />
-            <Route path="company" element={<CompanyTable />} />
-            <Route path="data" element={<AdminDataPage />} /> {/* 추가 */}
+            <Route path="data" element={<AdminDataPage />} />
           </Route>
         </Routes>
       </main>

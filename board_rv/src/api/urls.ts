@@ -11,7 +11,8 @@ export const API_URLS = {
     CHANGE_PASSWORD: `${API_BASE}/member/change-password`,
     CHECK_DUPLICATE: `${API_BASE}/admin/check-duplicate`,
     INCIDENT: `${API_BASE}/incident`,
-    COMPANIES: `${API_BASE}/admin/companies`,
+    COMPANIES: `${API_BASE}/companies`,
+    DEV: `${API_BASE}/dev`,
 };
 
 export const GRAPH_API = "http://localhost:8000/graph";

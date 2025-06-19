@@ -1,4 +1,4 @@
-export interface Company {
+export interface Companies {
     id: string;
     company_id: string;
     company_name: string;
