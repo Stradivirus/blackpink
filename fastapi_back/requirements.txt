@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+pymongo
+passlib
+bcrypt==3.2.0
+pydantic[email]
+seaborn
