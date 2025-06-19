@@ -1,72 +1,35 @@
+// src/pages/Admin/AdminDataPage.tsx
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
+// src/pages/Admin에서 src/api로 가려면 ../../../ 필요
 import { API_URLS } from "../../api/urls";
-
-// 팀 정의 (AdminLayout과 공유하는 경우 별도 파일로 분리하는 것이 더 좋음)
-const teamList = [
-  { key: "biz", label: "사업팀" },
-  { key: "dev", label: "개발팀" },
-  { key: "security", label: "보안팀" },
-];
-
-// 각 팀별 컬럼 정의 (렌더링용)
-const columnsByTeam: Record<string, { key: string; label: string }[]> = {
-  biz: [
-    { key: "company_id", label: "Company ID" },
-    { key: "company_name", label: "회사명" },
-    { key: "industry", label: "업종" },
-    { key: "plan", label: "플랜" },
-    { key: "contract_start", label: "계약 시작일" },
-    { key: "contract_end", label: "계약 종료일" },
-    { key: "status", label: "상태" },
-    { key: "manager_name", label: "담당자명" },
-    { key: "manager_phone", label: "담당자 연락처" },
-  ],
-  dev: [
-    { key: "company_id", label: "Company ID" },
-    { key: "os", label: "OS" },
-    { key: "os_version", label: "OS 버전" },
-    { key: "dev_start_date", label: "개발 시작일" },
-    { key: "dev_end_date", label: "개발 종료일" },
-    { key: "progress", label: "진행 상태" },
-    { key: "maintenance", label: "유지보수 여부" },
-  ],
-  security: [
-    { key: "incident_no", label: "Incident No" },
-    { key: "company_id", label: "Company ID" },
-    { key: "threat_type", label: "위협 유형" },
-    { key: "risk_level", label: "위험 등급" },
-    { key: "server_type", label: "서버 종류" },
-    { key: "incident_date", label: "사건 일자" },
-    { key: "handled_date", label: "처리 일자" },
-    { key: "status", label: "상태" },
-    { key: "action", label: "조치" },
-    { key: "handler_count", label: "처리 인원 수" },
-  ],
-};
+// src/pages/Admin에서 src/constants로 가려면 ../../../ 필요
+import { teamList, columnsByTeam } from "../../constants/dataconfig";
+// src/pages/Admin에서 src/components/Admin로 가려면 ../../../ 필요
+import AdminDataTable from "../../components/Admin/AdminDataTable";
 
 const AdminDataPage: React.FC = () => {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // ✨ 그룹바이 관련 상태 제거
+  // const [groupByColumn, setGroupByColumn] = useState<string | null>(null);
+
   const location = useLocation();
   const navigate = useNavigate();
   const params = new URLSearchParams(location.search);
-  // AdminLayout에서 기본적으로 'security' 팀으로 넘겨주므로,
-  // 여기서 기본값을 'biz'에서 'security'로 변경합니다.
   const selectedTeam = params.get("team") || "security";
 
   useEffect(() => {
-    // AdminLayout에서 유효한 팀을 넘겨준다고 가정하지만,
-    // 혹시 모를 직접 접근이나 잘못된 URL을 위해 유효성 검사 유지
     if (!teamList.some((t) => t.key === selectedTeam)) {
-      // 유효하지 않은 팀이면 'security' 팀으로 리다이렉트
       navigate("/admin/data?team=security", { replace: true });
       return;
     }
 
     setLoading(true);
+    // ✨ 팀 변경 시 그룹바이 관련 초기화 로직 제거
+    // setGroupByColumn(null);
 
     let fetchUrl = "";
     switch (selectedTeam) {
@@ -80,7 +43,6 @@ const AdminDataPage: React.FC = () => {
         fetchUrl = API_URLS.INCIDENT;
         break;
       default:
-        // 이 경우까지 오는 일은 없겠지만, 만약을 위해 로딩 종료
         setLoading(false);
         return;
     }
@@ -95,7 +57,6 @@ const AdminDataPage: React.FC = () => {
       .then((res) => {
         let result = [];
 
-        // API 응답 구조에 따라 데이터 추출
         if (selectedTeam === "security") {
           result = res.incidents || [];
         } else if (selectedTeam === "biz") {
@@ -109,51 +70,28 @@ const AdminDataPage: React.FC = () => {
       })
       .catch((error) => {
         console.error("데이터 로딩 중 오류 발생:", error);
-        setData([]); // 에러 발생 시 데이터 초기화
+        setData([]);
         setLoading(false);
       });
-  }, [selectedTeam, navigate]); // navigate도 의존성 배열에 추가
+  }, [selectedTeam, navigate]);
 
   const columns = columnsByTeam[selectedTeam] || [];
+  const currentTeamLabel = teamList.find((t) => t.key === selectedTeam)?.label || "알 수 없는 팀";
 
   return (
     <div style={{ padding: "2rem" }}>
       <h1>데이터 관리</h1>
 
-      {/* 상단 팀 선택 버튼은 AdminLayout의 좌측 메뉴로 대체되었으므로 제거됨 */}
-
-      <h2>{teamList.find((t) => t.key === selectedTeam)?.label} 데이터</h2>
-
-      {loading ? (
-        <div>로딩 중...</div>
-      ) : (
-        <table border={1} cellPadding={4} style={{ width: "100%", marginTop: 16 }}>
-          <thead>
-            <tr>
-              {columns.map((col) => (
-                <th key={col.key}>{col.label}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {data.length > 0 ? ( // 데이터가 있을 때만 렌더링
-              data.map((row, i) => (
-                <tr key={i}>
-                  {columns.map((col) => (
-                    <td key={col.key}>{(row as any)[col.key]}</td>
-                  ))}
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={columns.length} style={{ textAlign: "center", padding: "20px" }}>
-                  데이터가 없습니다.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      )}
+      <AdminDataTable
+        data={data}
+        columns={columns}
+        loading={loading}
+        selectedTeam={selectedTeam}
+        selectedTeamLabel={currentTeamLabel}
+        // ✨ 그룹바이 관련 props 제거
+        // groupByColumn={groupByColumn}
+        // setGroupByColumn={setGroupByColumn}
+      />
     </div>
   );
 };

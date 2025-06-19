@@ -5,7 +5,6 @@ export interface Dev {
     os_version: string;
     dev_start_date: string;
     dev_end_date: string; 
-    contract_end: string;
     progress: string;
     maintenance: string;
 };
