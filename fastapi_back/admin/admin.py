@@ -46,14 +46,16 @@ def admin_member_invite(
     userId: str = Body(...),
     nickname: str = Body(...),
     email: str = Body(...),
-    accountType: str = Body("member")  # 기본값 "member"
+    accountType: str = Body("member"),  # 기본값 "member"
+    team: str = Body(None)  # team 파라미터 추가
 ):
     try:
-        member = create_member(userId, nickname, email, accountType)  # accountType 전달
+        member = create_member(userId, nickname, email, accountType, team)  # team 전달
         return {"message": "임시 비밀번호가 이메일로 발송되었습니다.", "userId": userId}
     except ValueError as e:
         raise HTTPException(400, str(e))
     except Exception as e:
+        import traceback
         traceback.print_exc()
         raise HTTPException(500, f"회원 생성 또는 이메일 발송에 실패했습니다: {e}")
 

@@ -5,6 +5,7 @@ interface AuthUser {
     userId: string;
     nickname: string;
     type: string;
+    team?: string; // team 필드 포함 필요!
 }
 
 interface AuthContextType {

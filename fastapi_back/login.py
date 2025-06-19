@@ -14,7 +14,8 @@ def universal_login(req: MemberLoginRequest):
             "id": str(member["_id"]),
             "userId": member["userId"],
             "nickname": member["nickname"],
-            "type": "member"  # 여기만 "member"로 변경
+            "type": "member",
+            "team": member.get("team", None)  # team 정보 추가 (없으면 None)
         }
     # 2. 관리자 조회
     admin = admin_collection.find_one({"userId": req.userId})
@@ -23,6 +24,7 @@ def universal_login(req: MemberLoginRequest):
             "id": str(admin["_id"]),
             "userId": admin["userId"],
             "nickname": admin["nickname"],
-            "type": "admin"
+            "type": "admin",
+            "team": admin.get("team", "관리팀")  # team 정보 추가, 없으면 "관리팀"
         }
     raise HTTPException(400, "아이디 또는 비밀번호가 올바르지 않습니다.")

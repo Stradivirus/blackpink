@@ -28,7 +28,7 @@ def send_email(to_email: str, user_id: str, temp_password: str):
         server.login(smtp_user, smtp_password)
         server.sendmail(smtp_user, to_email, msg.as_string())
 
-def create_member(userId: str, nickname: str, email: str, accountType: str = "member"):
+def create_member(userId: str, nickname: str, email: str, accountType: str = "member", team: str = None):
     temp_password = generate_temp_password()
     hashed_password = bcrypt.hash(temp_password)  # 비밀번호 해시
     member = {
@@ -40,6 +40,8 @@ def create_member(userId: str, nickname: str, email: str, accountType: str = "me
     }
     if accountType == "admin":
         collection = admin_collection
+        if team:
+            member["team"] = team  # 팀 정보 추가
     else:
         collection = member_collection
     if collection.find_one({"userId": userId}):

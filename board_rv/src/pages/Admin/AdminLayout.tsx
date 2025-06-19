@@ -1,5 +1,6 @@
 import * as React from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext"; // 추가
 
 const menuItems = [
   { label: "대시보드", path: "/admin" },
@@ -14,10 +15,29 @@ const teamList = [
   { key: "biz", label: "사업팀" },
 ];
 
+const teamLabelMap: Record<string, string> = {
+  "보안팀": "보안팀",
+  "개발팀": "개발팀",
+  "사업팀": "사업팀",
+  "관리팀": "관리팀",
+  // 필요시 추가
+};
+
 const AdminLayout: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [dashboardOpen, setDashboardOpen] = React.useState(false);
+  const { user } = useAuth(); // 추가
+
+  // 팀명과 닉네임 표시용
+  const teamName = user?.team ? teamLabelMap[user.team] || user.team : "";
+  const nickname = user?.nickname || "";
+
+  // 콘솔 출력 추가
+  React.useEffect(() => {
+    console.log("user:", user);
+    console.log("teamName:", teamName);
+  }, [user, teamName]);
 
   // 대시보드 탭이 활성화되면 자동으로 아코디언 펼침
   React.useEffect(() => {
@@ -52,6 +72,12 @@ const AdminLayout: React.FC = () => {
           minWidth: 120,
         }}
       >
+        {/* 팀명 | 닉네임 표시 */}
+        {user && (
+          <div style={{ marginBottom: 28, fontWeight: "bold", color: "#1976d2" }}>
+            {teamName && `${teamName} | `}{nickname} 님
+          </div>
+        )}
         <ul style={{ listStyle: "none", padding: 0 }}>
           <li style={{ marginBottom: 20 }}>
             <div
