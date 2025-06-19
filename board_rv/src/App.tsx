@@ -1,4 +1,4 @@
-import React from "react";
+import * as React from "react";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import BoardHeader from "./components/CustomerBoard/BoardHeader";
 import Home from "./pages/Home";
@@ -7,10 +7,10 @@ import PostNewPage from "./pages/CustomerBoard/PostNewPage";
 import PostForm from "./components/CustomerBoard/PostForm";
 import { AuthProvider } from "./context/AuthContext";
 import PostList from "./components/CustomerBoard/PostList"; 
+import AdminLayout from "./pages/Admin/AdminLayout";
 import AdminDashboard from "./pages/Admin/AdminDashboard";
 import MemberInvitePage from "./pages/Admin/MemberInvitePage";
-import AdminLayout from "./pages/Admin/AdminLayout";
-import AdminDataPage from "./pages/Admin/AdminDataPage";
+import AdminDataPage from "./pages/Admin/AdminDataPage"; // 추가
 
 const AppContent: React.FC = () => {
   const location = useLocation();
@@ -30,7 +30,7 @@ const AppContent: React.FC = () => {
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminDashboard />} />
             <Route path="invite" element={<MemberInvitePage />} />
-            <Route path="data" element={<AdminDataPage />} />
+            <Route path="data" element={<AdminDataPage />} /> {/* 추가 */}
           </Route>
         </Routes>
       </main>
