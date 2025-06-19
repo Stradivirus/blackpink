@@ -5,7 +5,7 @@ from admin.admin import router as admin_router
 from login import router as login_router
 from customer.comment import router as comment_router
 from admin.generate_member import create_member
-from customer.password import router as change_password_router
+from password import router as change_password_router
 from admin.graph import router as graph_router
 from admin.incident import router as incident_router
 # main.py

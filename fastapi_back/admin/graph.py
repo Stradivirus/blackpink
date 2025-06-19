@@ -12,8 +12,8 @@ router = APIRouter(prefix="/graph")
 collection = incident_collection
 
 def set_plot_style():
-    font_path = "/usr/share/fonts/truetype/nanum/NanumGothic.ttf"
-    # font_path = 'C:/Windows/Fonts/malgun.ttf'
+    # font_path = "/usr/share/fonts/truetype/nanum/NanumGothic.ttf"
+    font_path = 'C:/Windows/Fonts/malgun.ttf'
     font_prop = fm.FontProperties(fname=font_path)
     plt.rcParams['font.family'] = font_prop.get_name()
     plt.rcParams['axes.unicode_minus'] = False

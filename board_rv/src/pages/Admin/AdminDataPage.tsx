@@ -15,6 +15,16 @@ const AdminDataPage: React.FC = () => {
       });
   }, []);
 
+  // incidents를 incident_no 기준 내림차순 정렬
+  const sortedIncidents = data.sort((a, b) => b.incident_no - a.incident_no);
+
+  const getStatus = (incident) => {
+    if (incident.handled_date) return "처리완료";
+    const today = "2025-07-01";
+    if (incident.incident_date <= today) return "진행중";
+    return "예정";
+  };
+
   if (loading) return <div>로딩 중...</div>;
 
   return (
@@ -23,19 +33,19 @@ const AdminDataPage: React.FC = () => {
       <table border={1} cellPadding={4} style={{ width: "100%", marginTop: 16 }}>
         <thead>
           <tr>
-            <th>incident_no</th>
-            <th>company_id</th>
-            <th>threat_type</th>
-            <th>risk_level</th>
-            <th>server_type</th>
-            <th>incident_date</th>
-            <th>status</th>
-            <th>action</th>
+            <th>일련번호</th>
+            <th>회사ID</th>
+            <th>위협유형</th>
+            <th>위험도</th>
+            <th>서버유형</th>
+            <th>사고일</th>
+            <th>처리상태</th>
+            <th>처리일</th>
             <th>handler_count</th>
           </tr>
         </thead>
         <tbody>
-          {data.map((row) => (
+          {sortedIncidents.map((row) => (
             <tr key={row.incident_no}>
               <td>{row.incident_no}</td>
               <td>{row.company_id}</td>
@@ -43,8 +53,12 @@ const AdminDataPage: React.FC = () => {
               <td>{row.risk_level}</td>
               <td>{row.server_type}</td>
               <td>{row.incident_date}</td>
-              <td>{row.status}</td>
-              <td>{row.action}</td>
+              <td>{getStatus(row)}</td>
+              <td>
+                {row.status === "처리완료" && row.handled_date
+                  ? row.handled_date
+                  : "미처리"}
+              </td>
               <td>{row.handler_count}</td>
             </tr>
           ))}

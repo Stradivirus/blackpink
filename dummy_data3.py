@@ -29,10 +29,9 @@ maintenance_statuses = [
     "점검 예정",
     "점검 진행중",
     "장애 발생",
-    "서비스 종료"
 ]
 
-today = datetime(2025, 6, 18)
+today = datetime(2025, 7, 1)
 start_date = datetime(2023, 1, 1)
 end_date = today
 

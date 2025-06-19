@@ -38,6 +38,7 @@ const ChangePasswordForm: React.FC<{ onSuccess?: () => void }> = ({ onSuccess })
                     userId: user?.userId,
                     old_password: oldPassword,
                     new_password: newPassword,
+                    accountType: user?.type || "member", // user.type 사용!
                 }),
             });
             if (res.ok) {

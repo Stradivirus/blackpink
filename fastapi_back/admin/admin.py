@@ -17,16 +17,27 @@ def admin_join(req: AdminCreateRequest):
         "userId": req.userId,
         "password": hashed_pw,
         "nickname": req.nickname,
+        "team": req.team,  # team 추가
     }
     result = admin_collection.insert_one(admin)
     admin["id"] = str(result.inserted_id)
-    return AdminResponse(id=admin["id"], userId=admin["userId"], nickname=admin["nickname"])
+    return AdminResponse(
+        id=admin["id"],
+        userId=admin["userId"],
+        nickname=admin["nickname"],
+        team=admin["team"],  # team 추가
+    )
 
 @router.get("/api/admin/list", response_model=list[AdminResponse])
 def admin_list():
     admins = admin_collection.find()
     return [
-        AdminResponse(id=str(a["_id"]), userId=a["userId"], nickname=a["nickname"])
+        AdminResponse(
+            id=str(a["_id"]),
+            userId=a["userId"],
+            nickname=a["nickname"],
+            team=a.get("team", "관리팀"),  # team이 없으면 "관리팀" 기본값
+        )
         for a in admins
     ]
 

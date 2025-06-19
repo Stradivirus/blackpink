@@ -29,9 +29,9 @@ for _ in range(10):
 # 업종별 일련번호 카운터
 industry_counter = {k: 1 for k in industries}
 
-# 회사 200개 생성
+# 회사 250개 생성
 companies = []
-for idx in range(1, 201):
+for idx in range(1, 251):
     industry = random.choice(industries)
     prefix = industry_prefix[industry]
     company_id = f"{prefix}{industry_counter[industry]:05d}"
@@ -55,29 +55,50 @@ def random_date(start, end):
     random_days = random.randint(0, delta.days)
     return start + timedelta(days=random_days)
 
-# 예시: 2023년 1월 1일 ~ 2025년 6월 18일 사이 랜덤 계약 시작일
-today = datetime(2025, 6, 18)
+# 예시: 2023년 1월 1일 ~ 2025년 7월 1일 사이 랜덤 계약 시작일
+today = datetime(2025, 7, 1)
 start_date = datetime(2023, 1, 1)
 end_date = today
 
+# 계약 기간 옵션 (일 단위)
+contract_periods = [30, 90, 180, 365, 1095]
+
 for company in companies:
     contract_start = random_date(start_date, end_date)
-    # 계약 종료일은 시작일 이후 1~365일 사이
-    contract_end = contract_start + timedelta(days=random.randint(1, 365))
+    period = random.choice(contract_periods)
+    contract_end = contract_start + timedelta(days=period)
+    company["contract_start"] = contract_start
+    company["contract_end"] = contract_end
+
+# 계약 시작일 기준 정렬
+companies.sort(key=lambda x: x["contract_start"])
+
+# 업종별 일련번호 카운터 초기화
+industry_counter = {k: 1 for k in industries}
+
+# 정렬된 순서대로 company_id, 날짜 포맷, 상태 부여
+for company in companies:
+    industry = company["industry"]
+    prefix = industry_prefix[industry]
+    company_id = f"{prefix}{industry_counter[industry]:05d}"
+    industry_counter[industry] += 1
+    company["company_id"] = company_id
+    # 날짜를 YYYY-MM-DD 문자열로 변환
+    company["contract_start"] = company["contract_start"].strftime("%Y-%m-%d")
+    company["contract_end"] = company["contract_end"].strftime("%Y-%m-%d")
     # 계약 상태 결정
+    contract_start = datetime.strptime(company["contract_start"], "%Y-%m-%d")
+    contract_end = datetime.strptime(company["contract_end"], "%Y-%m-%d")
     if contract_start > today:
         status = "예정"
     elif contract_start <= today <= contract_end:
         status = "진행중"
     elif today > contract_end:
         status = "만료"
-    # 해지 상태는 랜덤하게 일부만 부여 (예시)
     if random.random() < 0.1:
         status = "해지"
-    company["contract_start"] = contract_start
-    company["contract_end"] = contract_end
     company["status"] = status
 
 company_collection.delete_many({})
 company_collection.insert_many(companies)
-print("회사 200개 저장 완료")
+print("회사 250개 저장 완료")
