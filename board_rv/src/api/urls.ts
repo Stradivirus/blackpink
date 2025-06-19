@@ -8,7 +8,7 @@ export const API_URLS = {
     COMMENT_CREATE: `${API_BASE}/comments`,
     COMMENT_DELETE: (id: string) => `${API_BASE}/comments/${id}`,
     MEMBER_INVITE: `${API_BASE}/admin/member-invite`,
-    CHANGE_PASSWORD: `${API_BASE}/change-password`,
+    CHANGE_PASSWORD: `${API_BASE}/member/change-password`,
     CHECK_DUPLICATE: `${API_BASE}/admin/check-duplicate`,
     INCIDENT: `${API_BASE}/incident`,
     COMPANIES: `${API_BASE}/companies`,

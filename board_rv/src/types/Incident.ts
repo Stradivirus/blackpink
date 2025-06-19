@@ -5,7 +5,7 @@ export interface Incident {
   risk_level: string;
   server_type: string;
   incident_date: string;
-  handled_date?: string | null;
+  handled_date: string | null;
   status: string;
   action: string;
   handler_count: number;

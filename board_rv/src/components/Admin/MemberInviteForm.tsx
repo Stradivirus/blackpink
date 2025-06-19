@@ -1,16 +1,12 @@
 import { useState } from "react";
 import axios from "axios";
 import { API_URLS } from "../../api/urls";
-import type { Admin } from "../../types/Admin";
-
-const ADMIN_TEAMS: Admin["team"][] = ["관리팀", "보안팀", "사업팀", "개발팀"];
 
 const MemberInviteForm: React.FC = () => {
   const [userId, setUserId] = useState("");
   const [nickname, setNickname] = useState("");
   const [email, setEmail] = useState("");
   const [accountType, setAccountType] = useState<"member" | "admin">("member");
-  const [team, setTeam] = useState<Admin["team"]>("관리팀");
   const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [userIdError, setUserIdError] = useState<string | null>(null);
@@ -60,21 +56,16 @@ const MemberInviteForm: React.FC = () => {
 
     // 2. 중복이 없으면 회원 초대 진행
     try {
-      const payload: any = {
+      await axios.post(API_URLS.MEMBER_INVITE, {
         userId,
         nickname,
         email,
         accountType,
-      };
-      if (accountType === "admin") {
-        payload.team = team;
-      }
-      await axios.post(API_URLS.MEMBER_INVITE, payload);
+      });
       setMessage("임시 비밀번호가 이메일로 발송되었습니다.");
       setUserId("");
       setNickname("");
       setEmail("");
-      setTeam("관리팀");
     } catch (err: any) {
       setMessage(
         err.response?.data?.detail || "회원 초대에 실패했습니다."
@@ -109,20 +100,6 @@ const MemberInviteForm: React.FC = () => {
           관리자
         </label>
       </div>
-      {accountType === "admin" && (
-        <div style={{ marginBottom: 12 }}>
-          <select
-            value={team}
-            onChange={e => setTeam(e.target.value as Admin["team"])}
-            style={{ width: "100%", padding: 8 }}
-            required
-          >
-            {ADMIN_TEAMS.map(t => (
-              <option key={t} value={t}>{t}</option>
-            ))}
-          </select>
-        </div>
-      )}
       <div style={{ marginBottom: 12 }}>
         <input
           type="text"
