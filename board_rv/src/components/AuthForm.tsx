@@ -34,13 +34,19 @@ const AuthForm: React.FC<AuthFormProps> = ({ onSuccess }) => {
             if (res.ok) {
                 const data = await res.json();
                 // postpage에서만 member 로그인 허용
-                if (window.location.pathname === "/postpage" && data.type !== "member") {
-                    setLoginError("회원만 로그인할 수 있습니다.");
+                if (window.location.pathname === "/postpage" && data.type !== "member" && data.type !== "admin") {
+                    setLoginError("회원 또는 관리자만 로그인할 수 있습니다.");
                     return;
                 }
                 login(
                     data.token || "dummy-token",
-                    {id: data.id, userId: data.userId, nickname: data.nickname, type: data.type}
+                    {
+                        id: data.id,
+                        userId: data.userId,
+                        nickname: data.nickname,
+                        type: data.type,
+                        team: data.team // team 정보 추가
+                    }
                 );
                 if (onSuccess) onSuccess(data);
             } else {

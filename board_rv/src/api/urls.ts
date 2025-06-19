@@ -8,9 +8,16 @@ export const API_URLS = {
     COMMENT_CREATE: `${API_BASE}/comments`,
     COMMENT_DELETE: (id: string) => `${API_BASE}/comments/${id}`,
     MEMBER_INVITE: `${API_BASE}/admin/member-invite`,
-    CHANGE_PASSWORD: `${API_BASE}/member/change-password`,
+    CHANGE_PASSWORD: `${API_BASE}/change-password`,
     CHECK_DUPLICATE: `${API_BASE}/admin/check-duplicate`,
     INCIDENT: `${API_BASE}/incident`,
+    COMPANIES: `${API_BASE}/companies`,
+    DEV: `${API_BASE}/dev`,
+
+    // 추가: GCI, 위험국가, 위협리포트
+    GCI_RANKINGS: `${API_BASE}/gci_rankings`,
+    RISKY_COUNTRIES_MAP: `${API_BASE}/risky_countries/map_data`,
+    THREAT_REPORTS_COUNT: `${API_BASE}/threat_reports/count`,
 };
 
 export const GRAPH_API = "http://localhost:8000/graph";

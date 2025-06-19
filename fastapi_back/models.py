@@ -1,6 +1,6 @@
 from pydantic import BaseModel, EmailStr
-from datetime import date, time
-from typing import Optional, List
+from datetime import date, time, datetime
+from typing import Optional, List, Literal
 
 class MemberJoinRequest(BaseModel):
     userId: str
@@ -58,6 +58,7 @@ class AdminCreateRequest(BaseModel):
     userId: str
     password: str
     nickname: str
+    team: Literal["관리팀", "보안팀", "사업팀", "개발팀"]
 
 class AdminLoginRequest(BaseModel):
     userId: str
@@ -67,6 +68,7 @@ class AdminResponse(BaseModel):
     id: str
     userId: str
     nickname: str
+    team: Literal["관리팀", "보안팀", "사업팀", "개발팀"]
 
 class Incident(BaseModel):
     incident_no: int
@@ -82,3 +84,11 @@ class Incident(BaseModel):
 
 class IncidentListResponse(BaseModel):
     incidents: List[Incident]
+
+class RiskyCountry(BaseModel):
+    country: str
+    risk_level: str
+    alert_type: Optional[str]
+    latitude: float
+    longitude: float
+    timestamp: datetime
