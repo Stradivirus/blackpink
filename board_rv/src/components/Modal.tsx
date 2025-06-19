@@ -13,9 +13,6 @@ const Modal: React.FC<ModalProps> = ({open, onClose, children}) => {
         <div className="modal-backdrop" onClick={onClose}>
             <div className="modal" onClick={e => e.stopPropagation()}>
                 {children}
-                <div className="modal-btn-group">
-                    <button className="board-btn cancel" onClick={onClose}>닫기</button>
-                </div>
             </div>
         </div>
     );

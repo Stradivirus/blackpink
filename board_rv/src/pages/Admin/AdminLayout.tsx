@@ -1,6 +1,8 @@
 import * as React from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext"; // 추가
+import ChangePasswordForm from "../../components/ChangePasswordForm";
+import Modal from "../../components/Modal";
 
 const menuItems = [
   { label: "대시보드", path: "/admin", isParent: true, children: [] },
@@ -28,7 +30,8 @@ const AdminLayout: React.FC = () => {
   const navigate = useNavigate();
   const [dashboardOpen, setDashboardOpen] = React.useState(false);
   const [dataOpen, setDataOpen] = React.useState(false);
-  const { user } = useAuth(); // 추가
+  const { user, logout } = useAuth();
+  const [pwModalOpen, setPwModalOpen] = React.useState(false);
 
   // 팀명과 닉네임 표시용
   const teamName = user?.team ? teamLabelMap[user.team] || user.team : "";
@@ -45,29 +48,22 @@ const AdminLayout: React.FC = () => {
     if (location.pathname === "/admin") {
       setDashboardOpen(true);
     }
-    // 이전에 있던 else { setDashboardOpen(false); }는 제거됨
 
     // 데이터 탭이 활성화되면 자동으로 아코디언 펼침
     if (location.pathname.startsWith("/admin/data")) {
       setDataOpen(true);
     }
-    // 이전에 있던 else { setDataOpen(false); }는 제거됨
   }, [location.pathname]);
 
   const handleDashboardClick = () => {
     setDashboardOpen((prev) => !prev);
-    // 이전에 있던 if (!dashboardOpen) { ... navigate(...) ... } 블록은 제거됨
-    // 이제 이 함수는 단순히 아코디언을 열고 닫는 역할만 함
   };
 
   const handleDataClick = () => {
     setDataOpen((prev) => !prev);
-    // 이전에 있던 if (!dataOpen) { ... navigate(...) ... } 블록은 제거됨
-    // 이제 이 함수는 단순히 아코디언을 열고 닫는 역할만 함
   };
 
   const handleTeamClick = (menuPath: string, teamKey: string) => {
-    // 쿼리스트링으로 팀 정보 전달 (이 로직은 그대로 유지)
     navigate(`${menuPath}?team=${teamKey}`);
   };
 
@@ -95,10 +91,32 @@ const AdminLayout: React.FC = () => {
           minWidth: 120,
         }}
       >
-        {/* 팀명 | 닉네임 표시 */}
+        {/* 팀명 | 닉네임 + 버튼 */}
         {user && (
-          <div style={{ marginBottom: 28, fontWeight: "bold", color: "#1976d2" }}>
-            {teamName && `${teamName} | `}{nickname} 님
+          <div style={{ fontSize: 20,marginBottom: 28, fontWeight: "bold", color: "#1976d2" }}>
+            <span>
+              {teamName && `${teamName} | `}{nickname} 님
+            </span>
+            <div style={{ marginTop: 8, display: "flex", gap: 8 }}>
+              <button
+                className="board-btn"
+                style={{ fontSize: 15, padding: "4px 10px" }}
+                onClick={() => setPwModalOpen(true)}
+              >
+                비밀번호 변경
+              </button>
+              <button
+                className="board-btn"
+                style={{ fontSize: 13, padding: "4px 10px" }}
+                onClick={logout}
+              >
+                로그아웃
+              </button>
+            </div>
+            {/* 비밀번호 변경 모달 */}
+            <Modal open={pwModalOpen} onClose={() => setPwModalOpen(false)}>
+              <ChangePasswordForm onSuccess={() => setPwModalOpen(false)} />
+            </Modal>
           </div>
         )}
         <ul style={{ listStyle: "none", padding: 0 }}>

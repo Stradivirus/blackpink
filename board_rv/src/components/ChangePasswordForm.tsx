@@ -1,15 +1,17 @@
 import { useState, useEffect } from "react";
 import { API_URLS } from "../api/urls";
 import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom"; 
 
 const ChangePasswordForm: React.FC<{ onSuccess?: () => void }> = ({ onSuccess }) => {
     const { user, logout } = useAuth();
     const [oldPassword, setOldPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");
-    const [confirmPassword, setConfirmPassword] = useState(""); // 추가
+    const [confirmPassword, setConfirmPassword] = useState("");
     const [message, setMessage] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [showMatch, setShowMatch] = useState(false);
+    const navigate = useNavigate();
 
     // 새 비밀번호, 확인 비밀번호 입력 시 일치 여부 체크
     useEffect(() => {
@@ -45,8 +47,9 @@ const ChangePasswordForm: React.FC<{ onSuccess?: () => void }> = ({ onSuccess })
                 setMessage("비밀번호가 성공적으로 변경되었습니다. 다시 로그인 해주세요.");
                 setTimeout(() => {
                     logout();
+                    navigate("/"); // 여기로 이동
                     if (onSuccess) onSuccess();
-                }, 1500);
+                }, 1000);
             } else {
                 const data = await res.json();
                 setMessage(data.detail || "비밀번호 변경에 실패했습니다.");
