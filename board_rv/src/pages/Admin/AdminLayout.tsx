@@ -12,7 +12,6 @@ const menuItems = [
 ];
 
 const teamList = [
-  { key: "dashboard", label: "대시보드" },
   { key: "biz", label: "사업팀" },
   { key: "dev", label: "개발팀" },
   { key: "security", label: "보안팀" },
@@ -140,9 +139,17 @@ const AdminLayout: React.FC = () => {
                 alignItems: "center",
                 justifyContent: "space-between",
               }}
-              onClick={() => handleTeamClick("/admin", "dashboard")}
+              onClick={handleDashboardClick} // 아코디언 토글만 담당
             >
-              <span>대시보드</span>
+              <span
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleTeamClick("/admin", "dashboard"); // 대시보드 이동만 담당
+                }}
+                style={{ flex: 1, cursor: "pointer" }}
+              >
+                대시보드
+              </span>
               <span style={{ fontSize: 18 }}>{dashboardOpen ? "▲" : "▼"}</span>
             </div>
             {dashboardOpen && (
@@ -184,7 +191,7 @@ const AdminLayout: React.FC = () => {
               }}
               onClick={handleDataClick}
             >
-              <span>데이터</span>
+              <span>업무 자료</span>
               <span style={{ fontSize: 18 }}>{dataOpen ? "▲" : "▼"}</span>
             </div>
             {dataOpen && (
