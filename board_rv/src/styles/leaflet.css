@@ -1,0 +1,89 @@
+/* Leaflet 기본 스타일 (최소 동작에 필요한 부분만 추출) */
+
+/* 지도 컨테이너 */
+.leaflet-container {
+  height: 100%;
+  width: 100%;
+  position: relative;
+  outline: none;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 타일 이미지 */
+.leaflet-tile {
+  position: absolute;
+  left: 0;
+  top: 0;
+  will-change: transform;
+}
+
+/* 마커(기본 아이콘) */
+.leaflet-marker-icon,
+.leaflet-marker-shadow {
+  display: block;
+  position: absolute;
+  border: 0;
+  padding: 0;
+  margin-left: -12px;
+  margin-top: -41px;
+}
+
+/* 팝업 */
+.leaflet-popup {
+  position: absolute;
+  text-align: center;
+  margin-bottom: 20px;
+}
+.leaflet-popup-content-wrapper {
+  padding: 1px;
+  text-align: left;
+  border-radius: 12px;
+  background: white;
+  color: #222;
+  box-shadow: 0 3px 14px rgba(0,0,0,0.4);
+}
+.leaflet-popup-content {
+  margin: 13px 19px;
+  line-height: 1.4;
+}
+.leaflet-popup-tip {
+  width: 24px;
+  height: 12px;
+  margin: -1px auto 0;
+  background: white;
+  border-radius: 3px;
+}
+
+/* 줌 컨트롤 */
+.leaflet-control-zoom {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.65);
+}
+.leaflet-control-zoom-in,
+.leaflet-control-zoom-out {
+  display: block;
+  width: 26px;
+  height: 26px;
+  line-height: 26px;
+  text-align: center;
+  background: #fff;
+  color: #333;
+  font-size: 18px;
+  cursor: pointer;
+  border: none;
+}
+
+/* Attribution */
+.leaflet-control-attribution {
+  background: rgba(255,255,255,0.7);
+  margin: 0;
+  padding: 0 5px;
+  color: #333;
+  font-size: 11px;
+  text-align: right;
+}

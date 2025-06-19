@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr
-from datetime import date, time
+from datetime import date, time, datetime
 from typing import Optional, List, Literal
 
 class MemberJoinRequest(BaseModel):
@@ -84,3 +84,11 @@ class Incident(BaseModel):
 
 class IncidentListResponse(BaseModel):
     incidents: List[Incident]
+
+class RiskyCountry(BaseModel):
+    country: str
+    risk_level: str
+    alert_type: Optional[str]
+    latitude: float
+    longitude: float
+    timestamp: datetime

@@ -12,7 +12,8 @@ const menuItems = [
 ];
 
 const teamList = [
-  { key: "biz", label: "사업팀" }, // 사업팀으로 통일
+  { key: "dashboard", label: "대시보드" },
+  { key: "biz", label: "사업팀" },
   { key: "dev", label: "개발팀" },
   { key: "security", label: "보안팀" },
 ];
@@ -67,7 +68,6 @@ const AdminLayout: React.FC = () => {
     navigate(`${menuPath}?team=${teamKey}`);
   };
 
-  const isMenuItemActive = (path: string) => location.pathname === path;
   const isTeamActive = (teamKey: string, menuBasePath: string) =>
     location.pathname === menuBasePath &&
     new URLSearchParams(location.search).get("team") === teamKey;
@@ -124,35 +124,48 @@ const AdminLayout: React.FC = () => {
           <li style={{ marginBottom: 20 }}>
             <div
               style={{
-                color: isMenuItemActive("/admin") ? "#1976d2" : "#333",
-                fontWeight: isMenuItemActive("/admin") ? "bold" : "normal",
+                color:
+                  isTeamActive("dashboard", "/admin") ||
+                  (location.pathname === "/admin" && !new URLSearchParams(location.search).get("team"))
+                    ? "#1976d2"
+                    : "#333",
+                fontWeight:
+                  isTeamActive("dashboard", "/admin") ||
+                  (location.pathname === "/admin" && !new URLSearchParams(location.search).get("team"))
+                    ? "bold"
+                    : "normal",
                 cursor: "pointer",
                 userSelect: "none",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
               }}
-              onClick={handleDashboardClick}
+              onClick={() => handleTeamClick("/admin", "dashboard")}
             >
               <span>대시보드</span>
               <span style={{ fontSize: 18 }}>{dashboardOpen ? "▲" : "▼"}</span>
             </div>
             {dashboardOpen && (
               <ul style={{ listStyle: "none", paddingLeft: 16, marginTop: 8 }}>
-                {teamList.map((team) => (
-                  <li key={`dashboard-${team.key}`} style={{ marginBottom: 10 }}>
-                    <span
-                      style={{
-                        color: isTeamActive(team.key, "/admin") ? "#1976d2" : "#555",
-                        fontWeight: isTeamActive(team.key, "/admin") ? "bold" : "normal",
-                        cursor: "pointer",
-                      }}
-                      onClick={() => handleTeamClick("/admin", team.key)}
-                    >
-                      {team.label}
-                    </span>
-                  </li>
-                ))}
+                {teamList
+                  .filter((team) => team.key !== "dashboard")
+                  .map((team) => (
+                    <li key={`dashboard-${team.key}`} style={{ marginBottom: 10 }}>
+                      <span
+                        style={{
+                          color: isTeamActive(team.key, "/admin") ? "#1976d2" : "#555",
+                          fontWeight: isTeamActive(team.key, "/admin") ? "bold" : "normal",
+                          cursor: "pointer",
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleTeamClick("/admin", team.key);
+                        }}
+                      >
+                        {team.label}
+                      </span>
+                    </li>
+                  ))}
               </ul>
             )}
           </li>

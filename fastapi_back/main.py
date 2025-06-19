@@ -10,6 +10,8 @@ from admin.graph import router as graph_router
 from admin.incident import router as incident_router
 from admin.companies import router as companies_router
 from admin.dev import router as dev_router
+from admin.risky_country import router as risky_country_router
+
 
 # main.py
 
@@ -32,6 +34,8 @@ app.include_router(graph_router)
 app.include_router(incident_router)
 app.include_router(companies_router)
 app.include_router(dev_router)
+app.include_router(risky_country_router)
+
 
 if __name__ == "__main__":
     import uvicorn
