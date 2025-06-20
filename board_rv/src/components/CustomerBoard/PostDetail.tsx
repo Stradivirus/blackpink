@@ -164,6 +164,8 @@ const PostDetail: React.FC = () => {
 
     const {date, time} = formatDate(post.createdDate, post.createdTime);
 
+    console.log("user.id:", user?.id, "post.writerId:", post?.writerId);
+
     return (
         <>
             <main className="board-detail-container board-detail-outer">

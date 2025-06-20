@@ -10,7 +10,7 @@ router = APIRouter()
 def create_post(req: BoardCreateRequest):
     now = datetime.now()
     doc = req.dict()
-    doc["writerId"] = req.userId
+    doc["writerId"] = req.writerId  # writerId는 ObjectId string이어야 함
     doc["writerNickname"] = req.writerNickname
     doc["createdDate"] = now.strftime("%Y-%m-%d")
     doc["createdTime"] = now.strftime("%H:%M:%S")

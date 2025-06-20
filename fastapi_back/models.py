@@ -22,8 +22,8 @@ class MemberResponse(BaseModel):
 class BoardCreateRequest(BaseModel):
     title: str
     content: str
-    userId: str
-    writerNickname: str = ""  # 닉네임 필드 추가
+    writerId: str  # ← ObjectId string
+    writerNickname: str = ""
     isNotice: Optional[bool] = False  # 공지사항 여부 추가
 
 class BoardResponse(BaseModel):
