@@ -5,7 +5,7 @@ from fastapi import APIRouter, HTTPException, Body
 from db import member_collection, admin_collection
 from passlib.hash import bcrypt
 from bson.objectid import ObjectId
-from models import AdminCreateRequest, AdminLoginRequest, AdminResponse
+from models import AdminCreateRequest, AdminLoginRequest, AdminResponse, MemberResponse
 
 import smtplib
 from email.mime.text import MIMEText
@@ -112,3 +112,17 @@ def check_duplicate(field: str, value: str, accountType: str = "member"):
     collection = admin_collection if accountType == "admin" else member_collection
     exists = collection.find_one({field: value})
     return {"exists": bool(exists)}
+
+@router.get("/api/member/list", response_model=list[MemberResponse])
+def member_list():
+    members = member_collection.find()
+    return [
+        MemberResponse(
+            id=str(m["_id"]),
+            userId=m["userId"],
+            nickname=m["nickname"],
+            email=m["email"],
+            joinedAt=m["joinedAt"].date() if hasattr(m["joinedAt"], "date") else m["joinedAt"],
+        )
+        for m in members
+    ]
