@@ -10,7 +10,7 @@ router = APIRouter()
 def create_post(req: BoardCreateRequest):
     now = datetime.now()
     doc = req.dict()
-    doc["writerId"] = req.userId
+    doc["writerId"] = req.writerId   # userId 문자열로 저장
     doc["writerNickname"] = req.writerNickname
     doc["createdDate"] = now.strftime("%Y-%m-%d")
     doc["createdTime"] = now.strftime("%H:%M:%S")
@@ -96,6 +96,16 @@ def delete_post(id: str):
     now = datetime.now()
     board_collection.update_one(
         {"_id": ObjectId(id)},
+        {"$set": {
+            "deleted": True,
+            "deletedDate": now.date().isoformat(),
+            "deletedTime": now.time().replace(microsecond=0).isoformat()
+        }}
+    )
+    # 댓글도 soft delete 처리
+    from db import comment_collection
+    comment_collection.update_many(
+        {"postId": id, "deleted": False},
         {"$set": {
             "deleted": True,
             "deletedDate": now.date().isoformat(),

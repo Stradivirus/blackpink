@@ -2,7 +2,6 @@ import {useEffect, useState} from "react";
 import {Link} from "react-router-dom";
 import type {Post} from "../../types/Post";
 import {API_URLS} from "../../api/urls";
-import {formatDate} from "../../utils/formatDate";
 import {useAuth} from "../../context/AuthContext";
 import "../../styles/Board.css";
 
@@ -90,7 +89,6 @@ const PostList: React.FC = () => {
                         <>
                             {noticePosts.map((post, idx) => {
                                 const displayNumber = "공지";
-                                const {date, time} = formatDate(post.createdDate, post.createdTime);
                                 return (
                                     <tr key={post.id} className="notice-row">
                                         <td className="board-post-id" style={{color: "#d32f2f", fontWeight: 700}}>{displayNumber}</td>
@@ -104,16 +102,14 @@ const PostList: React.FC = () => {
                                             </Link>
                                         </td>
                                         <td className="board-post-author">{post.writerNickname || "-"}</td>
-                                        <td className="board-post-date">{date}</td>
-                                        <td className="board-post-date">{time}</td>
+                                        <td className="board-post-date">{post.createdDate}</td>
+                                        <td className="board-post-date">{post.createdTime}</td>
                                         <td className="board-post-views">{post.viewCount}</td>
                                     </tr>
                                 );
                             })}
                             {normalPosts.map((post, idx) => {
-                                // 글번호: 전체 글 개수에서 현재 페이지, 인덱스만큼 빼서 역순으로 표시
                                 const displayNumber = totalElements - (page * PAGE_SIZE) - idx - noticePosts.length;
-                                const {date, time} = formatDate(post.createdDate, post.createdTime);
                                 return (
                                     <tr key={post.id}>
                                         <td className="board-post-id">{displayNumber}</td>
@@ -126,8 +122,8 @@ const PostList: React.FC = () => {
                                             </Link>
                                         </td>
                                         <td className="board-post-author">{post.writerNickname || "-"}</td>
-                                        <td className="board-post-date">{date}</td>
-                                        <td className="board-post-date">{time}</td>
+                                        <td className="board-post-date">{post.createdDate}</td>
+                                        <td className="board-post-date">{post.createdTime}</td>
                                         <td className="board-post-views">{post.viewCount}</td>
                                     </tr>
                                 );

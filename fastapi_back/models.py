@@ -22,8 +22,8 @@ class MemberResponse(BaseModel):
 class BoardCreateRequest(BaseModel):
     title: str
     content: str
-    userId: str
-    writerNickname: str = ""  # 닉네임 필드 추가
+    writerId: str  # ← ObjectId string
+    writerNickname: str = ""
     isNotice: Optional[bool] = False  # 공지사항 여부 추가
 
 class BoardResponse(BaseModel):
@@ -51,11 +51,9 @@ class CommentResponse(BaseModel):
     writerId: str
     writerNickname: str
     content: str
-    createdDate: date
-    createdTime: time
-    deleted: Optional[bool] = False
-    deletedDate: Optional[date] = None
-    deletedTime: Optional[time] = None
+    createdDate: str
+    createdTime: str
+    team: str = ""
 
 class AdminCreateRequest(BaseModel):
     userId: str

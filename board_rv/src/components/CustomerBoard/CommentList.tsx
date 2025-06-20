@@ -38,7 +38,7 @@ const CommentList: React.FC<{ postId: string }> = ({ postId }) => {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 postId,
-                writerId: user.id,
+                writerId: user.userId, // userId로 변경
                 content,
             }),
         });
@@ -70,9 +70,12 @@ const CommentList: React.FC<{ postId: string }> = ({ postId }) => {
                     .map(c => (
                         <li key={c.id}>
                             <div className="comment-meta">
-                                <b>{c.writerNickname}</b>
+                                <b>
+                                    {c.writerNickname}
+                                    {c.team && ` (${c.team})`}
+                                </b>
                                 <span style={{ color: "#888", marginLeft: 8 }}>{c.createdDate} {c.createdTime}</span>
-                                {user && String(user.id) === String(c.writerId) && (
+                                {user && String(user.userId) === String(c.writerId) && ( // userId로 비교
                                     <button
                                         className="comment-delete-btn"
                                         onClick={() => handleDelete(c.id)}
