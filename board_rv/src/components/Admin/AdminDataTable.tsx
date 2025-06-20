@@ -21,6 +21,15 @@ const dateColumnsByTeam: {
   ],
 };
 
+// OS에 따른 버전 맵
+const osVersionMap: Record<string, string[]> = {
+  Windows: ["7", "8", "10", "11"],
+  Linux: ["Rocky 8", "Rocky 9", "Ubuntu 18.04", "Ubuntu 20.04", "Ubuntu 22.04"],
+  Android: ["10", "11", "12", "13"],
+  iOS: ["15", "16", "17"],
+  macOS: ["11", "12", "13", "14"],
+};
+
 const AdminDataTable: React.FC<AdminDataTableProps> = ({
   data,
   columns,
@@ -28,21 +37,18 @@ const AdminDataTable: React.FC<AdminDataTableProps> = ({
   selectedTeam,
   selectedTeamLabel,
 }) => {
-  // 필터 상태
-  const [filters, setFilters] = useState<{ [key: string]: string[] }>({});
-  // 날짜 필터용 컬럼 리스트 (팀별)
   const dateColumns = dateColumnsByTeam[selectedTeam] || [];
-  // 선택된 날짜 필터 컬럼 (처음에는 팀별 첫 번째 컬럼)
   const [dateFilterColumn, setDateFilterColumn] = useState<string>(
     dateColumns.length > 0 ? dateColumns[0].key : ""
   );
   const [yearFilter, setYearFilter] = useState<string | null>(null);
   const [monthFilter, setMonthFilter] = useState<string | null>(null);
+  const [filters, setFilters] = useState<{ [key: string]: string[] }>({});
+  const [companyNameQuery, setCompanyNameQuery] = useState<string>(""); // 회사명 텍스트 검색 상태
   const [activeDropdown, setActiveDropdown] = useState<
     "dateColumn" | "year" | "month" | string | null
   >(null);
 
-  // selectedTeam 변경 시 dateColumns, dateFilterColumn 초기화
   useEffect(() => {
     const newDateCols = dateColumnsByTeam[selectedTeam] || [];
     setDateFilterColumn(newDateCols.length > 0 ? newDateCols[0].key : "");
@@ -50,90 +56,105 @@ const AdminDataTable: React.FC<AdminDataTableProps> = ({
     setMonthFilter(null);
     setFilters({});
     setActiveDropdown(null);
+    setCompanyNameQuery(""); // 팀 변경 시 회사명 검색어 초기화
   }, [selectedTeam]);
 
-
-
-  // 팀별 제외 컬럼 설정 (필터에서 제외할 컬럼들)
   const excludedColumnsByTeam: { [key: string]: string[] } = {
-    security: ["incident_no", "company_id"],
-    biz: ["company_id", "manager_contact"],
-    dev: ["company_id", "contract_end"],
+    security: ["incident_no"],
+    biz: ["manager_phone"],
+    dev: ["contract_end"],
   };
 
-  // 팀별 필터 가능 컬럼 (날짜 필터 컬럼 제외)
-  const filterableColumns = columnsByTeam[selectedTeam]
-    ?.filter(
+  const filterableColumns =
+    columnsByTeam[selectedTeam]?.filter(
       (col) =>
-        !(
-          excludedColumnsByTeam[selectedTeam]?.includes(col.key) ||
-          dateColumns.some((d) => d.key === col.key)
-        )
-    )
-    || [];
+        !excludedColumnsByTeam[selectedTeam]?.includes(col.key) &&
+        !dateColumns.some((d) => d.key === col.key)
+    ) || [];
 
-  // 년도 리스트 생성 (선택된 날짜 필터 컬럼 기준)
   const uniqueYears = useMemo(() => {
     const yearsSet = new Set<string>();
     data.forEach((row) => {
       const raw = row[dateFilterColumn];
       if (!raw) return;
       const d = new Date(raw);
-      if (!isNaN(d.getTime())) {
-        yearsSet.add(String(d.getFullYear()));
-      }
+      if (!isNaN(d.getTime())) yearsSet.add(String(d.getFullYear()));
     });
     return Array.from(yearsSet).sort((a, b) => Number(b) - Number(a));
   }, [data, dateFilterColumn]);
 
-  // 월 리스트 생성 (선택된 날짜 필터 컬럼 기준)
   const uniqueMonths = useMemo(() => {
     const monthsSet = new Set<string>();
     data.forEach((row) => {
       const raw = row[dateFilterColumn];
       if (!raw) return;
       const d = new Date(raw);
-      if (!isNaN(d.getTime())) {
+      if (!isNaN(d.getTime()))
         monthsSet.add(String(d.getMonth() + 1).padStart(2, "0"));
-      }
     });
     return Array.from(monthsSet).sort();
   }, [data, dateFilterColumn]);
 
-  // 예시: 개발팀 진행상태 범위 필터 옵션
   const getProgressRanges = () => ["1~20", "21~40", "41~60", "61~80", "81~100"];
 
-  // 필터 옵션 값 구하기
   const getFilterValues = (colKey: string) => {
-    if (selectedTeam === "dev" && colKey === "progress") {
+    if (selectedTeam === "dev" && colKey === "progress")
       return getProgressRanges();
+    if (selectedTeam === "dev" && colKey === "os_version") {
+      const selectedOS = filters.os?.[0];
+      return selectedOS ? osVersionMap[selectedOS] || [] : [];
     }
+    if (colKey === "company_id") {
+      const firstLetters = new Set<string>();
+      data.forEach((row) => {
+        const val = row[colKey];
+        if (typeof val === "string" && val.length > 0) {
+          firstLetters.add(val.charAt(0).toUpperCase());
+        }
+      });
+      return Array.from(firstLetters).sort();
+    }
+
     const valuesSet = new Set<string>();
     data.forEach((row) => {
       const val = row[colKey];
-      if (val !== undefined && val !== null) {
-        valuesSet.add(val.toString());
-      }
+      if (val !== undefined && val !== null) valuesSet.add(val.toString());
     });
     return Array.from(valuesSet).sort();
   };
 
-  // 필터링된 데이터 계산
   const filteredData = data.filter((row) => {
-    // 날짜 필터
     const rawDate = row[dateFilterColumn];
     if (!rawDate) return false;
     const d = new Date(rawDate);
     if (isNaN(d.getTime())) return false;
     if (yearFilter && String(d.getFullYear()) !== yearFilter) return false;
-    if (monthFilter && String(d.getMonth() + 1).padStart(2, "0") !== monthFilter)
+    if (
+      monthFilter &&
+      String(d.getMonth() + 1).padStart(2, "0") !== monthFilter
+    )
       return false;
 
-    // 다중 필터
+    if (
+      selectedTeam === "biz" &&
+      companyNameQuery &&
+      typeof row["company_name"] === "string" &&
+      !row["company_name"]
+        .toLowerCase()
+        .includes(companyNameQuery.toLowerCase())
+    ) {
+      return false;
+    }
+
     return Object.entries(filters).every(([colKey, values]) => {
       if (values.length === 0) return true;
       const val = row[colKey];
       if (!val) return false;
+
+      if (colKey === "company_id") {
+        if (typeof val !== "string" || val.length === 0) return false;
+        return values.includes(val.charAt(0).toUpperCase());
+      }
 
       if (selectedTeam === "dev" && colKey === "progress") {
         const numeric = Number(val);
@@ -147,14 +168,18 @@ const AdminDataTable: React.FC<AdminDataTableProps> = ({
     });
   });
 
-  // 다중 필터 토글
   const toggleFilterValue = (columnKey: string, value: string) => {
     setFilters((prev) => {
+      let newFilters = { ...prev };
+      if (columnKey === "os") {
+        newFilters["os_version"] = [];
+      }
       const prevValues = prev[columnKey] || [];
       const newValues = prevValues.includes(value)
         ? prevValues.filter((v) => v !== value)
         : [...prevValues, value];
-      return { ...prev, [columnKey]: newValues };
+      newFilters[columnKey] = newValues;
+      return newFilters;
     });
   };
 
@@ -162,10 +187,21 @@ const AdminDataTable: React.FC<AdminDataTableProps> = ({
     setFilters({});
     setYearFilter(null);
     setMonthFilter(null);
+    setCompanyNameQuery("");
     setActiveDropdown(null);
   };
 
-  // 버튼 기본 스타일
+  const handleDateColumnToggle = () => {
+    if (dateColumns.length < 2) return;
+    const currentIndex = dateColumns.findIndex(
+      (col) => col.key === dateFilterColumn
+    );
+    const nextIndex = (currentIndex + 1) % dateColumns.length;
+    setDateFilterColumn(dateColumns[nextIndex].key);
+    setYearFilter(null);
+    setMonthFilter(null);
+  };
+
   const buttonBaseStyle: React.CSSProperties = {
     padding: "6px 12px",
     border: "1px solid #ccc",
@@ -176,7 +212,6 @@ const AdminDataTable: React.FC<AdminDataTableProps> = ({
     fontWeight: "normal",
   };
 
-  // 버튼 선택 시 스타일
   const buttonSelectedStyle: React.CSSProperties = {
     backgroundColor: "#007bff",
     color: "white",
@@ -191,61 +226,16 @@ const AdminDataTable: React.FC<AdminDataTableProps> = ({
 
       {/* 날짜 필터 그룹 */}
       <div style={{ display: "flex", gap: 10, marginBottom: 16, flexWrap: "wrap" }}>
-        {/* 날짜 컬럼 선택 */}
-        <div style={{ position: "relative" }}>
+        {dateColumns.length > 0 && (
           <button
-            onClick={() =>
-              setActiveDropdown((prev) => (prev === "dateColumn" ? null : "dateColumn"))
-            }
-            style={{
-              ...buttonBaseStyle,
-              ...(dateFilterColumn ? buttonSelectedStyle : {}),
-              minWidth: 120,
-              textAlign: "left",
-            }}
+            onClick={handleDateColumnToggle}
+            style={{ ...buttonBaseStyle, ...buttonSelectedStyle }}
             type="button"
           >
-            {dateColumns.find((c) => c.key === dateFilterColumn)?.label ?? "날짜 선택"} ▼
+            {dateColumns.find((col) => col.key === dateFilterColumn)?.label ??
+              "날짜 컬럼 선택"}
           </button>
-          {activeDropdown === "dateColumn" && (
-            <div
-              style={{
-                position: "absolute",
-                top: "100%",
-                left: 0,
-                zIndex: 10,
-                backgroundColor: "white",
-                border: "1px solid #ddd",
-                borderRadius: 4,
-                boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-                minWidth: 140,
-              }}
-            >
-              {dateColumns.map((col) => (
-                <button
-                  key={col.key}
-                  onClick={() => {
-                    setDateFilterColumn(col.key);
-                    setYearFilter(null);
-                    setMonthFilter(null);
-                    setActiveDropdown(null);
-                  }}
-                  style={{
-                    ...buttonBaseStyle,
-                    ...(dateFilterColumn === col.key ? buttonSelectedStyle : {}),
-                    width: "100%",
-                    border: "none",
-                    borderRadius: 0,
-                    textAlign: "left",
-                  }}
-                  type="button"
-                >
-                  {col.label}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+        )}
 
         {/* 연도 선택 */}
         <div style={{ position: "relative" }}>
@@ -402,7 +392,16 @@ const AdminDataTable: React.FC<AdminDataTableProps> = ({
 
       {/* 기존 다중 필터 (날짜 필터용 컬럼 제외) */}
       {filterableColumns.length > 0 && (
-        <div style={{ marginBottom: 16 }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            flexWrap: "wrap",
+            marginBottom: 16,
+          }}
+        >
+          {/* 왼쪽: 다중 필터 드롭다운과 초기화 버튼 */}
           <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
             {filterableColumns.map((col) => {
               const selected = filters[col.key] || [];
@@ -471,7 +470,12 @@ const AdminDataTable: React.FC<AdminDataTableProps> = ({
                             onChange={() => toggleFilterValue(col.key, value)}
                             style={{ marginRight: 8 }}
                           />
-                          {value === "" ? "(비어있음)" : value}
+                          {/* company_id 필터 드롭다운에서는 첫 글자만 표시 */}
+                          {col.key === "company_id" && value !== ""
+                            ? `${value}`
+                            : value === ""
+                            ? "(비어있음)"
+                            : value}
                         </label>
                       ))}
                     </div>
@@ -502,6 +506,24 @@ const AdminDataTable: React.FC<AdminDataTableProps> = ({
               </button>
             )}
           </div>
+
+          {/* 오른쪽: 회사명 검색창 */}
+          {selectedTeam === "biz" && (
+            <div style={{ marginTop: 10 }}>
+              <input
+                type="text"
+                placeholder="회사명 검색"
+                value={companyNameQuery}
+                onChange={(e) => setCompanyNameQuery(e.target.value)}
+                style={{
+                  padding: "6px 12px",
+                  border: "1px solid #ccc",
+                  borderRadius: 4,
+                  minWidth: 200,
+                }}
+              />
+            </div>
+          )}
         </div>
       )}
 
@@ -537,7 +559,10 @@ const AdminDataTable: React.FC<AdminDataTableProps> = ({
                       )
                   )
                   .map((col) => (
-                    <td key={col.key}>{row[col.key]}</td>
+                    <td key={col.key}>
+                      {/* 테이블 데이터에서는 company_id 전체 값 표시 */}
+                      {row[col.key]}
+                    </td>
                   ))}
               </tr>
             ))
