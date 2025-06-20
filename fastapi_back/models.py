@@ -56,6 +56,7 @@ class CommentResponse(BaseModel):
     deleted: Optional[bool] = False
     deletedDate: Optional[date] = None
     deletedTime: Optional[time] = None
+    team: Optional[str] = None  # ← 추가
 
 class AdminCreateRequest(BaseModel):
     userId: str

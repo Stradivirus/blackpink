@@ -70,7 +70,10 @@ const CommentList: React.FC<{ postId: string }> = ({ postId }) => {
                     .map(c => (
                         <li key={c.id}>
                             <div className="comment-meta">
-                                <b>{c.writerNickname}</b>
+                                <b>
+                                    {c.writerNickname}
+                                    {c.team && ` (${c.team})`}
+                                </b>
                                 <span style={{ color: "#888", marginLeft: 8 }}>{c.createdDate} {c.createdTime}</span>
                                 {user && String(user.id) === String(c.writerId) && (
                                     <button
