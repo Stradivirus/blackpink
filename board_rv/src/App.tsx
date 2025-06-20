@@ -23,6 +23,7 @@ const AppContent: React.FC = () => {
       <main>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/board" element={<PostList />} />
           <Route path="/postpage" element={<PostList />} />
           <Route path="/posts/:id" element={<PostPage />} />
           <Route path="/posts/:id/edit" element={<PostForm isEdit={true} />} />

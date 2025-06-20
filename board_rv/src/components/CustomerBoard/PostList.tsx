@@ -42,6 +42,9 @@ const PostList: React.FC = () => {
     const handlePrev = () => setPage(p => Math.max(0, p - 1));
     const handleNext = () => setPage(p => Math.min(totalPages - 1, p + 1));
 
+    const noticePosts = posts.filter(p => p.isNotice);
+    const normalPosts = posts.filter(p => !p.isNotice);
+
     return (
         <>
             <main className="board-main">
@@ -76,34 +79,61 @@ const PostList: React.FC = () => {
                                 불러오는 중...
                             </td>
                         </tr>
-                    ) : (posts || []).length === 0 ? (
+                    ) : posts.length === 0 ? (
                         <tr>
                             <td colSpan={6} style={{textAlign: 'center', color: '#aaa'}}>
                                 게시글이 없습니다.
                             </td>
                         </tr>
-                    ) : (posts || []).map((post, idx) => {
-                        // 글번호: 전체 글 개수에서 현재 페이지, 인덱스만큼 빼서 역순으로 표시
-                        const displayNumber = totalElements - (page * PAGE_SIZE) - idx;
-                        const {date, time} = formatDate(post.createdDate, post.createdTime);
-                        return (
-                            <tr key={post.id}>
-                                <td className="board-post-id">{displayNumber}</td>
-                                <td>
-                                    <Link
-                                        to={`/posts/${post.id}`}
-                                        className="board-post-title-link"
-                                    >
-                                        {post.title}
-                                    </Link>
-                                </td>
-                                <td className="board-post-author">{post.writerNickname || "-"}</td>
-                                <td className="board-post-date">{date}</td>
-                                <td className="board-post-date">{time}</td>
-                                <td className="board-post-views">{post.viewCount}</td>
-                            </tr>
-                        );
-                    })}
+                    ) : (
+                        // 공지글 먼저, 일반글 나중에 렌더링
+                        <>
+                            {noticePosts.map((post, idx) => {
+                                const displayNumber = "공지";
+                                const {date, time} = formatDate(post.createdDate, post.createdTime);
+                                return (
+                                    <tr key={post.id} className="notice-row">
+                                        <td className="board-post-id" style={{color: "#d32f2f", fontWeight: 700}}>{displayNumber}</td>
+                                        <td>
+                                            <Link
+                                                to={`/posts/${post.id}`}
+                                                className="board-post-title-link"
+                                                style={{fontWeight: 700, color: "#d32f2f"}}
+                                            >
+                                                📢 {post.title}
+                                            </Link>
+                                        </td>
+                                        <td className="board-post-author">{post.writerNickname || "-"}</td>
+                                        <td className="board-post-date">{date}</td>
+                                        <td className="board-post-date">{time}</td>
+                                        <td className="board-post-views">{post.viewCount}</td>
+                                    </tr>
+                                );
+                            })}
+                            {normalPosts.map((post, idx) => {
+                                // 글번호: 전체 글 개수에서 현재 페이지, 인덱스만큼 빼서 역순으로 표시
+                                const displayNumber = totalElements - (page * PAGE_SIZE) - idx - noticePosts.length;
+                                const {date, time} = formatDate(post.createdDate, post.createdTime);
+                                return (
+                                    <tr key={post.id}>
+                                        <td className="board-post-id">{displayNumber}</td>
+                                        <td>
+                                            <Link
+                                                to={`/posts/${post.id}`}
+                                                className="board-post-title-link"
+                                            >
+                                                {post.title}
+                                            </Link>
+                                        </td>
+                                        <td className="board-post-author">{post.writerNickname || "-"}</td>
+                                        <td className="board-post-date">{date}</td>
+                                        <td className="board-post-date">{time}</td>
+                                        <td className="board-post-views">{post.viewCount}</td>
+                                    </tr>
+                                );
+                            })}
+                        </>
+                    )}
                     </tbody>
                 </table>
                 <div className="board-pagination">

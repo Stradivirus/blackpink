@@ -23,6 +23,8 @@ class BoardCreateRequest(BaseModel):
     title: str
     content: str
     userId: str
+    writerNickname: str = ""  # 닉네임 필드 추가
+    isNotice: Optional[bool] = False  # 공지사항 여부 추가
 
 class BoardResponse(BaseModel):
     id: str
@@ -30,9 +32,10 @@ class BoardResponse(BaseModel):
     content: str
     writerId: str
     writerNickname: str
+    createdDate: str
+    createdTime: str
     viewCount: int
-    createdDate: date
-    createdTime: time
+    isNotice: Optional[bool] = False  # 공지사항 여부 추가
     deleted: Optional[bool] = False
     deletedDate: Optional[date] = None
     deletedTime: Optional[time] = None
