@@ -102,4 +102,14 @@ def delete_post(id: str):
             "deletedTime": now.time().replace(microsecond=0).isoformat()
         }}
     )
+    # 댓글도 soft delete 처리
+    from db import comment_collection
+    comment_collection.update_many(
+        {"postId": id, "deleted": False},
+        {"$set": {
+            "deleted": True,
+            "deletedDate": now.date().isoformat(),
+            "deletedTime": now.time().replace(microsecond=0).isoformat()
+        }}
+    )
     return {"message": "삭제되었습니다."}
