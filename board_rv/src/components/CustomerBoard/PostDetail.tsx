@@ -2,7 +2,6 @@ import React, {useEffect, useState} from "react";
 import {useParams, Link, useNavigate} from "react-router-dom";
 import type {Post} from "../../types/Post";
 import {API_URLS} from "../../api/urls";
-import {formatDate} from "../../utils/formatDate";
 import {useAuth} from "../../context/AuthContext";
 import CommentList from "./CommentList";
 import "../../styles/Board.css";
@@ -51,7 +50,6 @@ const RecentPostList: React.FC<{ excludeId?: string }> = ({excludeId}) => {
                 {posts.map((post, idx) => {
                     // 전체 글 개수에서 idx만큼 빼서 역순 번호
                     const displayNumber = totalElements - idx;
-                    const {date, time} = formatDate(post.createdDate, post.createdTime);
                     return (
                         <tr key={post.id}>
                             <td>{displayNumber}</td>
@@ -61,8 +59,8 @@ const RecentPostList: React.FC<{ excludeId?: string }> = ({excludeId}) => {
                                 </Link>
                             </td>
                             <td className="board-post-author">{post.writerNickname || "-"}</td>
-                            <td className="board-post-date">{date}</td>
-                            <td className="board-post-date">{time}</td>
+                            <td className="board-post-date">{post.createdDate}</td>
+                            <td className="board-post-date">{post.createdTime}</td>
                             <td className="board-post-views">{post.viewCount}</td>
                         </tr>
                     );
@@ -162,14 +160,6 @@ const PostDetail: React.FC = () => {
         </>
     );
 
-    const {date, time} = formatDate(post.createdDate, post.createdTime);
-
-    console.log("user.userId:", user?.userId, "post.writerId:", post?.writerId);
-
-    if (user && user.userId === post.writerId) {
-        // 본인 글일 때만 수정/삭제 버튼 노출
-    }
-
     return (
         <>
             <main className="board-detail-container board-detail-outer">
@@ -178,8 +168,8 @@ const PostDetail: React.FC = () => {
                 </div>
                 <div className="board-detail-meta board-detail-meta-flex">
                     <span><b>작성자</b> {post.writerNickname || "-"}</span>
-                    <span><b>작성일</b> {date}</span>
-                    <span><b>작성시간</b> {time}</span>
+                    <span><b>작성일</b> {post.createdDate}</span>
+                    <span><b>작성시간</b> {post.createdTime}</span>
                     <span><b>조회수</b> {post.viewCount}</span>
                 </div>
                 <div className="board-detail-content board-detail-content-bg">
