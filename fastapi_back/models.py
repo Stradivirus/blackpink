@@ -51,12 +51,9 @@ class CommentResponse(BaseModel):
     writerId: str
     writerNickname: str
     content: str
-    createdDate: date
-    createdTime: time
-    deleted: Optional[bool] = False
-    deletedDate: Optional[date] = None
-    deletedTime: Optional[time] = None
-    team: Optional[str] = None  # ← 추가
+    createdDate: str
+    createdTime: str
+    team: str = ""
 
 class AdminCreateRequest(BaseModel):
     userId: str

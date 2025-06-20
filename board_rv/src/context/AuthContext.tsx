@@ -1,8 +1,8 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 
 interface AuthUser {
-    id: number;
-    userId: string;
+    id: string; // 오브젝트ID (더 이상 사용 X)
+    userId: string; // 실제 로그인 아이디 (문자열)
     nickname: string;
     type: string;
     team?: string; // team 필드 포함 필요!

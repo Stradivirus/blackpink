@@ -164,7 +164,11 @@ const PostDetail: React.FC = () => {
 
     const {date, time} = formatDate(post.createdDate, post.createdTime);
 
-    console.log("user.id:", user?.id, "post.writerId:", post?.writerId);
+    console.log("user.userId:", user?.userId, "post.writerId:", post?.writerId);
+
+    if (user && user.userId === post.writerId) {
+        // 본인 글일 때만 수정/삭제 버튼 노출
+    }
 
     return (
         <>
@@ -181,25 +185,25 @@ const PostDetail: React.FC = () => {
                 <div className="board-detail-content board-detail-content-bg">
                     {post.content}
                 </div>
-                {user && String(user.id) === post.writerId ? (
+                {user && String(user.userId) === post.writerId ? ( // userId로 비교
                     <div className="board-detail-btn-group board-detail-btn-group-right">
                         <Link to={`/posts/${post.id}/edit`}>
                             <button className="board-btn">수정</button>
                         </Link>
-                <button
-                    className="board-btn"
-                    onClick={handleDeleteClick}
-                    disabled={isDeleting}
-                >
-                    {isDeleting ? "삭제 중..." : "삭제"}
-                </button>
-                <Link to="/postpage" className="board-btn cancel">목록으로</Link>
-            </div>
-        ) : (
-            <div className="board-detail-btn-group board-detail-btn-group-right">
-                <Link to="/postpage" className="board-btn cancel">목록으로</Link>
-            </div>
-        )}
+                        <button
+                            className="board-btn"
+                            onClick={handleDeleteClick}
+                            disabled={isDeleting}
+                        >
+                            {isDeleting ? "삭제 중..." : "삭제"}
+                        </button>
+                        <Link to="/postpage" className="board-btn cancel">목록으로</Link>
+                    </div>
+                ) : (
+                    <div className="board-detail-btn-group board-detail-btn-group-right">
+                        <Link to="/postpage" className="board-btn cancel">목록으로</Link>
+                    </div>
+                )}
                 <ConfirmModal
                     open={showConfirm}
                     x={modalPos.x}

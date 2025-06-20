@@ -16,8 +16,8 @@ const PostForm: React.FC<Props> = ({isEdit}) => {
     const [form, setForm] = useState({
         title: "",
         content: "",
-        writerId: user?.id ?? "", // ← 변경
-        writerNickname: user?.nickname ?? "", // 닉네임 추가
+        writerId: user?.userId ?? "", // userId로 변경
+        writerNickname: user?.nickname ?? "",
         isNotice: false,
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -25,7 +25,7 @@ const PostForm: React.FC<Props> = ({isEdit}) => {
 
     useEffect(() => {
         if (user) {
-            setForm(f => ({...f, writerId: user.id})); // ← 변경
+            setForm(f => ({...f, writerId: user.userId})); // userId로 변경
         }
     }, [user]);
 
@@ -39,7 +39,7 @@ const PostForm: React.FC<Props> = ({isEdit}) => {
                     setForm({
                         title: data.title,
                         content: data.content,
-                        writerId: data.writerId, // ← 변경
+                        writerId: data.writerId, // 이미 userId 문자열
                         writerNickname: data.writerNickname,
                         isNotice: !!data.isNotice,
                     });
@@ -73,7 +73,7 @@ const PostForm: React.FC<Props> = ({isEdit}) => {
             const url = isEdit ? `${API_URLS.POST}/${id}` : API_URLS.POSTS;
             const body = {
                 ...form,
-                writerId: user?.id, // ← 변경
+                writerId: user?.userId, // userId로 변경
                 writerNickname: user?.nickname,
             };
             const res = await fetch(url, {
