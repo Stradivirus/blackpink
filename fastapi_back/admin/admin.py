@@ -1,13 +1,76 @@
+import random
+import string
+from datetime import datetime
 from fastapi import APIRouter, HTTPException, Body
 from db import member_collection, admin_collection
 from passlib.hash import bcrypt
 from bson.objectid import ObjectId
-from models import AdminCreateRequest, AdminLoginRequest, AdminResponse
-from admin.generate_member import create_member
-import traceback
+from models import AdminCreateRequest, AdminResponse, MemberResponse
+
+import smtplib
+from email.mime.text import MIMEText
 
 router = APIRouter()
 
+# 임시 비밀번호 생성 함수
+# - 영문 대소문자+숫자 조합의 임시 비밀번호를 랜덤 생성
+# - 회원/관리자 초대 시 사용
+def generate_temp_password(length=10):
+    chars = string.ascii_letters + string.digits
+    return ''.join(random.choice(chars) for _ in range(length))
+
+# 이메일 발송 함수
+# - SMTP를 이용해 임시 비밀번호 안내 메일 발송
+# - 실제 서비스에서는 보안상 앱 비밀번호 등 환경변수로 관리 필요
+# - 네이버 SMTP 예시
+def send_email(to_email: str, user_id: str, temp_password: str):
+    smtp_server = "smtp.naver.com"
+    smtp_port = 587
+    smtp_user = "stradivirus@naver.com"
+    smtp_password = "R6LZJP61QE4R"
+
+    subject = "임시 비밀번호 안내"
+    body = f"안녕하세요.\n\n아이디: {user_id}\n임시 비밀번호: {temp_password}\n로그인 후 비밀번호를 꼭 변경해주세요."
+    msg = MIMEText(body)
+    msg["Subject"] = subject
+    msg["From"] = smtp_user
+    msg["To"] = to_email
+
+    with smtplib.SMTP(smtp_server, smtp_port) as server:
+        server.starttls()
+        server.login(smtp_user, smtp_password)
+        server.sendmail(smtp_user, to_email, msg.as_string())
+
+# 회원/관리자 계정 생성 및 초대 메일 발송 함수
+# - 임시 비밀번호 생성 및 해시 저장
+# - 중복 아이디 체크, DB 저장, 이메일 발송
+# - accountType: "member" 또는 "admin"
+def create_member(userId: str, nickname: str, email: str, accountType: str = "member", team: str = None):
+    temp_password = generate_temp_password()
+    hashed_password = bcrypt.hash(temp_password)
+    member = {
+        "userId": userId,
+        "nickname": nickname,
+        "password": hashed_password,
+        "email": email,
+        "joinedAt": datetime.now()
+    }
+    if accountType == "admin":
+        collection = admin_collection
+        if team:
+            member["team"] = team
+    else:
+        collection = member_collection
+    if collection.find_one({"userId": userId}):
+        raise ValueError("이미 존재하는 아이디입니다.")
+    collection.insert_one(member)
+    send_email(email, userId, temp_password)
+    return member
+
+# 관리자 회원가입 엔드포인트
+# - 관리자 계정 신규 생성 (userId, password, nickname, team)
+# - 중복 체크 및 비밀번호 해시 저장
+# - 생성된 관리자 정보를 AdminResponse로 반환
 @router.post("/api/admin/join", response_model=AdminResponse)
 def admin_join(req: AdminCreateRequest):
     if admin_collection.find_one({"userId": req.userId}):
@@ -17,7 +80,7 @@ def admin_join(req: AdminCreateRequest):
         "userId": req.userId,
         "password": hashed_pw,
         "nickname": req.nickname,
-        "team": req.team,  # team 추가
+        "team": req.team,
     }
     result = admin_collection.insert_one(admin)
     admin["id"] = str(result.inserted_id)
@@ -25,9 +88,11 @@ def admin_join(req: AdminCreateRequest):
         id=admin["id"],
         userId=admin["userId"],
         nickname=admin["nickname"],
-        team=admin["team"],  # team 추가
+        team=admin["team"],
     )
 
+# 관리자 목록 조회 엔드포인트
+# - 모든 관리자 계정 정보를 AdminResponse 리스트로 반환
 @router.get("/api/admin/list", response_model=list[AdminResponse])
 def admin_list():
     admins = admin_collection.find()
@@ -36,29 +101,34 @@ def admin_list():
             id=str(a["_id"]),
             userId=a["userId"],
             nickname=a["nickname"],
-            team=a.get("team", "관리팀"),  # team이 없으면 "관리팀" 기본값
+            team=a.get("team", "관리팀"),
         )
         for a in admins
     ]
 
+# 회원/관리자 초대(임시 비밀번호 발송) 엔드포인트
+# - userId, nickname, email, accountType, team 정보로 계정 생성 및 메일 발송
+# - 중복 아이디/이메일 체크 및 예외 처리
 @router.post("/api/admin/member-invite")
 def admin_member_invite(
     userId: str = Body(...),
     nickname: str = Body(...),
     email: str = Body(...),
-    accountType: str = Body("member"),  # 기본값 "member"
-    team: str = Body(None)  # team 파라미터 추가
+    accountType: str = Body("member"),
+    team: str = Body(None)
 ):
     try:
-        member = create_member(userId, nickname, email, accountType, team)  # team 전달
+        member = create_member(userId, nickname, email, accountType, team)
         return {"message": "임시 비밀번호가 이메일로 발송되었습니다.", "userId": userId}
     except ValueError as e:
         raise HTTPException(400, str(e))
     except Exception as e:
-        import traceback
-        traceback.print_exc()
-        raise HTTPException(500, f"회원 생성 또는 이메일 발송에 실패했습니다: {e}")
+        raise HTTPException(500, f"오류 발생: {e}")
 
+# 아이디/닉네임 중복 체크 엔드포인트
+# - field: userId 또는 nickname
+# - accountType에 따라 컬렉션 분기
+# - 이미 존재하면 exists: true 반환
 @router.get("/api/admin/check-duplicate")
 def check_duplicate(field: str, value: str, accountType: str = "member"):
     if field not in ["userId", "nickname"]:
@@ -66,3 +136,19 @@ def check_duplicate(field: str, value: str, accountType: str = "member"):
     collection = admin_collection if accountType == "admin" else member_collection
     exists = collection.find_one({field: value})
     return {"exists": bool(exists)}
+
+# 회원 목록 조회 엔드포인트
+# - 모든 회원 계정 정보를 MemberResponse 리스트로 반환
+@router.get("/api/member/list", response_model=list[MemberResponse])
+def member_list():
+    members = member_collection.find()
+    return [
+        MemberResponse(
+            id=str(m["_id"]),
+            userId=m["userId"],
+            nickname=m["nickname"],
+            email=m["email"],
+            joinedAt=m["joinedAt"].date() if hasattr(m["joinedAt"], "date") else m["joinedAt"],
+        )
+        for m in members
+    ]

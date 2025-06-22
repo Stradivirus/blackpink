@@ -1,0 +1,103 @@
+.admin-data-table-container {
+  /* 전체 컨테이너 */
+}
+.admin-data-table-title {
+  font-size: 1.3rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+.admin-data-table-date-filter-group {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.admin-data-table-btn {
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #f8f9fa;
+  color: black;
+  cursor: pointer;
+  font-weight: normal;
+  min-width: 100px;
+  text-align: left;
+}
+.admin-data-table-btn.selected {
+  background-color: #007bff;
+  color: white;
+  font-weight: bold;
+}
+.admin-data-table-dropdown {
+  position: relative;
+}
+.admin-data-table-dropdown-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 10;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  max-height: 200px;
+  overflow-y: auto;
+  min-width: 120px;
+}
+.admin-data-table-dropdown-list .admin-data-table-btn {
+  width: 100%;
+  border: none;
+  border-radius: 0;
+  text-align: left;
+}
+.admin-data-table-multi-filter-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.admin-data-table-multi-filter-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.admin-data-table-dropdown-checkbox-label {
+  display: block;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+.admin-data-table-reset-btn {
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #f44336;
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
+  height: 36px;
+  align-self: center;
+}
+.admin-data-table-company-search {
+  margin-top: 10px;
+}
+.admin-data-table-company-search input {
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  min-width: 200px;
+}
+.admin-data-table-table {
+  width: 100%;
+  margin-top: 16px;
+  border-collapse: collapse;
+}
+.admin-data-table-table th,
+.admin-data-table-table td {
+  border: 1px solid #ccc;
+  padding: 4px;
+}
+.admin-data-table-no-data {
+  text-align: center;
+  padding: 20px;
+}

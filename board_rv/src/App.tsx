@@ -11,6 +11,8 @@ import AdminDashboard from "./pages/Admin/AdminDashboard";
 import MemberInvitePage from "./pages/Admin/MemberInvitePage";
 import AdminLayout from "./pages/Admin/AdminLayout";
 import AdminDataPage from "./pages/Admin/AdminDataPage";
+import MembersList from "./pages/Admin/MembersList";
+import AdminsList from "./pages/Admin/AdminsList";
 
 const AppContent: React.FC = () => {
   const location = useLocation();
@@ -23,6 +25,7 @@ const AppContent: React.FC = () => {
       <main>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/board" element={<PostList />} />
           <Route path="/postpage" element={<PostList />} />
           <Route path="/posts/:id" element={<PostPage />} />
           <Route path="/posts/:id/edit" element={<PostForm isEdit={true} />} />
@@ -31,6 +34,8 @@ const AppContent: React.FC = () => {
             <Route index element={<AdminDashboard />} />
             <Route path="invite" element={<MemberInvitePage />} />
             <Route path="data" element={<AdminDataPage />} />
+            <Route path="admins" element={<AdminsList />} />
+            <Route path="members" element={<MembersList />} />
           </Route>
         </Routes>
       </main>

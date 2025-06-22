@@ -2,7 +2,6 @@ import React, {useEffect, useState} from "react";
 import {useParams, Link, useNavigate} from "react-router-dom";
 import type {Post} from "../../types/Post";
 import {API_URLS} from "../../api/urls";
-import {formatDate} from "../../utils/formatDate";
 import {useAuth} from "../../context/AuthContext";
 import CommentList from "./CommentList";
 import "../../styles/Board.css";
@@ -51,7 +50,6 @@ const RecentPostList: React.FC<{ excludeId?: string }> = ({excludeId}) => {
                 {posts.map((post, idx) => {
                     // 전체 글 개수에서 idx만큼 빼서 역순 번호
                     const displayNumber = totalElements - idx;
-                    const {date, time} = formatDate(post.createdDate, post.createdTime);
                     return (
                         <tr key={post.id}>
                             <td>{displayNumber}</td>
@@ -61,8 +59,8 @@ const RecentPostList: React.FC<{ excludeId?: string }> = ({excludeId}) => {
                                 </Link>
                             </td>
                             <td className="board-post-author">{post.writerNickname || "-"}</td>
-                            <td className="board-post-date">{date}</td>
-                            <td className="board-post-date">{time}</td>
+                            <td className="board-post-date">{post.createdDate}</td>
+                            <td className="board-post-date">{post.createdTime}</td>
                             <td className="board-post-views">{post.viewCount}</td>
                         </tr>
                     );
@@ -162,8 +160,6 @@ const PostDetail: React.FC = () => {
         </>
     );
 
-    const {date, time} = formatDate(post.createdDate, post.createdTime);
-
     return (
         <>
             <main className="board-detail-container board-detail-outer">
@@ -172,32 +168,32 @@ const PostDetail: React.FC = () => {
                 </div>
                 <div className="board-detail-meta board-detail-meta-flex">
                     <span><b>작성자</b> {post.writerNickname || "-"}</span>
-                    <span><b>작성일</b> {date}</span>
-                    <span><b>작성시간</b> {time}</span>
+                    <span><b>작성일</b> {post.createdDate}</span>
+                    <span><b>작성시간</b> {post.createdTime}</span>
                     <span><b>조회수</b> {post.viewCount}</span>
                 </div>
                 <div className="board-detail-content board-detail-content-bg">
                     {post.content}
                 </div>
-                {user && String(user.id) === post.writerId ? (
+                {user && String(user.userId) === post.writerId ? ( // userId로 비교
                     <div className="board-detail-btn-group board-detail-btn-group-right">
                         <Link to={`/posts/${post.id}/edit`}>
                             <button className="board-btn">수정</button>
                         </Link>
-                <button
-                    className="board-btn"
-                    onClick={handleDeleteClick}
-                    disabled={isDeleting}
-                >
-                    {isDeleting ? "삭제 중..." : "삭제"}
-                </button>
-                <Link to="/postpage" className="board-btn cancel">목록으로</Link>
-            </div>
-        ) : (
-            <div className="board-detail-btn-group board-detail-btn-group-right">
-                <Link to="/postpage" className="board-btn cancel">목록으로</Link>
-            </div>
-        )}
+                        <button
+                            className="board-btn"
+                            onClick={handleDeleteClick}
+                            disabled={isDeleting}
+                        >
+                            {isDeleting ? "삭제 중..." : "삭제"}
+                        </button>
+                        <Link to="/postpage" className="board-btn cancel">목록으로</Link>
+                    </div>
+                ) : (
+                    <div className="board-detail-btn-group board-detail-btn-group-right">
+                        <Link to="/postpage" className="board-btn cancel">목록으로</Link>
+                    </div>
+                )}
                 <ConfirmModal
                     open={showConfirm}
                     x={modalPos.x}

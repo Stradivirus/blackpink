@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Response
-from models import Incident, IncidentListResponse
+from models import Incident
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -11,15 +11,18 @@ router = APIRouter(prefix="/graph")
 
 collection = incident_collection
 
+# 그래프 스타일(폰트, 색상 등)을 설정하는 함수
 def set_plot_style():
-    # font_path = "/usr/share/fonts/truetype/nanum/NanumGothic.ttf"
-    font_path = 'C:/Windows/Fonts/malgun.ttf'
+    font_path = "/usr/share/fonts/truetype/nanum/NanumGothic.ttf"
+    # font_path = 'C:/Windows/Fonts/malgun.ttf'
     font_prop = fm.FontProperties(fname=font_path)
     plt.rcParams['font.family'] = font_prop.get_name()
     plt.rcParams['axes.unicode_minus'] = False
     sns.set_style("whitegrid")
     sns.set_palette("Set2")
 
+# MongoDB에서 incident 데이터를 불러와 DataFrame으로 변환하는 함수
+# Pydantic 모델로 데이터 검증 및 전처리 포함
 def get_dataframe():
     data = list(collection.find())
     if not data:
@@ -42,6 +45,9 @@ def get_dataframe():
     df['month'] = df['incident_date'].dt.month
     return df
 
+# 그래프 타입에 따라 시각화 이미지를 생성하는 함수
+# 지원 타입: threat, risk, threat_y, threat_m
+# 데이터가 없거나 타입이 잘못되면 None 반환
 def create_plot(graph_type):
     df = get_dataframe()
     if df.empty:
@@ -89,6 +95,8 @@ def create_plot(graph_type):
     buf.seek(0)
     return buf.getvalue()
 
+# FastAPI 엔드포인트: 그래프 이미지를 반환
+# /graph/{graph_type} 경로로 접근
 @router.get("/{graph_type}")
 async def plot(graph_type: str):
     img_data = create_plot(graph_type)

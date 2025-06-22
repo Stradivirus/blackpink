@@ -8,6 +8,8 @@ const menuItems = [
   { label: "대시보드", path: "/admin", isParent: true, children: [] },
   { label: "데이터", path: "/admin/data", isParent: true, children: [] },
   { label: "신규 계정 발급", path: "/admin/invite", isParent: false },
+  { label: "관리자 목록", path: "/admin/admins", isParent: false }, // 추가
+  { label: "가입된 사람 목록", path: "/admin/members", isParent: false },
   { label: "고객 게시판", path: "/postpage", isParent: false },
 ];
 

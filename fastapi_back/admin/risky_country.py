@@ -1,10 +1,11 @@
 # 위험 국가 지도 데이터 (GeoJSON 형태)
 from fastapi import APIRouter
-from db import db  # 기존 db.py에서 db 객체 import
+from db import db 
 from datetime import datetime
 
 router = APIRouter()
 
+# 위험 국가(GeoJSON) 데이터를 반환하는 엔드포인트
 @router.get("/api/risky_countries/map_data")
 def get_risky_countries_map_data():
     collection = db["global_security_index"]
@@ -29,6 +30,7 @@ def get_risky_countries_map_data():
         "features": features
     }
 
+# 글로벌 사이버보안 지수(GCI) 랭킹 데이터를 반환하는 엔드포인트
 @router.get("/api/gci_rankings")
 def get_gci_rankings(year: int = None):
     query = {"type": "gci_ranking"}

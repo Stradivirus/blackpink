@@ -1,20 +1,14 @@
 // src/pages/Admin/AdminDataPage.tsx
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-
-// src/pages/Admin에서 src/api로 가려면 ../../../ 필요
 import { API_URLS } from "../../api/urls";
-// src/pages/Admin에서 src/constants로 가려면 ../../../ 필요
 import { teamList, columnsByTeam } from "../../constants/dataconfig";
-// src/pages/Admin에서 src/components/Admin로 가려면 ../../../ 필요
 import AdminDataTable from "../../components/Admin/AdminDataTable";
+import "../../styles/AdminDataPage.css";
 
 const AdminDataPage: React.FC = () => {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-
-  // ✨ 그룹바이 관련 상태 제거
-  // const [groupByColumn, setGroupByColumn] = useState<string | null>(null);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -28,8 +22,6 @@ const AdminDataPage: React.FC = () => {
     }
 
     setLoading(true);
-    // ✨ 팀 변경 시 그룹바이 관련 초기화 로직 제거
-    // setGroupByColumn(null);
 
     let fetchUrl = "";
     switch (selectedTeam) {
@@ -88,9 +80,7 @@ const AdminDataPage: React.FC = () => {
         loading={loading}
         selectedTeam={selectedTeam}
         selectedTeamLabel={currentTeamLabel}
-        // ✨ 그룹바이 관련 props 제거
-        // groupByColumn={groupByColumn}
-        // setGroupByColumn={setGroupByColumn}
+
       />
     </div>
   );

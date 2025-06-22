@@ -4,12 +4,6 @@ import {API_URLS} from "../../api/urls";
 import {useAuth} from "../../context/AuthContext";
 import "../../styles/Board.css";
 
-interface PostFormState {
-    title: string;
-    content: string;
-    userId: string;
-}
-
 interface Props {
     isEdit?: boolean;
 }
@@ -17,51 +11,56 @@ interface Props {
 const PostForm: React.FC<Props> = ({isEdit}) => {
     const {id} = useParams<{ id: string }>();
     const navigate = useNavigate();
-    const {user} = useAuth();
+    const { user } = useAuth();
 
-    const [form, setForm] = useState<PostFormState>({
+    const [form, setForm] = useState({
         title: "",
         content: "",
-        userId: user?.userId ?? "",
+        writerId: user?.userId ?? "", // userId로 변경
+        writerNickname: user?.nickname ?? "",
+        isNotice: false,
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         if (user) {
-            setForm(f => ({...f, userId: user.userId}));
+            setForm(f => ({...f, writerId: user.userId})); // userId로 변경
         }
     }, [user]);
 
+    // 수정 모드일 때 기존 데이터 불러오기 (isNotice 포함)
     useEffect(() => {
         if (isEdit && id && user) {
             setError(null);
-            // 수정: /edit이 아니라 그냥 상세조회 API로!
-            fetch(API_URLS.POST(id))
-                .then(res => {
-                    if (!res.ok) throw new Error("글 정보를 불러오지 못했습니다.");
-                    return res.json();
+            fetch(`${API_URLS.POST}/${id}`)
+                .then(res => res.json())
+                .then(data => {
+                    setForm({
+                        title: data.title,
+                        content: data.content,
+                        writerId: data.writerId, // 이미 userId 문자열
+                        writerNickname: data.writerNickname,
+                        isNotice: !!data.isNotice,
+                    });
                 })
-                .then(data => setForm({
-                    title: data.title,
-                    content: data.content,
-                    userId: user.userId,
-                }))
-                .catch(err => {
-                    setError(err.message || "글 정보를 불러오지 못했습니다.");
-                });
+                .catch(() => setError("게시글 정보를 불러오지 못했습니다."));
         }
     }, [isEdit, id, user]);
 
     useEffect(() => {
         if (error) {
-            const timer = setTimeout(() => setError(null), 2000);
-            return () => clearTimeout(timer);
+            alert(error);
         }
     }, [error]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setForm({...form, [e.target.name]: e.target.value});
+    };
+
+    // 2. 체크박스 핸들러 추가
+    const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setForm({...form, isNotice: e.target.checked});
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -70,32 +69,22 @@ const PostForm: React.FC<Props> = ({isEdit}) => {
         setIsSubmitting(true);
         setError(null);
         try {
-            let res: Response;
-            if (isEdit && id) {
-                res = await fetch(API_URLS.POST(id), {
-                    method: "PUT",
-                    headers: {"Content-Type": "application/json"},
-                    body: JSON.stringify(form),
-                });
-            } else {
-                res = await fetch(API_URLS.POSTS, {
-                    method: "POST",
-                    headers: {"Content-Type": "application/json"},
-                    body: JSON.stringify(form),
-                });
-            }
-            if (!res.ok) {
-                const data = await res.json().catch(() => ({}));
-                throw new Error(data.detail || data.message || "저장에 실패했습니다.");
-            }
-            // 수정: 글 작성/수정 후 게시판 목록으로 이동
-            navigate("/postpage");
-        } catch (err) {
-            let msg = (err as Error).message || "저장 중 오류가 발생했습니다.";
-            if (msg.includes("동일한 내용의 글이 이미 등록되어 있습니다")) {
-                msg = "중복입니다: 동일한 내용의 글이 이미 등록되어 있습니다.";
-            }
-            setError(msg);
+            const method = isEdit ? "PUT" : "POST";
+            const url = isEdit ? `${API_URLS.POST}/${id}` : API_URLS.POSTS;
+            const body = {
+                ...form,
+                writerId: user?.userId, // userId로 변경
+                writerNickname: user?.nickname,
+            };
+            const res = await fetch(url, {
+                method,
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify(body),
+            });
+            if (!res.ok) throw new Error("저장에 실패했습니다.");
+            navigate("/board");
+        } catch (err: any) {
+            setError(err.message || "오류가 발생했습니다.");
         } finally {
             setIsSubmitting(false);
         }
@@ -144,6 +133,18 @@ const PostForm: React.FC<Props> = ({isEdit}) => {
                             maxLength={2000}
                         />
                     </label>
+                    {/* 2. 관리자만 공지 체크박스 노출 */}
+                    {user.type === "admin" && (
+                        <label>
+                            <input
+                                type="checkbox"
+                                name="isNotice"
+                                checked={form.isNotice}
+                                onChange={handleCheckboxChange}
+                            />
+                            공지사항으로 등록
+                        </label>
+                    )}
                     <div className="board-form-btn-group board-form-btn-group--right">
                         <button type="submit" className="board-btn" disabled={isSubmitting}>
                             {isEdit ? "수정" : "작성"}

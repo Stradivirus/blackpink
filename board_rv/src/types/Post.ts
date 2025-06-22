@@ -9,4 +9,5 @@ export interface Post {
     createdDate: string;
     createdTime: string;
     viewCount: number;
+    isNotice: boolean; // 추가
 }
