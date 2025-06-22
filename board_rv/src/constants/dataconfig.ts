@@ -21,7 +21,7 @@ export const columnsByTeam: Record<string, { key: string; label: string }[]> = {
     { key: "manager_phone", label: "담당자 연락처" },
   ],
   dev: [
-    { key: "company_id", label: "Company ID" },
+    { key: "company_id", label: "회사명" }, // 기존: label: "company_id"
     { key: "os", label: "OS" },
     { key: "os_version", label: "OS 버전" },
     { key: "dev_start_date", label: "개발 시작일" },
@@ -31,8 +31,7 @@ export const columnsByTeam: Record<string, { key: string; label: string }[]> = {
     { key: "maintenance", label: "유지보수 여부" },
   ],
   security: [
-    { key: "incident_no", label: "Incident No" },
-    { key: "company_id", label: "Company ID" },
+    { key: "company_id", label: "회사명" }, // 기존: label: "company_id"
     { key: "threat_type", label: "위협 유형" },
     { key: "risk_level", label: "위험 등급" },
     { key: "server_type", label: "서버 종류" },
@@ -42,4 +41,31 @@ export const columnsByTeam: Record<string, { key: string; label: string }[]> = {
     { key: "action", label: "조치" },
     { key: "handler_count", label: "처리 인원 수" },
   ],
+};
+
+// 팀별 날짜 필터용 컬럼 정보 정의
+export const dateColumnsByTeam: {
+  [team: string]: { key: string; label: string }[];
+} = {
+  security: [
+    { key: "incident_date", label: "사건일자" },
+    { key: "handled_date", label: "처리일자" },
+  ],
+  biz: [
+    { key: "contract_start", label: "계약 시작일" },
+    { key: "contract_end", label: "계약 종료일" },
+  ],
+  dev: [
+    { key: "dev_start_date", label: "개발 시작일" },
+    { key: "dev_end_date", label: "개발 종료일" },
+  ],
+};
+
+// OS에 따른 버전 맵
+export const osVersionMap: Record<string, string[]> = {
+  Windows: ["7", "8", "10", "11"],
+  Linux: ["Rocky 8", "Rocky 9", "Ubuntu 18.04", "Ubuntu 20.04", "Ubuntu 22.04"],
+  Android: ["10", "11", "12", "13"],
+  iOS: ["15", "16", "17"],
+  macOS: ["11", "12", "13", "14"],
 };

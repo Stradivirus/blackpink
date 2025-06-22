@@ -14,8 +14,11 @@ export const API_URLS = {
     CHECK_DUPLICATE: `${API_BASE}/admin/check-duplicate`,
     // 데이터
     INCIDENT: `${API_BASE}/incident`,
+    INCIDENT_COLUMNS: `${API_BASE}/incident/columns`,
     COMPANIES: `${API_BASE}/companies`,
+    COMPANIES_COLUMNS: `${API_BASE}/companies/columns`,
     DEV: `${API_BASE}/dev`,
+    DEV_COLUMNS: `${API_BASE}/dev/columns`,
     // 그래프
     GCI_RANKINGS: `${API_BASE}/gci_rankings`,
     RISKY_COUNTRIES_MAP: `${API_BASE}/risky_countries/map_data`,

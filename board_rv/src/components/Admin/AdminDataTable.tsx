@@ -1,34 +1,63 @@
 // src/components/Admin/AdminDataTable.tsx
 import React, { useState, useMemo, useEffect } from "react";
-import { columnsByTeam } from "../../constants/dataconfig";
+import { columnsByTeam, dateColumnsByTeam, osVersionMap } from "../../constants/dataconfig";
 import type { AdminDataTableProps } from "../../types/Admin";
 
-// 팀별 날짜 필터용 컬럼 정보 정의
-const dateColumnsByTeam: {
-  [team: string]: { key: string; label: string }[];
-} = {
-  security: [
-    { key: "incident_date", label: "사건일자" },
-    { key: "handled_date", label: "처리일자" },
-  ],
-  biz: [
-    { key: "contract_start", label: "계약 시작일" },
-    { key: "contract_end", label: "계약 종료일" },
-  ],
-  dev: [
-    { key: "dev_start_date", label: "개발 시작일" },
-    { key: "dev_end_date", label: "개발 종료일" },
-  ],
-};
+// DropdownButton: 버튼 + 드롭다운 리스트(옵션 선택)
+const DropdownButton = ({ label, selected, onClick, children, disabled }: any) => (
+  <div className="admin-data-table-dropdown">
+    <button
+      onClick={onClick}
+      className={`admin-data-table-btn${selected ? " selected" : ""}`}
+      type="button"
+      disabled={disabled}
+      style={disabled ? { cursor: "not-allowed", color: "#aaa" } : undefined}
+    >
+      {label}
+    </button>
+    {children}
+  </div>
+);
 
-// OS에 따른 버전 맵
-const osVersionMap: Record<string, string[]> = {
-  Windows: ["7", "8", "10", "11"],
-  Linux: ["Rocky 8", "Rocky 9", "Ubuntu 18.04", "Ubuntu 20.04", "Ubuntu 22.04"],
-  Android: ["10", "11", "12", "13"],
-  iOS: ["15", "16", "17"],
-  macOS: ["11", "12", "13", "14"],
-};
+// FilterCheckboxList: 체크박스 리스트(다중 선택)
+const FilterCheckboxList = ({ values, selected, onChange, labelRender }: any) => (
+  <div className="admin-data-table-dropdown-list" style={{ minWidth: 160, maxHeight: 240, marginTop: 4 }}>
+    <button
+      onClick={() => onChange([])}
+      className={`admin-data-table-btn${selected.length === 0 ? " selected" : ""}`}
+      type="button"
+    >
+      모두 보기
+    </button>
+    {values.map((value: string) => (
+      <label key={value} className="admin-data-table-dropdown-checkbox-label">
+        <input
+          type="checkbox"
+          checked={selected.includes(value)}
+          onChange={() => onChange(
+            selected.includes(value)
+              ? selected.filter((v: string) => v !== value)
+              : [...selected, value]
+          )}
+          style={{ marginRight: 8 }}
+        />
+        {labelRender ? labelRender(value) : value}
+      </label>
+    ))}
+  </div>
+);
+
+// CompanySearchInput: 회사명 검색 input
+const CompanySearchInput = ({ value, onChange }: any) => (
+  <div className="admin-data-table-company-search">
+    <input
+      type="text"
+      placeholder="회사명 검색"
+      value={value}
+      onChange={onChange}
+    />
+  </div>
+);
 
 const AdminDataTable: React.FC<AdminDataTableProps> = ({
   data,
@@ -168,21 +197,6 @@ const AdminDataTable: React.FC<AdminDataTableProps> = ({
     });
   });
 
-  const toggleFilterValue = (columnKey: string, value: string) => {
-    setFilters((prev) => {
-      let newFilters = { ...prev };
-      if (columnKey === "os") {
-        newFilters["os_version"] = [];
-      }
-      const prevValues = prev[columnKey] || [];
-      const newValues = prevValues.includes(value)
-        ? prevValues.filter((v) => v !== value)
-        : [...prevValues, value];
-      newFilters[columnKey] = newValues;
-      return newFilters;
-    });
-  };
-
   const handleResetFilters = () => {
     setFilters({});
     setYearFilter(null);
@@ -202,82 +216,57 @@ const AdminDataTable: React.FC<AdminDataTableProps> = ({
     setMonthFilter(null);
   };
 
-  const buttonBaseStyle: React.CSSProperties = {
-    padding: "6px 12px",
-    border: "1px solid #ccc",
-    borderRadius: 4,
-    backgroundColor: "#f8f9fa",
-    color: "black",
-    cursor: "pointer",
-    fontWeight: "normal",
+  // company_id 대신 company_name을 보여주도록 보조 함수
+  const getDisplayValue = (row: any, colKey: string) => {
+    // dev, security만 company_id 대신 company_name 표시
+    if (
+      (selectedTeam === "dev" || selectedTeam === "security") &&
+      colKey === "company_id" &&
+      row["company_name"]
+    ) {
+      return row["company_name"];
+    }
+    return row[colKey];
   };
 
-  const buttonSelectedStyle: React.CSSProperties = {
-    backgroundColor: "#007bff",
-    color: "white",
-    fontWeight: "bold",
-  };
+  // 컬럼 필터링 함수로 중복 제거
+  const getVisibleColumns = useMemo(() =>
+    columns.filter(
+      (col) =>
+        (columnsByTeam[selectedTeam] || []).some(
+          (teamCol) =>
+            teamCol.key === col.key &&
+            !excludedColumnsByTeam[selectedTeam]?.includes(col.key)
+        )
+    ),
+    [columns, selectedTeam]
+  );
 
   if (loading) return <div>로딩 중...</div>;
 
   return (
-    <div>
-      <h2>{selectedTeamLabel} 데이터</h2>
+    <div className="admin-data-table-container">
+      <h2 className="admin-data-table-title">{selectedTeamLabel} 데이터</h2>
 
       {/* 날짜 필터 그룹 */}
-      <div style={{ display: "flex", gap: 10, marginBottom: 16, flexWrap: "wrap" }}>
+      <div className="admin-data-table-date-filter-group">
         {dateColumns.length > 0 && (
-          <button
+          <DropdownButton
+            label={dateColumns.find((col) => col.key === dateFilterColumn)?.label ?? "날짜 컬럼 선택"}
+            selected={true}
             onClick={handleDateColumnToggle}
-            style={{ ...buttonBaseStyle, ...buttonSelectedStyle }}
-            type="button"
-          >
-            {dateColumns.find((col) => col.key === dateFilterColumn)?.label ??
-              "날짜 컬럼 선택"}
-          </button>
+          />
         )}
-
         {/* 연도 선택 */}
-        <div style={{ position: "relative" }}>
-          <button
-            onClick={() =>
-              setActiveDropdown((prev) => (prev === "year" ? null : "year"))
-            }
-            style={{
-              ...buttonBaseStyle,
-              ...(yearFilter ? buttonSelectedStyle : {}),
-              minWidth: 100,
-              textAlign: "left",
-            }}
-            type="button"
-          >
-            {yearFilter ?? "연도 선택"} ▼
-          </button>
+        <DropdownButton
+          label={`${yearFilter ?? "연도 선택"} ▼`}
+          selected={!!yearFilter}
+          onClick={() => setActiveDropdown((prev) => (prev === "year" ? null : "year"))}
+        >
           {activeDropdown === "year" && (
-            <div
-              style={{
-                position: "absolute",
-                top: "100%",
-                left: 0,
-                zIndex: 10,
-                backgroundColor: "white",
-                border: "1px solid #ddd",
-                borderRadius: 4,
-                boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-                maxHeight: 200,
-                overflowY: "auto",
-                minWidth: 120,
-              }}
-            >
+            <div className="admin-data-table-dropdown-list">
               <button
-                style={{
-                  ...buttonBaseStyle,
-                  ...(yearFilter === null ? buttonSelectedStyle : {}),
-                  width: "100%",
-                  border: "none",
-                  borderRadius: 0,
-                  textAlign: "left",
-                }}
+                className={`admin-data-table-btn${yearFilter === null ? " selected" : ""}`}
                 type="button"
                 onClick={() => {
                   setYearFilter(null);
@@ -290,14 +279,7 @@ const AdminDataTable: React.FC<AdminDataTableProps> = ({
               {uniqueYears.map((y) => (
                 <button
                   key={y}
-                  style={{
-                    ...buttonBaseStyle,
-                    ...(yearFilter === y ? buttonSelectedStyle : {}),
-                    width: "100%",
-                    border: "none",
-                    borderRadius: 0,
-                    textAlign: "left",
-                  }}
+                  className={`admin-data-table-btn${yearFilter === y ? " selected" : ""}`}
                   type="button"
                   onClick={() => {
                     setYearFilter(y);
@@ -310,53 +292,21 @@ const AdminDataTable: React.FC<AdminDataTableProps> = ({
               ))}
             </div>
           )}
-        </div>
-
+        </DropdownButton>
         {/* 월 선택 */}
-        <div style={{ position: "relative" }}>
-          <button
-            onClick={() => {
-              if (!yearFilter) return;
-              setActiveDropdown((prev) => (prev === "month" ? null : "month"));
-            }}
-            style={{
-              ...buttonBaseStyle,
-              ...(monthFilter ? buttonSelectedStyle : {}),
-              minWidth: 100,
-              textAlign: "left",
-              cursor: yearFilter ? "pointer" : "not-allowed",
-              color: yearFilter ? "black" : "#aaa",
-            }}
-            type="button"
-            disabled={!yearFilter}
-          >
-            {monthFilter ? `${monthFilter}월` : "월 선택"} ▼
-          </button>
+        <DropdownButton
+          label={`${monthFilter ? monthFilter + "월" : "월 선택"} ▼`}
+          selected={!!monthFilter}
+          onClick={() => {
+            if (!yearFilter) return;
+            setActiveDropdown((prev) => (prev === "month" ? null : "month"));
+          }}
+          disabled={!yearFilter}
+        >
           {activeDropdown === "month" && yearFilter && (
-            <div
-              style={{
-                position: "absolute",
-                top: "100%",
-                left: 0,
-                zIndex: 10,
-                backgroundColor: "white",
-                border: "1px solid #ddd",
-                borderRadius: 4,
-                boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-                maxHeight: 200,
-                overflowY: "auto",
-                minWidth: 120,
-              }}
-            >
+            <div className="admin-data-table-dropdown-list">
               <button
-                style={{
-                  ...buttonBaseStyle,
-                  ...(monthFilter === null ? buttonSelectedStyle : {}),
-                  width: "100%",
-                  border: "none",
-                  borderRadius: 0,
-                  textAlign: "left",
-                }}
+                className={`admin-data-table-btn${monthFilter === null ? " selected" : ""}`}
                 type="button"
                 onClick={() => {
                   setMonthFilter(null);
@@ -368,14 +318,7 @@ const AdminDataTable: React.FC<AdminDataTableProps> = ({
               {uniqueMonths.map((m) => (
                 <button
                   key={m}
-                  style={{
-                    ...buttonBaseStyle,
-                    ...(monthFilter === m ? buttonSelectedStyle : {}),
-                    width: "100%",
-                    border: "none",
-                    borderRadius: 0,
-                    textAlign: "left",
-                  }}
+                  className={`admin-data-table-btn${monthFilter === m ? " selected" : ""}`}
                   type="button"
                   onClick={() => {
                     setMonthFilter(m);
@@ -387,188 +330,80 @@ const AdminDataTable: React.FC<AdminDataTableProps> = ({
               ))}
             </div>
           )}
-        </div>
+        </DropdownButton>
       </div>
 
       {/* 기존 다중 필터 (날짜 필터용 컬럼 제외) */}
       {filterableColumns.length > 0 && (
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            flexWrap: "wrap",
-            marginBottom: 16,
-          }}
-        >
-          {/* 왼쪽: 다중 필터 드롭다운과 초기화 버튼 */}
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+        <div className="admin-data-table-multi-filter-row">
+          <div className="admin-data-table-multi-filter-group">
             {filterableColumns.map((col) => {
               const selected = filters[col.key] || [];
               return (
-                <div key={col.key} style={{ position: "relative" }}>
-                  <button
-                    onClick={() =>
-                      setActiveDropdown((prev) =>
-                        prev === col.key ? null : (col.key as string)
-                      )
-                    }
-                    style={{
-                      ...buttonBaseStyle,
-                      ...(selected.length > 0 ? buttonSelectedStyle : {}),
-                    }}
-                    type="button"
-                  >
-                    {col.label} ▼
-                  </button>
+                <DropdownButton
+                  key={col.key}
+                  label={`${col.label} ▼`}
+                  selected={selected.length > 0}
+                  onClick={() => setActiveDropdown((prev) => prev === col.key ? null : col.key)}
+                >
                   {activeDropdown === col.key && (
-                    <div
-                      style={{
-                        position: "absolute",
-                        top: "100%",
-                        left: 0,
-                        zIndex: 10,
-                        backgroundColor: "white",
-                        border: "1px solid #ddd",
-                        borderRadius: 4,
-                        boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-                        minWidth: 160,
-                        maxHeight: 240,
-                        overflowY: "auto",
-                        marginTop: 4,
+                    <FilterCheckboxList
+                      values={getFilterValues(col.key)}
+                      selected={selected}
+                      onChange={(newVals: string[]) => {
+                        setFilters((prev) => ({ ...prev, [col.key]: newVals }));
+                        setActiveDropdown(null);
                       }}
-                    >
-                      <button
-                        onClick={() => {
-                          setFilters((prev) => ({ ...prev, [col.key]: [] }));
-                          setActiveDropdown(null);
-                        }}
-                        style={{
-                          ...buttonBaseStyle,
-                          ...(selected.length === 0 ? buttonSelectedStyle : {}),
-                          width: "100%",
-                          border: "none",
-                          borderRadius: 0,
-                          textAlign: "left",
-                        }}
-                        type="button"
-                      >
-                        모두 보기
-                      </button>
-                      {getFilterValues(col.key).map((value) => (
-                        <label
-                          key={value}
-                          style={{
-                            display: "block",
-                            padding: "6px 10px",
-                            cursor: "pointer",
-                          }}
-                        >
-                          <input
-                            type="checkbox"
-                            checked={selected.includes(value)}
-                            onChange={() => toggleFilterValue(col.key, value)}
-                            style={{ marginRight: 8 }}
-                          />
-                          {/* company_id 필터 드롭다운에서는 첫 글자만 표시 */}
-                          {col.key === "company_id" && value !== ""
-                            ? `${value}`
-                            : value === ""
-                            ? "(비어있음)"
-                            : value}
-                        </label>
-                      ))}
-                    </div>
+                      labelRender={col.key === "company_id"
+                        ? (value: string) => value !== "" ? value : "(비어있음)"
+                        : undefined}
+                    />
                   )}
-                </div>
+                </DropdownButton>
               );
             })}
-
             {(Object.values(filters).some((vals) => vals.length > 0) ||
               yearFilter !== null ||
               monthFilter !== null) && (
               <button
                 onClick={handleResetFilters}
-                style={{
-                  padding: "6px 12px",
-                  border: "1px solid #ccc",
-                  borderRadius: 4,
-                  backgroundColor: "#f44336",
-                  color: "white",
-                  cursor: "pointer",
-                  fontWeight: "bold",
-                  height: 36,
-                  alignSelf: "center",
-                }}
+                className="admin-data-table-reset-btn"
                 type="button"
               >
                 초기화
               </button>
             )}
           </div>
-
-          {/* 오른쪽: 회사명 검색창 */}
           {selectedTeam === "biz" && (
-            <div style={{ marginTop: 10 }}>
-              <input
-                type="text"
-                placeholder="회사명 검색"
-                value={companyNameQuery}
-                onChange={(e) => setCompanyNameQuery(e.target.value)}
-                style={{
-                  padding: "6px 12px",
-                  border: "1px solid #ccc",
-                  borderRadius: 4,
-                  minWidth: 200,
-                }}
-              />
-            </div>
+            <CompanySearchInput
+              value={companyNameQuery}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCompanyNameQuery(e.target.value)}
+            />
           )}
         </div>
       )}
 
       {/* 데이터 테이블 */}
-      <table border={1} cellPadding={4} style={{ width: "100%", marginTop: 16 }}>
+      <table className="admin-data-table-table">
         <thead>
           <tr>
-            {columns
-              .filter(
-                (col) =>
-                  (columnsByTeam[selectedTeam] || []).some(
-                    (teamCol) =>
-                      teamCol.key === col.key &&
-                      !excludedColumnsByTeam[selectedTeam]?.includes(col.key)
-                  )
-              )
-              .map((col) => (
-                <th key={col.key}>{col.label}</th>
-              ))}
+            {getVisibleColumns.map((col) => (
+              <th key={col.key}>{col.label}</th>
+            ))}
           </tr>
         </thead>
         <tbody>
           {filteredData.length > 0 ? (
             filteredData.map((row, idx) => (
               <tr key={idx}>
-                {columns
-                  .filter(
-                    (col) =>
-                      (columnsByTeam[selectedTeam] || []).some(
-                        (teamCol) =>
-                          teamCol.key === col.key &&
-                          !excludedColumnsByTeam[selectedTeam]?.includes(col.key)
-                      )
-                  )
-                  .map((col) => (
-                    <td key={col.key}>
-                      {/* 테이블 데이터에서는 company_id 전체 값 표시 */}
-                      {row[col.key]}
-                    </td>
-                  ))}
+                {getVisibleColumns.map((col) => (
+                  <td key={col.key}>{getDisplayValue(row, col.key)}</td>
+                ))}
               </tr>
             ))
           ) : (
             <tr>
-              <td colSpan={columns.length} style={{ textAlign: "center", padding: 20 }}>
+              <td colSpan={getVisibleColumns.length} className="admin-data-table-no-data">
                 선택된 필터에 해당하는 데이터가 없습니다.
               </td>
             </tr>
