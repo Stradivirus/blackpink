@@ -1,5 +1,6 @@
 .admin-data-table-container {
   /* 전체 컨테이너 */
+  width: 100%;
 }
 .admin-data-table-title {
   font-size: 1.3rem;
