@@ -1,6 +1,6 @@
 import {useEffect, useState} from "react";
 import {Link} from "react-router-dom";
-import type {Post} from "../../types/Post";
+import type {Post} from "../../types/Board";
 import {API_URLS} from "../../api/urls";
 import {useAuth} from "../../context/AuthContext";
 import "../../styles/Board.css";
@@ -87,7 +87,7 @@ const PostList: React.FC = () => {
                     ) : (
                         // 공지글 먼저, 일반글 나중에 렌더링
                         <>
-                            {noticePosts.map((post, idx) => {
+                            {noticePosts.map((post) => {
                                 const displayNumber = "공지";
                                 return (
                                     <tr key={post.id} className="notice-row">

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { API_URLS } from "../../api/urls";
-import type { Comment } from "../../types/Comment";
+import type { Comment } from "../../types/Board";
 import { useAuth } from "../../context/AuthContext";
 import "../../styles/comment.css";
 
