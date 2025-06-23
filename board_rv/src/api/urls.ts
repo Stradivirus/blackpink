@@ -13,10 +13,10 @@ export const API_URLS = {
     CHANGE_PASSWORD: `${API_BASE}/change-password`,
     CHECK_DUPLICATE: `${API_BASE}/admin/check-duplicate`,
     // 데이터
-    INCIDENT: `${API_BASE}/incident`,
-    INCIDENT_COLUMNS: `${API_BASE}/incident/columns`,
-    COMPANIES: `${API_BASE}/companies`,
-    COMPANIES_COLUMNS: `${API_BASE}/companies/columns`,
+    SECURITY: `${API_BASE}/security`,
+    SECURITY_COLUMNS: `${API_BASE}/security/columns`,
+    BIZ: `${API_BASE}/biz`,
+    BIZ_COLUMNS: `${API_BASE}/biz/columns`,
     DEV: `${API_BASE}/dev`,
     DEV_COLUMNS: `${API_BASE}/dev/columns`,
     // 그래프
