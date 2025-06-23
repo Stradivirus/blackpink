@@ -26,7 +26,7 @@ app.include_router(auth_router)
 app.include_router(post_router)
 app.include_router(comment_router)
 app.include_router(admin_router)
-app.include_router(graph_router, prefix="/api")
+app.include_router(graph_router)
 app.include_router(team_data_router)
 app.include_router(risky_country_router)
 
