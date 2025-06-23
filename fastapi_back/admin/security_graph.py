@@ -63,13 +63,6 @@ def set_font_all(ax, font_prop):
         label.set_fontproperties(font_prop)
 
 # --- 그래프별 함수 분리 ---
-def plot_threat(df, font_prop):
-    fig, ax = plt.subplots(figsize=(10, 6))
-    sns.countplot(x='threat_type', data=df, ax=ax)
-    ax.set_title('위협 유형 분포', fontproperties=font_prop)
-    ax.tick_params(axis='x', rotation=45)
-    set_font_all(ax, font_prop)
-    return save_to_png(fig)
 
 def plot_risk(df, font_prop):
     risk_counts = df['risk_level'].value_counts().reset_index()
@@ -177,7 +170,6 @@ def plot_threat_m(df, font_prop, threat_type):
 
 # 그래프 타입별 함수 매핑
 graph_func_map = {
-    'threat': plot_threat,
     'risk': plot_risk,
     'threat_y': plot_threat_y,
     'threat_m': plot_threat_m,

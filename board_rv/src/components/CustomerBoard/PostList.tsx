@@ -119,6 +119,9 @@ const PostList: React.FC = () => {
                                                 className="board-post-title-link"
                                             >
                                                 {post.title}
+                                                {post.isAnswered && (
+                                                    <span style={{ color: '#555', fontWeight: 700, marginLeft: 8, fontStyle: 'italic' }}>(답변완료)</span>
+                                                )}
                                             </Link>
                                         </td>
                                         <td className="board-post-author">{post.writerNickname || "-"}</td>

@@ -11,67 +11,118 @@ type TeamGraphsProps = {
   graphTypes: GraphType[];
 };
 
-
-
-const ThreatMGraph: React.FC = () => {
+const ThreatMGraph: React.FC<{ onImgClick?: (src: string, alt: string) => void }> = ({ onImgClick }) => {
   const [idx, setIdx] = React.useState(0);
+  const [imgLoaded, setImgLoaded] = React.useState(false);
 
   React.useEffect(() => {
     const interval = setInterval(() => {
       setIdx((prev) => (prev + 1) % threatTypes.length);
-    }, 3000);
+    }, 8000);
     return () => clearInterval(interval);
   }, []);
 
-  const currentType = threatTypes[idx];
+  React.useEffect(() => {
+    setImgLoaded(false); // 이미지가 바뀔 때마다 로딩 상태 초기화
+  }, [idx]);
 
+  const currentType = threatTypes[idx];
+  const imgSrc = `${API_URLS.GRAPH}/threat_m?threat_type=${encodeURIComponent(currentType)}`;
 
   return (
-    <div>
+    <div style={{ minHeight: 340, position: 'relative' }}>
       <h4>{currentType} 월별 침해 현황</h4>
+      {!imgLoaded && (
+        <div style={{
+          position: 'absolute', left: 0, right: 0, top: 60, bottom: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1
+        }}>
+          <div className="spinner" style={{ width: 40, height: 40, border: '4px solid #ccc', borderTop: '4px solid #1976d2', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+        </div>
+      )}
       <img
-        src={`${API_URLS.GRAPH}/threat_m?threat_type=${encodeURIComponent(
-          currentType
-        )}`}
+        src={imgSrc}
         alt={currentType}
-        style={{ minWidth: 350, maxWidth: 500 }}
+        style={{ minWidth: 350, maxWidth: 500, minHeight: 240, cursor: onImgClick ? 'zoom-in' : undefined, opacity: imgLoaded ? 1 : 0, transition: 'opacity 0.2s' }}
+        onClick={onImgClick ? () => onImgClick(imgSrc, `${currentType} 월별 침해 현황`) : undefined}
+        onLoad={() => setImgLoaded(true)}
       />
+      <style>{`
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+      `}</style>
     </div>
   );
 };
 
 const TeamGraphs: React.FC<TeamGraphsProps> = ({ graphTypes }) => {
+  const [modalImg, setModalImg] = React.useState<string | null>(null);
+  const [modalAlt, setModalAlt] = React.useState<string>("");
+
+  const handleImgClick = (src: string, alt: string) => {
+    setModalImg(src);
+    setModalAlt(alt);
+  };
+
+  const closeModal = () => setModalImg(null);
+
   return (
-    <div className="admin-correlation-grid">
-      {graphTypes.map((g) =>
-        g.type === "threat_m" ? (
-          <div
-            key={g.type}
-            className="admin-card admin-correlation-card"
-            style={{ minWidth: 350, maxWidth: 500 }}
-          >
-            <ThreatMGraph />
-          </div>
-        ) : (
-          <div
-            key={g.type}
-            className="admin-card admin-correlation-card"
-            style={{ minWidth: 350, maxWidth: 500 }}
-          >
-            <h4 className="admin-card-title">{g.label}</h4>
-            <div className="admin-image-container">
-              <img
-                src={`${API_URLS.GRAPH}/${g.type}`}
-                alt={g.label}
-                onError={(e) => {
-                  e.currentTarget.style.display = "none";
-                }}
-              />
+    <>
+      <div className="admin-correlation-grid">
+        {graphTypes.map((g) =>
+          g.type === "threat_m" ? (
+            <div
+              key={g.type}
+              className="admin-card admin-correlation-card"
+              style={{ minWidth: 350, maxWidth: 500 }}
+            >
+              <ThreatMGraph onImgClick={handleImgClick} />
             </div>
-          </div>
-        )
+          ) : (
+            <div
+              key={g.type}
+              className="admin-card admin-correlation-card"
+              style={{ minWidth: 350, maxWidth: 500 }}
+            >
+              <h4 className="admin-card-title">{g.label}</h4>
+              <div className="admin-image-container">
+                <img
+                  src={`${API_URLS.GRAPH}/${g.type}`}
+                  alt={g.label}
+                  onClick={() => handleImgClick(`${API_URLS.GRAPH}/${g.type}`, g.label)}
+                  style={{ cursor: "zoom-in", maxWidth: "100%" }}
+                  onError={(e) => {
+                    e.currentTarget.style.display = "none";
+                  }}
+                />
+              </div>
+            </div>
+          )
+        )}
+      </div>
+      {modalImg && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            background: "rgba(0,0,0,0.7)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 9999,
+          }}
+          onClick={closeModal}
+        >
+          <img
+            src={modalImg}
+            alt={modalAlt}
+            style={{ maxWidth: "90vw", maxHeight: "90vh", background: "#fff", padding: 16, borderRadius: 8 }}
+            onClick={e => e.stopPropagation()}
+          />
+        </div>
       )}
-    </div>
+    </>
   );
 };
 

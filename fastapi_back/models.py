@@ -29,6 +29,7 @@ class BoardCreateRequest(BaseModel):
     writerId: str
     writerNickname: str = ""
     isNotice: Optional[bool] = False  
+    isAnswered: Optional[bool] = False  # 답변완료 여부 추가
 
 # 게시글 정보 응답 모델
 class BoardResponse(BaseModel):
@@ -41,6 +42,7 @@ class BoardResponse(BaseModel):
     createdTime: str
     viewCount: int
     isNotice: Optional[bool] = False
+    isAnswered: Optional[bool] = False  # 답변완료 여부 추가
     deleted: Optional[bool] = False
     deletedDate: Optional[date] = None
     deletedTime: Optional[time] = None
@@ -50,6 +52,7 @@ class CommentCreateRequest(BaseModel):
     postId: str
     writerId: str
     content: str
+    isAnswered: Optional[bool] = False  # 답변완료 여부(관리자용)
 
 # 댓글 정보 응답 모델
 class CommentResponse(BaseModel):

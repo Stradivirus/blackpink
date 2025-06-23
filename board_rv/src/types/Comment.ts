@@ -9,5 +9,6 @@ export interface Comment {
     deleted?: boolean;
     deletedDate?: string | null;
     deletedTime?: string | null;
-    team?: string; // ← 추가
+    team?: string;
+    isAnswered?: boolean;
 }

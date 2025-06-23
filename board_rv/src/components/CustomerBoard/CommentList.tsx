@@ -7,6 +7,7 @@ import "../../styles/comment.css";
 const CommentList: React.FC<{ postId: string }> = ({ postId }) => {
     const [comments, setComments] = useState<Comment[]>([]);
     const [content, setContent] = useState("");
+    const [isAnswered, setIsAnswered] = useState(false); // 답변완료 체크박스 상태
     const [error, setError] = useState<string | null>(null);
     const { user } = useAuth();
 
@@ -33,20 +34,25 @@ const CommentList: React.FC<{ postId: string }> = ({ postId }) => {
             setError("댓글 내용을 입력하세요.");
             return;
         }
+        const body: any = {
+            postId,
+            writerId: user.userId, // userId로 변경
+            content,
+        };
+        if (user.type === "admin") {
+            body.isAnswered = isAnswered;
+        }
         const res = await fetch(API_URLS.COMMENT_CREATE, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                postId,
-                writerId: user.userId, // userId로 변경
-                content,
-            }),
+            body: JSON.stringify(body),
         });
         if (!res.ok) {
             setError("댓글 작성에 실패했습니다.");
             return;
         }
         setContent("");
+        setIsAnswered(false);
         fetchComments();
     };
 
@@ -73,6 +79,7 @@ const CommentList: React.FC<{ postId: string }> = ({ postId }) => {
                                 <b>
                                     {c.writerNickname}
                                     {c.team && ` (${c.team})`}
+                                    {c.isAnswered && <span style={{color:'#1976d2', marginLeft:4}}>[답변완료]</span>}
                                 </b>
                                 <span style={{ color: "#888", marginLeft: 8 }}>{c.createdDate} {c.createdTime}</span>
                                 {user && String(user.userId) === String(c.writerId) && ( // userId로 비교
@@ -88,17 +95,41 @@ const CommentList: React.FC<{ postId: string }> = ({ postId }) => {
                         </li>
                     ))}
             </ul>
-            <form onSubmit={handleSubmit} className="comment-form" style={{ marginTop: 18 }}>
-                <textarea
-                    value={content}
-                    onChange={e => setContent(e.target.value)}
-                    rows={3}
-                    placeholder="댓글을 입력하세요"
-                />
-                <button type="submit" disabled={!user} style={{ marginTop: 8 }}>
-                    작성
-                </button>
-            </form>
+            {/* 관리자만 답변완료 체크박스 노출 */}
+            {user && user.type === "admin" && (
+                <form onSubmit={handleSubmit} className="comment-form" style={{ marginTop: 18 }}>
+                    <textarea
+                        value={content}
+                        onChange={e => setContent(e.target.value)}
+                        rows={3}
+                        placeholder="댓글을 입력하세요"
+                    />
+                    <label style={{display:'block',marginTop:8}}>
+                        <input
+                            type="checkbox"
+                            checked={isAnswered}
+                            onChange={e => setIsAnswered(e.target.checked)}
+                        /> 답변완료로 표시
+                    </label>
+                    <button type="submit" disabled={!user} style={{ marginTop: 8 }}>
+                        작성
+                    </button>
+                </form>
+            )}
+            {/* 일반회원은 기존 폼 그대로 */}
+            {user && user.type !== "admin" && (
+                <form onSubmit={handleSubmit} className="comment-form" style={{ marginTop: 18 }}>
+                    <textarea
+                        value={content}
+                        onChange={e => setContent(e.target.value)}
+                        rows={3}
+                        placeholder="댓글을 입력하세요"
+                    />
+                    <button type="submit" disabled={!user} style={{ marginTop: 8 }}>
+                        작성
+                    </button>
+                </form>
+            )}
             {error && <div style={{ color: "red", marginTop: 8 }}>{error}</div>}
         </section>
     );

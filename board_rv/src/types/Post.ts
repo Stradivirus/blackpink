@@ -10,4 +10,5 @@ export interface Post {
     createdTime: string;
     viewCount: number;
     isNotice: boolean; // 추가
+    isAnswered?: boolean; // 답변완료 여부 추가
 }
