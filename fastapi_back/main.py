@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from customer.post import router as post_router
 from customer.comment import router as comment_router
 from admin.admin import router as admin_router
-from admin.graph import router as graph_router
+from admin.security_graph import router as security_graph_router
 from admin.team_data import router as team_data_router
 from admin.risky_country import router as risky_country_router
 from auth import router as auth_router
@@ -26,7 +26,7 @@ app.include_router(auth_router)
 app.include_router(post_router)
 app.include_router(comment_router)
 app.include_router(admin_router)
-app.include_router(graph_router)
+app.include_router(security_graph_router)
 app.include_router(team_data_router)
 app.include_router(risky_country_router)
 

@@ -1,47 +1,57 @@
 import * as React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import TeamGraphs from "../../components/Admin/TeamGraphs";
-import type { GraphType } from "../../components/Admin/TeamGraphs";
+import TeamGraphs from "../../components/Admin/SecurityGraphs";
+import GCIRankingPanel from "../../components/Admin/GCIRankingPanel";
+import RiskyCountryMap from "../../components/Admin/RiskyCountryMap";
+import type { GraphType } from "../../components/Admin/SecurityGraphs";
+import { teamList, securityGraphTypes } from "../../constants/dataconfig";
 import "../../styles/admindashboard.css";
 
-const securityGraphTypes: GraphType[] = [
-  { type: "threat", label: "위협 유형 분포" },
-  { type: "risk", label: "위험 등급 비율" },
-  { type: "threat_y", label: "연도별 침해 현황" },
-  // { type: "threat_m", label: "월별 침해 현황(상위 5개)" },
-  { type: "processed_threats", label: "처리된 위협 종류" },
-  { type: "correl_threats_server", label: "서버별 위협 발생(Heatmap)" },
-  { type: "correl_risk_status", label: "위협 등급별 처리 현황" },
-  { type: "correl_threat_action", label: "위협 유형과 조치 방법" },
-  { type: "correl_threat_handler", label: "위협 유형별 필요 인원" },
-];
+const EmptyTeamPage: React.FC<{ teamLabel: string }> = ({ teamLabel }) => (
+  <div style={{ textAlign: "center", marginTop: 80 }}>
+    <h2 style={{ color: "#888" }}>{teamLabel} 대시보드는 준비 중입니다.</h2>
+  </div>
+);
 
-const teamList = [
-  { key: "security", label: "보안팀" },
-];
+const DashboardMainPanels: React.FC = () => (
+  <div style={{ display: "flex", gap: 24, justifyContent: "center", marginTop: 32 }}>
+    <GCIRankingPanel />
+    <RiskyCountryMap />
+  </div>
+);
 
 const AdminDashboard: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const params = new URLSearchParams(location.search);
-  const selectedTeam = params.get("team") || "security";
+  const selectedTeam = params.get("team") || "";
+  const [showMainPanels, setShowMainPanels] = React.useState(selectedTeam === "");
 
   React.useEffect(() => {
+    setShowMainPanels(selectedTeam === "");
     if (selectedTeam && !teamList.some((t) => t.key === selectedTeam)) {
-      navigate("/admin?team=security", { replace: true });
+      navigate("/admin", { replace: true });
     }
   }, [selectedTeam, navigate]);
 
   let graphTypes: GraphType[] = [];
   if (selectedTeam === "security") graphTypes = securityGraphTypes;
 
+  const selectedTeamLabel = teamList.find((t) => t.key === selectedTeam)?.label || "";
+
   return (
     <div className="admin-dashboard-container">
       <div className="admin-dashboard-header">
-        <h1>보안팀 대시보드</h1>
-        <p>보안팀의 위협 현황 및 통계</p>
+        <h1>관리자 대시보드</h1>
+        <p>팀별 주요 현황 및 통계</p>
       </div>
       <div style={{ display: "flex", justifyContent: "center", gap: 16 }}>
+        <button
+          className={showMainPanels ? "admin-tab-selected" : "admin-tab"}
+          onClick={() => navigate("/admin")}
+        >
+          대시보드
+        </button>
         {teamList.map((team) => (
           <button
             key={team.key}
@@ -53,9 +63,9 @@ const AdminDashboard: React.FC = () => {
         ))}
       </div>
       <div className="admin-grid-layout" style={{ textAlign: "center", marginTop: 48 }}>
-        {selectedTeam === "security" && (
-          <TeamGraphs graphTypes={securityGraphTypes} />
-        )}
+        {showMainPanels && <DashboardMainPanels />}
+        {!showMainPanels && selectedTeam === "security" && <TeamGraphs graphTypes={securityGraphTypes} />}
+        {!showMainPanels && selectedTeam !== "security" && <EmptyTeamPage teamLabel={selectedTeamLabel} />}
       </div>
     </div>
   );

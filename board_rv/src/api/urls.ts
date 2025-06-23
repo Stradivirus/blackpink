@@ -22,7 +22,6 @@ export const API_URLS = {
     // 그래프
     GCI_RANKINGS: `${API_BASE}/gci_rankings`,
     RISKY_COUNTRIES_MAP: `${API_BASE}/risky_countries/map_data`,
-    THREAT_REPORTS_COUNT: `${API_BASE}/threat_reports/count`,
     GRAPH: `${API_BASE}/graph`,
     // 관리자/멤버 관련
     ADMIN_LIST: `${API_BASE}/admin/list`,

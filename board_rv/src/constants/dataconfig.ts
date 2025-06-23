@@ -7,6 +7,30 @@ export const teamList = [
   { key: "security", label: "보안팀" },
 ];
 
+export const threatTypes = [
+  "악성코드",
+  "해킹공격",
+  "피싱",
+  "랜섬웨어",
+  "DDoS",
+  "웹취약점",
+  "자격증명 탈취",
+  "메시지 가로채기",
+];
+
+// 보안팀 그래프 타입 정의
+export const securityGraphTypes = [
+  { type: "threat_m", label: "월별 침해 현황" },
+  { type: "threat", label: "위협 유형 분포" },
+  { type: "risk", label: "위험 등급 비율" },
+  { type: "threat_y", label: "연도별 침해 현황" },
+  { type: "processed_threats", label: "처리된 위협 종류" },
+  { type: "correl_threats_server", label: "서버별 위협 발생(Heatmap)" },
+  { type: "correl_risk_status", label: "위협 등급별 처리 현황" },
+  { type: "correl_threat_action", label: "위협 유형과 조치 방법" },
+  { type: "correl_threat_handler", label: "위협 유형별 필요 인원" },
+];
+
 // 각 팀별 컬럼 정의
 export const columnsByTeam: Record<string, { key: string; label: string }[]> = {
   biz: [
