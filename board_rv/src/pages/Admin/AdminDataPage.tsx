@@ -74,7 +74,6 @@ const AdminDataPage: React.FC = () => {
 
   return (
     <div style={{ padding: "2rem" }}>
-      <h1>데이터 관리</h1>
 
       <AdminDataTable
         data={data}

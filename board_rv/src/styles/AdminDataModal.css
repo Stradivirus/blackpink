@@ -1,0 +1,132 @@
+/* 모달 전체 */
+.admin-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.25);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-modal-content {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  padding: 36px 32px 28px 32px;
+  min-width: 340px;
+  max-width: 95vw;
+  min-height: 100px;
+  position: relative;
+  animation: modalFadeIn 0.25s;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; transform: translateY(-20px);}
+  to { opacity: 1; transform: translateY(0);}
+}
+
+/* 제목 */
+.admin-modal-title {
+  font-size: 1.7rem;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 28px;
+  letter-spacing: -1px;
+}
+
+/* 폼 필드 */
+.admin-modal-form-row {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+  gap: 5px;
+}
+
+.admin-modal-form-row label {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 3px;
+  color: #222;
+  letter-spacing: -0.5px;
+}
+
+.admin-modal-form-row input,
+.admin-modal-form-row select {
+  font-size: 1.08rem;
+  padding: 12px 14px;
+  border: 1.5px solid #d0d4da;
+  border-radius: 8px;
+  outline: none;
+  background: linear-gradient(90deg, #f8fafc 60%, #f3f6fa 100%);
+  transition: border 0.2s, box-shadow 0.2s, background 0.2s;
+  box-shadow: 0 2px 8px rgba(60,80,120,0.07);
+  color: #23272f;
+  font-family: inherit;
+}
+
+.admin-modal-form-row input:focus,
+.admin-modal-form-row select:focus {
+  border: 2px solid #3a6cf6;
+  background: #fff;
+  box-shadow: 0 4px 16px rgba(58,108,246,0.13);
+}
+
+.admin-modal-form-row input[readonly],
+.admin-modal-form-row input:disabled,
+.admin-modal-form-row select:disabled {
+  background: #f3f3f3;
+  color: #b0b8c1;
+  border-style: dashed;
+  opacity: 0.85;
+}
+
+.admin-modal-form-row input::placeholder {
+  color: #b0b8c1;
+  opacity: 1;
+  font-size: 0.99em;
+  font-style: italic;
+}
+
+.admin-modal-form-row select {
+  cursor: pointer;
+  background-image: linear-gradient(90deg, #f8fafc 60%, #f3f6fa 100%);
+}
+
+.admin-modal-form-row select:disabled {
+  cursor: not-allowed;
+}
+
+/* 입력칸에 마우스 올릴 때 효과 */
+.admin-modal-form-row input:hover,
+.admin-modal-form-row select:hover {
+  border-color: #8fa7e6;
+  background: #f5f8ff;
+}
+
+/* 버튼 영역 */
+.admin-modal-btn-row {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.admin-modal-btn {
+  padding: 7px 28px;
+  border: none;
+  border-radius: 6px;
+  background: #3a6cf6;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.admin-modal-btn.cancel {
+  background: #bbb;
+  color: #fff;
+}
+.admin-modal-btn:hover:not(.cancel) {
+  background: #1746b6;
+}

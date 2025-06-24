@@ -100,3 +100,36 @@ export const teamLabelMap: Record<string, string> = {
   "관리팀": "관리팀",
   // 필요시 추가
 };
+
+export const serverTypes = [
+  "웹서버", "DB서버", "애플리케이션서버", "인증서버"
+];
+
+export const actions = [
+  "ip 차단", "패치적용", "계정잠금", "백업복구", "접근제어 강화",
+  "모니터링 강화", "보안 교육 실시", "방화벽 설정"
+];
+
+export const statusOptions = {
+  biz: ["진행중", "만료", "해지"],
+  dev: ["정상", "중지", "만료"],
+  security: ["진행중", "처리완료"],
+};
+
+export const selectOptions: Record<string, string[]> = {
+  plan: ["베이직", "프로", "엔터프라이즈"],
+  status: [], // 기본값은 빈 배열, 실제 렌더링 시 team에 따라 동적으로 할당
+  industry: ["IT", "금융", "제조", "유통"],
+  risk_level: ["낮음", "보통", "높음"],
+  threat_type: threatTypes,
+  server_type: serverTypes,
+  action: actions,
+  // 필요시 추가
+};
+
+export const industryPrefixMap: Record<string, string> = {
+  IT: "I",
+  제조: "M",
+  금융: "F",
+  유통: "D",
+};

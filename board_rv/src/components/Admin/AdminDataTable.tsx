@@ -1,7 +1,7 @@
 // src/components/Admin/AdminDataTable.tsx
 import React, { useMemo } from "react";
 import type { AdminDataTableProps } from "../../types/Admin";
-import RegisterEditModal from "./RegisterEditModal";
+import RegisterEditModal from "./AdminData/RegisterEditModal";
 import { useAdminDataCrud } from "./AdminData/useAdminDataCrud";
 import { useAdminDataTableFilters } from "./AdminData/useAdminDataTableFilters";
 import { DropdownButton, FilterCheckboxList, CompanySearchInput } from "./AdminData/useAdminDataUI";
@@ -49,7 +49,7 @@ const AdminDataTable: React.FC<AdminDataTableProps> = ({
     modalVisible,
     setModalVisible,
     modalInitialData,
-    // setModalInitialData,
+    setModalInitialData,
     handleRegisterClick,
     handleEditClick,
     handleSubmit,
@@ -81,7 +81,7 @@ const AdminDataTable: React.FC<AdminDataTableProps> = ({
 
   return (
     <div className="admin-data-table-container">
-      <h2 className="admin-data-table-title">{selectedTeamLabel} 데이터</h2>
+      <h1 className="admin-data-table-title">{selectedTeamLabel} 데이터</h1>
 
       {/* 날짜 필터 그룹 */}
       <div className="admin-data-table-date-filter-group">
@@ -164,6 +164,12 @@ const AdminDataTable: React.FC<AdminDataTableProps> = ({
             </div>
           )}
         </DropdownButton>
+        {/* 오른쪽 끝에 카운트 표시 */}
+        <div style={{ flex: 1, display: "flex", justifyContent: "flex-end", alignItems: "center" }}>
+          <span style={{ fontWeight: 500, color: "#555", minWidth: 80, textAlign: "right" }}>
+            총 {filteredData.length}건
+          </span>
+        </div>
       </div>
 
       {/* 다중 필터 영역 */}
@@ -213,11 +219,15 @@ const AdminDataTable: React.FC<AdminDataTableProps> = ({
               </button>
             )}
           </div>
+
           {(selectedTeam === "biz" || selectedTeam === "dev") && (
-            <CompanySearchInput
-              value={companyNameQuery}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCompanyNameQuery(e.target.value)}
-            />
+            <div style={{ display: "flex", alignItems: "center", gap: 12, flex: 1, justifyContent: "flex-end" }}>
+              <CompanySearchInput
+                value={companyNameQuery}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCompanyNameQuery(e.target.value)}
+              />
+              {/* 카운트 표시 */}
+            </div>
           )}
         </div>
       )}
@@ -246,7 +256,16 @@ const AdminDataTable: React.FC<AdminDataTableProps> = ({
               />
             </th>
             {getVisibleColumns.map((col) => (
-              <th key={col.key}>{col.label}</th>
+              <th key={col.key}>
+                {/* 회사명 컬럼 위에만 카운트 표시 */}
+                {col.key === "company_name" ? (
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                    <span>{col.label}</span>
+                  </div>
+                ) : (
+                  col.label
+                )}
+              </th>
             ))}
           </tr>
         </thead>
@@ -285,7 +304,7 @@ const AdminDataTable: React.FC<AdminDataTableProps> = ({
       <div className="admin-data-table-pagination">
         {startPage > 1 && (
           <button
-            className="admin-data-table-page-btn-group-nav"
+            className="admin-data-table-page-btn-group_nav"
             onClick={() => setCurrentPage(startPage - 1)}
           >
             &lt;
@@ -306,7 +325,7 @@ const AdminDataTable: React.FC<AdminDataTableProps> = ({
 
         {endPage < totalPages && (
           <button
-            className="admin-data-table-page-btn-group-nav"
+            className="admin-data-table-page-btn-group_nav"
             onClick={() => setCurrentPage(endPage + 1)}
           >
             &gt;
@@ -342,8 +361,14 @@ const AdminDataTable: React.FC<AdminDataTableProps> = ({
           visible={modalVisible}
           team={selectedTeam}
           initialData={modalInitialData || undefined}
-          onClose={() => setModalVisible(false)}
-          onSubmit={handleSubmit}
+          onClose={() => {
+            setModalVisible(false);
+            setSelectedIds(new Set());
+          }}
+          onSubmit={(data) => {
+            handleSubmit(data);
+            setSelectedIds(new Set());
+          }}
         />
       )}
     </div>

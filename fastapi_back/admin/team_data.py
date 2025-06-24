@@ -164,3 +164,31 @@ async def delete_items(team: str, request: Request):
 
     result = collection.delete_many({"_id": {"$in": object_ids}})
     return {"deleted_count": result.deleted_count}
+
+@router.get("/biz/next-company-id")
+async def get_next_company_id(industry: str):
+    """
+    업종(industry)별 다음 company_id 반환 (예: IT → I00012)
+    """
+    prefix_map = {"IT": "I", "제조": "M", "금융": "F", "유통": "D"}
+    prefix = prefix_map.get(industry)
+    if not prefix:
+        raise HTTPException(status_code=400, detail="유효하지 않은 업종입니다.")
+
+    # company_id가 prefix로 시작하는 것 중 가장 큰 값 찾기
+    last = companies_collection.find({"company_id": {"$regex": f"^{prefix}"}}).sort("company_id", -1).limit(1)
+    last_id = None
+    for doc in last:
+        last_id = doc["company_id"]
+        break
+
+    if last_id:
+        try:
+            next_num = int(last_id[1:]) + 1
+        except Exception:
+            next_num = 1
+    else:
+        next_num = 1
+
+    next_id = prefix + str(next_num).zfill(5)
+    return {"next_company_id": next_id}
