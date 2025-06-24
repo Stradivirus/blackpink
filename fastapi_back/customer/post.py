@@ -20,6 +20,7 @@ def create_post(req: BoardCreateRequest):
     doc["createdTime"] = now.strftime("%H:%M:%S")
     doc["viewCount"] = 0
     doc["isNotice"] = req.isNotice or False
+    doc["isAnswered"] = req.isAnswered or False  # 답변완료 여부 저장
     doc["deletedDate"] = None
     doc["deletedTime"] = None
 
@@ -42,6 +43,7 @@ def update_post(id: str, req: BoardCreateRequest = Body(...)):
     update_doc["createdDate"] = prev.get("createdDate", "")
     update_doc["createdTime"] = prev.get("createdTime", "")
     update_doc["isNotice"] = req.isNotice or False
+    update_doc["isAnswered"] = req.isAnswered if "isAnswered" in update_doc else prev.get("isAnswered", False)  # 답변완료 여부
     board_collection.update_one({"_id": id}, {"$set": update_doc})
     updated = board_collection.find_one({"_id": id})
     updated["id"] = str(updated["_id"])
@@ -55,9 +57,11 @@ def update_post(id: str, req: BoardCreateRequest = Body(...)):
 @router.get("/api/posts")
 def get_posts(
     page: int = Query(0, ge=0),
-    size: int = Query(30, ge=1, le=100),
+    size: int = Query(15, ge=1, le=100),
 ):
     skip = page * size
+    total_elements = board_collection.count_documents({})
+    total_pages = (total_elements + size - 1) // size if total_elements > 0 else 1
     cursor = board_collection.find().sort([
         ("isNotice", -1),           # 공지 먼저
         ("createdDate", -1),        # 최신글이 위로
@@ -67,6 +71,7 @@ def get_posts(
     posts = []
     for doc in cursor:
         doc["isNotice"] = doc.get("isNotice", False)
+        doc["isAnswered"] = doc.get("isAnswered", False)  # 답변완료 여부 보정
         doc["writerId"] = doc.get("writerId", "")
         doc["writerNickname"] = doc.get("writerNickname", "")
         doc["createdDate"] = doc.get("createdDate", "")
@@ -76,8 +81,8 @@ def get_posts(
         posts.append(BoardResponse(**doc))
     return {
         "content": posts,
-        "totalElements": board_collection.count_documents({}),
-        "totalPages": 1  # 실제 페이지 계산 로직 필요
+        "totalElements": total_elements,
+        "totalPages": total_pages
     }
 
 # 게시글 단건 조회 및 조회수 증가 엔드포인트
@@ -92,6 +97,7 @@ def get_post(id: str):
     b["viewCount"] = b.get("viewCount", 0) + 1
     board_collection.update_one({"_id": ObjectId(id)}, {"$set": {"viewCount": b["viewCount"]}})
     b["isNotice"] = b.get("isNotice", False)
+    b["isAnswered"] = b.get("isAnswered", False)  # 답변완료 여부 보정
     b["writerId"] = b.get("writerId", "")
     b["writerNickname"] = b.get("writerNickname", "")
     b["createdDate"] = b.get("createdDate", "")

@@ -1,61 +1,75 @@
 import * as React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import TeamGraphs from "../../components/Admin/TeamGraphs";
-import type { GraphType } from "../../components/Admin/TeamGraphs";
+import SecurityGraphs from "../../components/Admin/AdminDashBoard/SecurityGraphs";
+import GCIRankingPanel from "../../components/Admin/GCIRankingPanel";
+import RiskyCountryMap from "../../components/Admin/RiskyCountryMap";
+import BusinessGraphs from "../../components/Admin/AdminDashBoard/BusinessGraphs";
+import SysDevGraphs from "../../components/Admin/AdminDashBoard/SysDevGraphs";
+import type { GraphType } from "../../components/Admin/AdminDashBoard/SecurityGraphs";
+import { teamList, securityGraphTypes } from "../../constants/dataconfig";
 import "../../styles/admindashboard.css";
 
-const securityGraphTypes: GraphType[] = [
-  { type: "threat", label: "위협 유형 분포" },
-  { type: "risk", label: "위험 등급 비율" },
-  { type: "threat_y", label: "연도별 침해 현황" },
-  // { type: "threat_m", label: "월별 침해 현황(상위 5개)" },
-  { type: "processed_threats", label: "처리된 위협 종류" },
-  { type: "correl_threats_server", label: "서버별 위협 발생(Heatmap)" },
-  { type: "correl_risk_status", label: "위협 등급별 처리 현황" },
-  { type: "correl_threat_action", label: "위협 유형과 조치 방법" },
-  { type: "correl_threat_handler", label: "위협 유형별 필요 인원" },
-];
-
-const teamList = [
-  { key: "security", label: "보안팀" },
-];
+const DashboardMainPanels: React.FC = () => (
+  <div style={{ display: "flex", gap: 24, justifyContent: "center", marginTop: 32 }}>
+    <GCIRankingPanel />
+    <RiskyCountryMap />
+  </div>
+);
 
 const AdminDashboard: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const params = new URLSearchParams(location.search);
-  const selectedTeam = params.get("team") || "security";
+  const selectedTeam = params.get("team") || "";
+  const [showMainPanels, setShowMainPanels] = React.useState(selectedTeam === "");
 
   React.useEffect(() => {
+    setShowMainPanels(selectedTeam === "");
     if (selectedTeam && !teamList.some((t) => t.key === selectedTeam)) {
-      navigate("/admin?team=security", { replace: true });
+      navigate("/admin", { replace: true });
     }
   }, [selectedTeam, navigate]);
 
   let graphTypes: GraphType[] = [];
   if (selectedTeam === "security") graphTypes = securityGraphTypes;
+  if (selectedTeam === "biz") graphTypes = [];
+
+  const selectedTeamLabel = teamList.find((t) => t.key === selectedTeam)?.label || "";
 
   return (
-    <div className="admin-dashboard-container">
+    <div className={
+      selectedTeam ? "admin-dashboard-container admin-team-dashboard" : "admin-dashboard-container"
+    }>
       <div className="admin-dashboard-header">
-        <h1>보안팀 대시보드</h1>
-        <p>보안팀의 위협 현황 및 통계</p>
-      </div>
-      <div style={{ display: "flex", justifyContent: "center", gap: 16 }}>
-        {teamList.map((team) => (
+        <h1>관리자 대시보드</h1>
+        <div className="admin-team-tabs">
           <button
-            key={team.key}
-            className={selectedTeam === team.key ? "admin-tab-selected" : "admin-tab"}
-            onClick={() => navigate(`/admin?team=${team.key}`)}
+            className={showMainPanels ? "admin-team-tab admin-tab-selected" : "admin-team-tab"}
+            onClick={() => navigate("/admin")}
+            style={{ marginRight: 12 }}
           >
-            {team.label}
+            대시보드
           </button>
-        ))}
+          {teamList.map((team) => (
+            <button
+              key={team.key}
+              className={
+                selectedTeam === team.key
+                  ? "admin-team-tab admin-tab-selected"
+                  : "admin-team-tab"
+              }
+              onClick={() => navigate(`/admin?team=${team.key}`)}
+            >
+              {team.label}
+            </button>
+          ))}
+        </div>
       </div>
       <div className="admin-grid-layout" style={{ textAlign: "center", marginTop: 48 }}>
-        {selectedTeam === "security" && (
-          <TeamGraphs graphTypes={securityGraphTypes} />
-        )}
+        {showMainPanels && <DashboardMainPanels />}
+        {!showMainPanels && selectedTeam === "security" && <SecurityGraphs graphTypes={securityGraphTypes} />}
+        {!showMainPanels && selectedTeam === "biz" && <BusinessGraphs />}
+        {!showMainPanels && (selectedTeam === "dev" || selectedTeam === "sys_dev") && <SysDevGraphs />}
       </div>
     </div>
   );

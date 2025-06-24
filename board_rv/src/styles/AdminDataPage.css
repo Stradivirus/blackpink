@@ -1,3 +1,7 @@
+html {  /* 스크롤바 항상 유지시켜 화면 고정*/
+  overflow-y: scroll;
+}
+
 .admin-data-table-container {
   /* 전체 컨테이너 */
   width: 100%;
@@ -21,8 +25,13 @@
   color: black;
   cursor: pointer;
   font-weight: normal;
-  min-width: 100px;
+  min-width: auto;
   text-align: left;
+
+  height: 36px;        /* 고정 높이 */
+  line-height: 12px;   /* 텍스트 수직 정렬 */
+  box-sizing: border-box; /* 패딩, 보더 포함 높이 계산 */
+  font-size: 14px;     /* 폰트 크기 통일 */
 }
 .admin-data-table-btn.selected {
   background-color: #007bff;
@@ -83,22 +92,93 @@
   margin-top: 10px;
 }
 .admin-data-table-company-search input {
-  padding: 6px 12px;
+  padding: 10px 20px;
   border: 1px solid #ccc;
   border-radius: 4px;
   min-width: 200px;
 }
 .admin-data-table-table {
+  table-layout: fixed;
   width: 100%;
-  margin-top: 16px;
   border-collapse: collapse;
 }
+
 .admin-data-table-table th,
 .admin-data-table-table td {
+  width: 120px; /* 모든 셀의 기본 너비 (필요시 조절) */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 8px;
   border: 1px solid #ccc;
-  padding: 4px;
 }
+
 .admin-data-table-no-data {
   text-align: center;
-  padding: 20px;
+  padding: 12px;
+}
+
+.admin-data-table-fixed-buttons {
+  position: fixed;
+  bottom: 32px;
+  right: 48px;
+  display: flex;
+  gap: 12px;
+  z-index: 100;
+}
+
+.admin-data-table-fixed-btn {
+  background-color: #1976d2;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  font-size: 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  transition: background-color 0.2s;
+}
+
+.admin-data-table-fixed-btn:hover {
+  background-color: #115293;
+}
+
+.admin-data-table-table .checkbox-column {
+  padding: 4px;
+  text-align: center;
+}
+
+.admin-data-table-table input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+}
+
+.admin-data-table-pagination {
+  margin-top: 16px;
+  text-align: center;
+}
+
+.admin-data-table-page-btn {
+  margin: 0 4px;
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #fff;
+  color: #000;
+  cursor: pointer;
+}
+
+.admin-data-table-page-btn.active {
+  background-color: #007bff;
+  color: #fff;
+  font-weight: bold;
+}
+
+.admin-data-table-page-btn-group-nav {
+  margin: 0 4px;
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #eee;
+  cursor: pointer;
 }

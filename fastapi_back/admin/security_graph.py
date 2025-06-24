@@ -37,7 +37,7 @@ def get_dataframe():
     if not data:
         return pd.DataFrame()
     df = pd.DataFrame(data).drop(columns=['_id'], errors='ignore')
-    df['incident_date'] = pd.to_datetime(df['incident_date'])
+    df['incident_date'] = pd.to_datetime(df['incident_date'], errors='coerce')
     df['year'] = df['incident_date'].dt.year
     df['month'] = df['incident_date'].dt.month
     return df
@@ -63,13 +63,6 @@ def set_font_all(ax, font_prop):
         label.set_fontproperties(font_prop)
 
 # --- 그래프별 함수 분리 ---
-def plot_threat(df, font_prop):
-    fig, ax = plt.subplots(figsize=(10, 6))
-    sns.countplot(x='threat_type', data=df, ax=ax)
-    ax.set_title('위협 유형 분포', fontproperties=font_prop)
-    ax.tick_params(axis='x', rotation=45)
-    set_font_all(ax, font_prop)
-    return save_to_png(fig)
 
 def plot_risk(df, font_prop):
     risk_counts = df['risk_level'].value_counts().reset_index()
@@ -87,26 +80,6 @@ def plot_threat_y(df, font_prop):
     fig.update_layout(font_family="Malgun Gothic", xaxis_title="연도", yaxis_title="발생 건수", title_font_size=22)
     return save_plotly_to_png(fig)
 
-def plot_threat_m(df, font_prop, threat_type):
-    top_threats = df['threat_type'].value_counts().nlargest(5).index.tolist()
-    color_map = dict(zip(top_threats, ["#F54343", "#0C81F5", "#F5A608", "#08FA08", "#7F09F5"]))
-    linestyle_map = dict(zip(top_threats, ["-", "--", "-", "--", (0, (5, 1))]))
-    threat_df = df[df['threat_type'] == threat_type]
-    if threat_df.empty:
-        return None
-    fig, ax = plt.subplots(figsize=(10, 6))
-    monthly_counts = threat_df.groupby(['month']).size().reset_index(name='count')
-    sns.lineplot(
-        x='month', y='count', data=monthly_counts, marker='o', ax=ax,
-        color=color_map.get(threat_type, "#000000"), linestyle=linestyle_map.get(threat_type, '-')
-    )
-    ax.set_title(f"{threat_type}", fontproperties=font_prop, fontsize=16, fontweight='bold', color=color_map.get(threat_type, "#000"))
-    ax.set_xticks(range(1, 13))
-    ax.set_xlabel("월", fontproperties=font_prop, fontsize=14)
-    ax.set_ylabel("발생 횟수", fontproperties=font_prop, fontsize=14)
-    ax.grid(True, alpha=0.3)
-    set_font_all(ax, font_prop)
-    return save_to_png(fig)
 
 def plot_processed_threats(df, font_prop):
     fig, ax = plt.subplots(figsize=(10, 6))
@@ -175,16 +148,65 @@ def plot_correl_threat_handler(df, font_prop):
     ax.set_title('위협 유형별 투입 인원', fontproperties=font_prop)
     return save_to_png(fig)
 
+def plot_threat_m(df, font_prop, threat_type):
+    filtered = df[df['threat_type'] == threat_type]
+    if filtered.empty:
+        return None
+    monthly_counts = filtered.groupby('month').size().reset_index(name='count')
+    fig = px.line(
+        monthly_counts,
+        x='month',
+        y='count',
+        markers=True,
+        title=f"{threat_type} 월별 발생 추이"
+    )
+    fig.update_layout(
+        font_family="Malgun Gothic",
+        xaxis_title="월",
+        yaxis_title="발생 건수",
+        title_font_size=22
+    )
+    return save_plotly_to_png(fig)
+
+def plot_manpower(df, font_prop):
+    df['incident_date'] = pd.to_datetime(df['incident_date'])
+    df['processed_date'] = pd.to_datetime(df['handled_date'])
+    df['처리기간(일)'] = (df['processed_date'] - df['incident_date']).dt.days
+    df['투입인원'] = df['handler_count'].astype(int)
+
+    if df['처리기간(일)'].isnull().all():
+        return None
+
+    set_plot_style()
+    jp = sns.jointplot(
+        data=df,
+        x='처리기간(일)',
+        y='투입인원',
+        hue='threat_type',
+        kind='scatter',
+        palette='Set2',
+        height=8
+    )
+    jp.fig.suptitle('처리기간 vs 투입인원 (위협유형별)', fontproperties=font_prop, fontsize=18)
+    jp.fig.tight_layout()
+    jp.fig.subplots_adjust(top=0.95)
+    jp.ax_joint.set_xlabel('처리기간(일)', fontproperties=font_prop, fontsize=20)
+    jp.ax_joint.set_ylabel('투입인원', fontproperties=font_prop, fontsize=20)
+    for text in jp.ax_joint.legend_.get_texts():
+        text.set_fontproperties(font_prop)
+    return save_to_png(jp.fig)
+
 # 그래프 타입별 함수 매핑
 graph_func_map = {
-    'threat': plot_threat,
     'risk': plot_risk,
     'threat_y': plot_threat_y,
+    'threat_m': plot_threat_m,
     'processed_threats': plot_processed_threats,
     'correl_threats_server': plot_correl_threats_server,
     'correl_risk_status': plot_correl_risk_status,
     'correl_threat_action': plot_correl_threat_action,
-    'correl_threat_handler': plot_correl_threat_handler
+    'correl_threat_handler': plot_correl_threat_handler,
+    'manpower': plot_manpower,
 }
 
 def create_plot(graph_type, threat_type=None):
@@ -192,13 +214,12 @@ def create_plot(graph_type, threat_type=None):
     if df.empty:
         return None
     font_prop = set_plot_style()
-    if graph_type == 'threat_m':
-        if not threat_type:
-            return None
-        return plot_threat_m(df, font_prop, threat_type)
     func = graph_func_map.get(graph_type)
     if func:
-        return func(df, font_prop)
+        if graph_type == "threat_m":
+            return func(df, font_prop, threat_type)
+        else:
+            return func(df, font_prop)
     return None
 
 # 공통 Response 처리
@@ -207,24 +228,15 @@ def image_response(img_data):
         return Response(content="Unknown graph type or no data", status_code=404)
     return Response(content=img_data, media_type="image/png")
 
-@router.get("/api/graph/{graph_type}")
-async def plot(graph_type: str):
-    if graph_type == "threat_m":
-        return Response(content="threat_type required", status_code=404)
-    img_data = create_plot(graph_type)
+@router.get("/api/security/graph/{graph_type}")
+async def plot(graph_type: str, threat_type: str = None):
+    img_data = create_plot(graph_type, threat_type)
     return image_response(img_data)
 
-@router.get("/api/graph/threat_m/{threat_type}")
-async def plot_threat_m_path(threat_type: str):
-    img_data = create_plot("threat_m", threat_type)
-    if img_data is None:
-        return Response(content="No data", status_code=404)
-    return Response(content=img_data, media_type="image/png")
-
-@router.get("/api/graph/top_threats")
-async def get_top_threats():
+@router.get("/api/security/graph/threat_types")
+async def get_threat_types():
     df = get_dataframe()
-    if df.empty:
-        return JSONResponse(content={"top_threats": []})
-    top_threats = df['threat_type'].value_counts().nlargest(5).index.tolist()
-    return JSONResponse(content={"top_threats": top_threats})
+    if df.empty or 'threat_type' not in df.columns:
+        return JSONResponse(content=[])
+    types = df['threat_type'].dropna().unique().tolist()
+    return JSONResponse(content=types)

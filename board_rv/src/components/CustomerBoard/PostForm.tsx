@@ -149,7 +149,7 @@ const PostForm: React.FC<Props> = ({isEdit}) => {
                         <button type="submit" className="board-btn" disabled={isSubmitting}>
                             {isEdit ? "수정" : "작성"}
                         </button>
-                        <Link to="/" className="board-btn cancel">
+                        <Link to="/postpage" className="board-btn cancel">
                             취소
                         </Link>
                     </div>
