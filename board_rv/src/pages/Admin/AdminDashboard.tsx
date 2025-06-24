@@ -9,12 +9,6 @@ import type { GraphType } from "../../components/Admin/AdminDashBoard/SecurityGr
 import { teamList, securityGraphTypes } from "../../constants/dataconfig";
 import "../../styles/admindashboard.css";
 
-const EmptyTeamPage: React.FC<{ teamLabel: string }> = ({ teamLabel }) => (
-  <div style={{ textAlign: "center", marginTop: 80 }}>
-    <h2 style={{ color: "#888" }}>{teamLabel} 대시보드는 준비 중입니다.</h2>
-  </div>
-);
-
 const DashboardMainPanels: React.FC = () => (
   <div style={{ display: "flex", gap: 24, justifyContent: "center", marginTop: 32 }}>
     <GCIRankingPanel />
@@ -75,8 +69,7 @@ const AdminDashboard: React.FC = () => {
         {showMainPanels && <DashboardMainPanels />}
         {!showMainPanels && selectedTeam === "security" && <SecurityGraphs graphTypes={securityGraphTypes} />}
         {!showMainPanels && selectedTeam === "biz" && <BusinessGraphs />}
-        {!showMainPanels && selectedTeam === "sys_dev" && <SysDevGraphs />}
-        {!showMainPanels && selectedTeam !== "security" && selectedTeam !== "biz" && selectedTeam !== "sys_dev" && <EmptyTeamPage teamLabel={selectedTeamLabel} />}
+        {!showMainPanels && (selectedTeam === "dev" || selectedTeam === "sys_dev") && <SysDevGraphs />}
       </div>
     </div>
   );

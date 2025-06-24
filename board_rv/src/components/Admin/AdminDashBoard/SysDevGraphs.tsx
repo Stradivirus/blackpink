@@ -19,7 +19,7 @@ const SysDevGraphs: React.FC = () => {
       setTimeout(() => {
         setImgSrcs((prev) => {
           const arr = [...prev];
-          arr[idx] = `${API_URLS.SYS_DEV_GRAPH}/${g.type}?t=${imgKeys[idx]}`;
+          arr[idx] = `${API_URLS.DEV_GRAPH}/${g.type}?t=${imgKeys[idx]}`;
           return arr;
         });
       }, idx * 1000);
@@ -56,7 +56,7 @@ const SysDevGraphs: React.FC = () => {
     setTimeout(() => {
       setImgSrcs((prev) => {
         const arr = [...prev];
-        arr[idx] = `${API_URLS.SYS_DEV_GRAPH}/${SYS_DEV_GRAPH_TYPES[idx].type}?t=${Date.now()}`;
+        arr[idx] = `${API_URLS.DEV_GRAPH}/${SYS_DEV_GRAPH_TYPES[idx].type}?t=${Date.now()}`;
         return arr;
       });
     }, 1000);

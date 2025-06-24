@@ -5,10 +5,10 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from matplotlib import font_manager as fm
 import io
-from db import project_collection
+from db import dev_collection
 
 router = APIRouter()  # prefix 제거
-collection = project_collection
+collection = dev_collection
 
 def set_plot_style():
     font_path = 'C:/Windows/Fonts/malgun.ttf'
@@ -103,7 +103,7 @@ def image_response(img_data):
         return Response(content="Unknown graph type or no data", status_code=404)
     return Response(content=img_data, media_type="image/png")
 
-@router.get("/api/sys_dev/graph/{graph_type}")
+@router.get("/api/dev/graph/{graph_type}")
 async def plot(graph_type: str):
     img_data = create_plot(graph_type)
     return image_response(img_data)
