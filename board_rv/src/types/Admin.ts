@@ -15,6 +15,7 @@ export interface AdminDataTableProps {
   data: any[];
   columns: Column[];
   loading: boolean;
-  selectedTeam: string;
+  selectedTeam: "dev" | "biz" | "security";
   selectedTeamLabel: string;
+  fetchData?: () => void;
 }

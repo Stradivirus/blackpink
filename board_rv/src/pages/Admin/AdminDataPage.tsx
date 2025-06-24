@@ -1,5 +1,5 @@
 // src/pages/Admin/AdminDataPage.tsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { API_URLS } from "../../api/urls";
 import { teamList, columnsByTeam } from "../../constants/dataconfig";
@@ -15,7 +15,7 @@ const AdminDataPage: React.FC = () => {
   const params = new URLSearchParams(location.search);
   const selectedTeam = params.get("team") || "security";
 
-  useEffect(() => {
+  const fetchData = useCallback(() => {
     if (!teamList.some((t) => t.key === selectedTeam)) {
       navigate("/admin/data?team=security", { replace: true });
       return;
@@ -26,13 +26,13 @@ const AdminDataPage: React.FC = () => {
     let fetchUrl = "";
     switch (selectedTeam) {
       case "biz":
-        fetchUrl = API_URLS.COMPANIES;
+        fetchUrl = API_URLS.BIZ;
         break;
       case "dev":
         fetchUrl = API_URLS.DEV;
         break;
       case "security":
-        fetchUrl = API_URLS.INCIDENT;
+        fetchUrl = API_URLS.SECURITY;
         break;
       default:
         setLoading(false);
@@ -48,15 +48,13 @@ const AdminDataPage: React.FC = () => {
       })
       .then((res) => {
         let result = [];
-
         if (selectedTeam === "security") {
           result = res.incidents || [];
         } else if (selectedTeam === "biz") {
-          result = res.companies || [];
+          result = res.biz || [];
         } else if (selectedTeam === "dev") {
           result = res.dev || [];
         }
-
         setData(result);
         setLoading(false);
       })
@@ -66,6 +64,10 @@ const AdminDataPage: React.FC = () => {
         setLoading(false);
       });
   }, [selectedTeam, navigate]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const columns = columnsByTeam[selectedTeam] || [];
   const currentTeamLabel = teamList.find((t) => t.key === selectedTeam)?.label || "알 수 없는 팀";
@@ -80,7 +82,7 @@ const AdminDataPage: React.FC = () => {
         loading={loading}
         selectedTeam={selectedTeam}
         selectedTeamLabel={currentTeamLabel}
-
+        fetchData={fetchData} // ✅ 등록/수정 후 리로딩용 함수 전달
       />
     </div>
   );

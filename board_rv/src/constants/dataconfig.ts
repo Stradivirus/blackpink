@@ -33,7 +33,7 @@ export const securityGraphTypes = [
 // 각 팀별 컬럼 정의
 export const columnsByTeam: Record<string, { key: string; label: string }[]> = {
   biz: [
-    { key: "company_id", label: "Company ID" },
+    { key: "company_id", label: "회사코드" }, // 기존 label : "company_id" > "회사코드"
     { key: "company_name", label: "회사명" },
     { key: "industry", label: "업종" },
     { key: "plan", label: "플랜" },
@@ -49,7 +49,6 @@ export const columnsByTeam: Record<string, { key: string; label: string }[]> = {
     { key: "os_version", label: "OS 버전" },
     { key: "dev_start_date", label: "개발 시작일" },
     { key: "dev_end_date", label: "개발 종료일" },
-    { key: "contract_end", label: "계약 종료일" },
     { key: "progress", label: "진행 상태" },
     { key: "maintenance", label: "유지보수 여부" },
   ],
