@@ -120,7 +120,7 @@ export const selectOptions: Record<string, string[]> = {
   plan: ["베이직", "프로", "엔터프라이즈"],
   status: [], // 기본값은 빈 배열, 실제 렌더링 시 team에 따라 동적으로 할당
   industry: ["IT", "금융", "제조", "유통"],
-  risk_level: ["낮음", "보통", "높음"],
+  risk_level: ["LOW", "MEDIUM", "HIGH"],
   threat_type: threatTypes,
   server_type: serverTypes,
   action: actions,

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { columnsByTeam, selectOptions, statusOptions, osVersionMap } from "../../../constants/dataconfig";
+import { isDateField, handleChangeFactory } from "./TeamFormDynamic";
 
 interface SecurityFormProps {
   initialData?: Record<string, any>;
@@ -47,25 +48,39 @@ const SecurityFormDynamic: React.FC<SecurityFormProps> = ({ initialData = {}, on
     onChange(formData);
   }, [formData, onChange]);
 
-  const handleChange = (key: string, value: any) => {
-    setFormData((prev) => ({ ...prev, [key]: value }));
-  };
+  const handleChange = handleChangeFactory(setFormData);
 
   return (
     <>
       {columns.map(({ key, label }) => {
         if (key === "company_id") {
-          // company_id에 해당하는 회사명을 읽기전용 input으로 보여주기
-          const companyName = formData.company_name || (companyOptions.find(opt => opt.value === formData.company_id)?.label) || formData.company_id || "";
+          const filteredOptions = companyOptions.filter((opt) => opt.label.includes(companySearch));
           return (
             <div key={key} style={{ marginBottom: 12 }}>
               <label>회사명</label>
               <input
                 type="text"
-                value={companyName}
-                readOnly
-                style={{ background: '#f5f5f5' }}
+                placeholder="회사명 검색"
+                value={companySearch}
+                onChange={e => setCompanySearch(e.target.value)}
+                style={{ marginRight: 8 }}
               />
+              <select
+                value={formData[key]}
+                onChange={e => {
+                  const selected = companyOptions.find(opt => opt.value === e.target.value);
+                  setFormData(prev => ({
+                    ...prev,
+                    company_id: selected ? selected.value : "",
+                    company_name: selected ? selected.label : "",
+                  }));
+                }}
+              >
+                <option value="">선택</option>
+                {filteredOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
             </div>
           );
         }
@@ -149,12 +164,11 @@ const SecurityFormDynamic: React.FC<SecurityFormProps> = ({ initialData = {}, on
             </div>
           );
         }
-        const isDateField = key.toLowerCase().includes("date") || key.toLowerCase().includes("start") || key.toLowerCase().includes("end");
         return (
           <div key={key} style={{ marginBottom: 12 }}>
             <label>{label}</label>
             <input
-              type={isDateField ? "date" : "text"}
+              type={isDateField(key) ? "date" : "text"}
               value={formData[key]}
               onChange={e => handleChange(key, e.target.value)}
             />

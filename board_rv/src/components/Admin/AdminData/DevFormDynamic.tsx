@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { columnsByTeam, selectOptions, statusOptions, osVersionMap } from "../../../constants/dataconfig";
+import { isDateField, handleChangeFactory } from "./TeamFormDynamic";
 
 interface DevFormProps {
   initialData?: Record<string, any>;
@@ -47,9 +48,7 @@ const DevFormDynamic: React.FC<DevFormProps> = ({ initialData = {}, onChange }) 
     onChange(formData);
   }, [formData, onChange]);
 
-  const handleChange = (key: string, value: any) => {
-    setFormData((prev) => ({ ...prev, [key]: value }));
-  };
+  const handleChange = handleChangeFactory(setFormData);
 
   return (
     <>
@@ -131,12 +130,11 @@ const DevFormDynamic: React.FC<DevFormProps> = ({ initialData = {}, onChange }) 
           );
         }
         // 날짜 관련 필드: 항상 입력 가능
-        const isDateField = key.toLowerCase().includes("date") || key.toLowerCase().includes("start") || key.toLowerCase().includes("end");
         return (
           <div key={key} style={{ marginBottom: 12 }}>
             <label>{label}</label>
             <input
-              type={isDateField ? "date" : "text"}
+              type={isDateField(key) ? "date" : "text"}
               value={formData[key]}
               onChange={e => handleChange(key, e.target.value)}
             />

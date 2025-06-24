@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { columnsByTeam, selectOptions } from "../../../constants/dataconfig";
+import { isDateField, handleChangeFactory } from "./TeamFormDynamic";
 
 interface BizFormProps {
   initialData?: Record<string, any>;
@@ -48,9 +49,7 @@ const BizFormDynamic: React.FC<BizFormProps> = ({ initialData = {}, onChange }) 
   // 등록/수정 모드 구분
   const isEdit = initialData && Object.keys(initialData).length > 0;
 
-  const handleChange = (key: string, value: any) => {
-    setFormData((prev) => ({ ...prev, [key]: value }));
-  };
+  const handleChange = handleChangeFactory(setFormData);
 
   return (
     <>
@@ -120,12 +119,11 @@ const BizFormDynamic: React.FC<BizFormProps> = ({ initialData = {}, onChange }) 
           );
         }
         // 날짜 관련 필드: 항상 입력 가능
-        const isDateField = key.toLowerCase().includes("date") || key.toLowerCase().includes("start") || key.toLowerCase().includes("end");
         return (
           <div key={key} style={{ marginBottom: 12 }}>
             <label>{label}</label>
             <input
-              type={isDateField ? "date" : "text"}
+              type={isDateField(key) ? "date" : "text"}
               value={formData[key]}
               onChange={e => handleChange(key, e.target.value)}
             />
