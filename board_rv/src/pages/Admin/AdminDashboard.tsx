@@ -1,6 +1,6 @@
 import * as React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import TeamGraphs from "../../components/Admin/SecurityGraphs";
+import SecurityGraphs from "../../components/Admin/SecurityGraphs";
 import GCIRankingPanel from "../../components/Admin/GCIRankingPanel";
 import RiskyCountryMap from "../../components/Admin/RiskyCountryMap";
 import BusinessGraphs from "../../components/Admin/BusinessGraphs";
@@ -37,7 +37,6 @@ const AdminDashboard: React.FC = () => {
 
   let graphTypes: GraphType[] = [];
   if (selectedTeam === "security") graphTypes = securityGraphTypes;
-  // 사업팀 추가 (key: biz)
   if (selectedTeam === "biz") graphTypes = [];
 
   const selectedTeamLabel = teamList.find((t) => t.key === selectedTeam)?.label || "";
@@ -68,7 +67,7 @@ const AdminDashboard: React.FC = () => {
       </div>
       <div className="admin-grid-layout" style={{ textAlign: "center", marginTop: 48 }}>
         {showMainPanels && <DashboardMainPanels />}
-        {!showMainPanels && selectedTeam === "security" && <TeamGraphs graphTypes={securityGraphTypes} />}
+        {!showMainPanels && selectedTeam === "security" && <SecurityGraphs graphTypes={securityGraphTypes} />}
         {!showMainPanels && selectedTeam === "biz" && <BusinessGraphs />}
         {!showMainPanels && selectedTeam !== "security" && selectedTeam !== "biz" && <EmptyTeamPage teamLabel={selectedTeamLabel} />}
       </div>

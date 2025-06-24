@@ -7,7 +7,7 @@ export type GraphType = {
   label: string;
 };
 
-type TeamGraphsProps = {
+type SecurityGraphsProps = {
   graphTypes: GraphType[];
 };
 
@@ -53,7 +53,7 @@ const ThreatMGraph: React.FC<{ onImgClick?: (src: string, alt: string) => void }
   );
 };
 
-const TeamGraphs: React.FC<TeamGraphsProps> = ({ graphTypes }) => {
+const SecurityGraphs: React.FC<SecurityGraphsProps> = ({ graphTypes }) => {
   const [modalImg, setModalImg] = React.useState<string | null>(null);
   const [modalAlt, setModalAlt] = React.useState<string>("");
 
@@ -126,4 +126,4 @@ const TeamGraphs: React.FC<TeamGraphsProps> = ({ graphTypes }) => {
   );
 };
 
-export default TeamGraphs;
+export default SecurityGraphs;
