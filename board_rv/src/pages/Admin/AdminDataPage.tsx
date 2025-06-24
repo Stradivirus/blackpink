@@ -13,7 +13,7 @@ const AdminDataPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const params = new URLSearchParams(location.search);
-  const selectedTeam = params.get("team") || "security";
+  const selectedTeam = (params.get("team") as "biz" | "dev" | "security") || "security";
 
   const fetchData = useCallback(() => {
     if (!teamList.some((t) => t.key === selectedTeam)) {

@@ -35,3 +35,16 @@ export const API_URLS = {
     ADMIN_LIST: `${API_BASE}/admin/list`,
     MEMBER_LIST: `${API_BASE}/member/list`,
 };
+
+export const getCrudEndpoint = (selectedTeam: string): string => {
+    switch (selectedTeam) {
+        case "dev":
+            return API_URLS.DEV;
+        case "biz":
+            return API_URLS.BIZ;
+        case "security":
+            return API_URLS.SECURITY;
+        default:
+            throw new Error("잘못된 팀입니다.");
+    }
+};
