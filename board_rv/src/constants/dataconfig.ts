@@ -28,6 +28,7 @@ export const securityGraphTypes = [
   { type: "correl_risk_status", label: "위협 등급별 처리 현황" },
   { type: "correl_threat_action", label: "위협 유형과 조치 방법" },
   { type: "correl_threat_handler", label: "위협 유형별 필요 인원" },
+  { type: "manpower", label: "처리기간 vs 투입인원" }
 ];
 
 // 각 팀별 컬럼 정의

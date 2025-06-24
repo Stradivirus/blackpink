@@ -168,6 +168,34 @@ def plot_threat_m(df, font_prop, threat_type):
     )
     return save_plotly_to_png(fig)
 
+def plot_manpower(df, font_prop):
+    df['incident_date'] = pd.to_datetime(df['incident_date'])
+    df['processed_date'] = pd.to_datetime(df['handled_date'])
+    df['처리기간(일)'] = (df['processed_date'] - df['incident_date']).dt.days
+    df['투입인원'] = df['handler_count'].astype(int)
+
+    if df['처리기간(일)'].isnull().all():
+        return None
+
+    set_plot_style()
+    jp = sns.jointplot(
+        data=df,
+        x='처리기간(일)',
+        y='투입인원',
+        hue='threat_type',
+        kind='scatter',
+        palette='Set2',
+        height=8
+    )
+    jp.fig.suptitle('처리기간 vs 투입인원 (위협유형별)', fontproperties=font_prop, fontsize=18)
+    jp.fig.tight_layout()
+    jp.fig.subplots_adjust(top=0.95)
+    jp.ax_joint.set_xlabel('처리기간(일)', fontproperties=font_prop, fontsize=20)
+    jp.ax_joint.set_ylabel('투입인원', fontproperties=font_prop, fontsize=20)
+    for text in jp.ax_joint.legend_.get_texts():
+        text.set_fontproperties(font_prop)
+    return save_to_png(jp.fig)
+
 # 그래프 타입별 함수 매핑
 graph_func_map = {
     'risk': plot_risk,
@@ -178,6 +206,7 @@ graph_func_map = {
     'correl_risk_status': plot_correl_risk_status,
     'correl_threat_action': plot_correl_threat_action,
     'correl_threat_handler': plot_correl_threat_handler,
+    'manpower': plot_manpower,
 }
 
 def create_plot(graph_type, threat_type=None):

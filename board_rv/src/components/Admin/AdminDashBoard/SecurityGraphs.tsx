@@ -53,6 +53,34 @@ const ThreatMGraph: React.FC<{ onImgClick?: (src: string, alt: string) => void }
   );
 };
 
+const ManpowerGraph: React.FC<{ onImgClick?: (src: string, alt: string) => void }> = ({ onImgClick }) => {
+  const [imgLoaded, setImgLoaded] = React.useState(false);
+  const imgSrc = `${API_URLS.GRAPH}/manpower`;
+
+  return (
+    <div style={{ minHeight: 340, position: 'relative' }}>
+      <h4>처리기간 vs 투입인원 (위협유형별)</h4>
+      {!imgLoaded && (
+        <div style={{
+          position: 'absolute', left: 0, right: 0, top: 60, bottom: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1
+        }}>
+          <div className="spinner" style={{ width: 40, height: 40, border: '4px solid #ccc', borderTop: '4px solid #1976d2', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+        </div>
+      )}
+      <img
+        src={imgSrc}
+        alt="처리기간 vs 투입인원 (위협유형별)"
+        style={{ minWidth: 350, maxWidth: 500, minHeight: 240, cursor: onImgClick ? 'zoom-in' : undefined, opacity: imgLoaded ? 1 : 0, transition: 'opacity 0.2s' }}
+        onClick={onImgClick ? () => onImgClick(imgSrc, '처리기간 vs 투입인원 (위협유형별)') : undefined}
+        onLoad={() => setImgLoaded(true)}
+      />
+      <style>{`
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+      `}</style>
+    </div>
+  );
+};
+
 const SecurityGraphs: React.FC<SecurityGraphsProps> = ({ graphTypes }) => {
   const [modalImg, setModalImg] = React.useState<string | null>(null);
   const [modalAlt, setModalAlt] = React.useState<string>("");
@@ -75,6 +103,14 @@ const SecurityGraphs: React.FC<SecurityGraphsProps> = ({ graphTypes }) => {
               style={{ minWidth: 350, maxWidth: 500 }}
             >
               <ThreatMGraph onImgClick={handleImgClick} />
+            </div>
+          ) : g.type === "manpower" ? (
+            <div
+              key={g.type}
+              className="admin-card admin-correlation-card"
+              style={{ minWidth: 350, maxWidth: 500 }}
+            >
+              <ManpowerGraph onImgClick={handleImgClick} />
             </div>
           ) : (
             <div

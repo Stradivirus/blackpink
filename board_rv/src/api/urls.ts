@@ -25,6 +25,7 @@ export const API_URLS = {
     // 그래프
     GRAPH: `${API_BASE}/security/graph`,
     BUSINESS_GRAPH: `${API_BASE}/business/graph`,
+
     // 관리자/멤버 관련
     ADMIN_LIST: `${API_BASE}/admin/list`,
     MEMBER_LIST: `${API_BASE}/member/list`,
