@@ -199,12 +199,12 @@ def image_response(img_data):
         return Response(content="Unknown graph type or no data", status_code=404)
     return Response(content=img_data, media_type="image/png")
 
-@router.get("/api/graph/{graph_type}")
+@router.get("/api/security/graph/{graph_type}")
 async def plot(graph_type: str, threat_type: str = None):
     img_data = create_plot(graph_type, threat_type)
     return image_response(img_data)
 
-@router.get("/api/graph/threat_types")
+@router.get("/api/security/graph/threat_types")
 async def get_threat_types():
     df = get_dataframe()
     if df.empty or 'threat_type' not in df.columns:

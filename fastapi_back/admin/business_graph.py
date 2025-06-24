@@ -244,60 +244,33 @@ def create_suspended_contract_plan_plot(df):
     buf.seek(0)
     return buf.getvalue()
 
-# ROUTES
+# --- 통합 라우터 및 함수 매핑 ---
 
-@router.get("/api/business/bar")
-def plot_bar():
+business_graph_func_map = {
+    'bar': create_bar_plot,
+    'heatmap': create_heatmap,
+    'annual_sales': create_annual_sales_plot,
+    'company_plan_heatmap': create_company_plan_heatmap,
+    'company_plan_donut_multi': create_nested_pie_chart,
+    'terminated_duration': create_terminated_contract_duration_plot,
+    'suspended_plan': create_suspended_contract_plan_plot,
+}
+
+def create_business_plot(graph_type):
     df = load_data()
     if df.empty:
-        return Response(content="No Data", status_code=404)
-    img = create_bar_plot(df)
-    return Response(content=img, media_type="image/png")
+        return None
+    func = business_graph_func_map.get(graph_type)
+    if func:
+        return func(df)
+    return None
 
-@router.get("/api/business/heatmap")
-def plot_heatmap():
-    df = load_data()
-    if df.empty:
-        return Response(content="No Data", status_code=404)
-    img = create_heatmap(df)
-    return Response(content=img, media_type="image/png")
+def image_response(img_data):
+    if img_data is None:
+        return Response(content="Unknown graph type or no data", status_code=404)
+    return Response(content=img_data, media_type="image/png")
 
-@router.get("/api/business/annual_sales")
-def plot_annual_sales():
-    df = load_data()
-    if df.empty:
-        return Response(content="No Data", status_code=404)
-    img = create_annual_sales_plot(df)
-    return Response(content=img, media_type="image/png")
-
-@router.get("/api/business/company_plan_heatmap")
-def plot_company_plan_heatmap():
-    df = load_data()
-    if df.empty:
-        return Response(content="No Data", status_code=404)
-    img = create_company_plan_heatmap(df)
-    return Response(content=img, media_type="image/png")
-
-@router.get("/api/business/company_plan_donut_multi")
-def plot_company_plan_donut_multi():
-    df = load_data()
-    if df.empty:
-        return Response(content="No Data", status_code=404)
-    img = create_nested_pie_chart(df)
-    return Response(content=img, media_type="image/png")
-
-@router.get("/api/business/terminated_duration")
-def plot_terminated_duration():
-    df = load_data()
-    if df.empty:
-        return Response(content="No Data", status_code=404)
-    img = create_terminated_contract_duration_plot(df)
-    return Response(content=img, media_type="image/png")
-
-@router.get("/api/business/suspended_plan")
-def plot_suspended_plan():
-    df = load_data()
-    if df.empty:
-        return Response(content="No Data", status_code=404)
-    img = create_suspended_contract_plan_plot(df)
-    return Response(content=img, media_type="image/png")
+@router.get("/api/business/graph/{graph_type}")
+def plot_business_graph(graph_type: str):
+    img_data = create_business_plot(graph_type)
+    return image_response(img_data)

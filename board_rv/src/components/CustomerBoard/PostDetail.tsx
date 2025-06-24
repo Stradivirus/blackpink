@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import {useParams, Link, useNavigate} from "react-router-dom";
-import type {Post} from "../../types/Post";
+import type {Post} from "../../types/Board";
 import {API_URLS} from "../../api/urls";
 import {useAuth} from "../../context/AuthContext";
 import CommentList from "./CommentList";

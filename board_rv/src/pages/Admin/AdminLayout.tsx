@@ -174,7 +174,7 @@ const AdminLayout: React.FC = () => {
               }}
               onClick={handleDataClick}
             >
-              <span>업무 자료</span>
+              <span>데이터 관리</span>
               <span style={{ fontSize: 18 }}>{dataOpen ? "▲" : "▼"}</span>
             </div>
             {dataOpen && (

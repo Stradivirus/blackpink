@@ -19,18 +19,12 @@ export const API_URLS = {
     BIZ_COLUMNS: `${API_BASE}/biz/columns`,
     DEV: `${API_BASE}/dev`,
     DEV_COLUMNS: `${API_BASE}/dev/columns`,
-    // 그래프
+    // 대시보드
     GCI_RANKINGS: `${API_BASE}/gci_rankings`,
     RISKY_COUNTRIES_MAP: `${API_BASE}/risky_countries/map_data`,
-    GRAPH: `${API_BASE}/graph`,
-    // 비즈니스 그래프 (사업팀)
-    BUSINESS_BAR: `${API_BASE}/business/bar`,
-    BUSINESS_HEATMAP: `${API_BASE}/business/heatmap`,
-    BUSINESS_ANNUAL_SALES: `${API_BASE}/business/annual_sales`,
-    BUSINESS_COMPANY_PLAN_HEATMAP: `${API_BASE}/business/company_plan_heatmap`,
-    BUSINESS_COMPANY_PLAN_DONUT_MULTI: `${API_BASE}/business/company_plan_donut_multi`,
-    BUSINESS_TERMINATED_DURATION: `${API_BASE}/business/terminated_duration`,
-    BUSINESS_SUSPENDED_PLAN: `${API_BASE}/business/suspended_plan`,
+    // 그래프
+    GRAPH: `${API_BASE}/security/graph`,
+    BUSINESS_GRAPH: `${API_BASE}/business/graph`,
     // 관리자/멤버 관련
     ADMIN_LIST: `${API_BASE}/admin/list`,
     MEMBER_LIST: `${API_BASE}/member/list`,

@@ -57,9 +57,11 @@ def update_post(id: str, req: BoardCreateRequest = Body(...)):
 @router.get("/api/posts")
 def get_posts(
     page: int = Query(0, ge=0),
-    size: int = Query(30, ge=1, le=100),
+    size: int = Query(15, ge=1, le=100),
 ):
     skip = page * size
+    total_elements = board_collection.count_documents({})
+    total_pages = (total_elements + size - 1) // size if total_elements > 0 else 1
     cursor = board_collection.find().sort([
         ("isNotice", -1),           # 공지 먼저
         ("createdDate", -1),        # 최신글이 위로
@@ -79,8 +81,8 @@ def get_posts(
         posts.append(BoardResponse(**doc))
     return {
         "content": posts,
-        "totalElements": board_collection.count_documents({}),
-        "totalPages": 1  # 실제 페이지 계산 로직 필요
+        "totalElements": total_elements,
+        "totalPages": total_pages
     }
 
 # 게시글 단건 조회 및 조회수 증가 엔드포인트

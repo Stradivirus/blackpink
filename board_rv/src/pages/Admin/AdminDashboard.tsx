@@ -69,7 +69,6 @@ const AdminDashboard: React.FC = () => {
       <div className="admin-grid-layout" style={{ textAlign: "center", marginTop: 48 }}>
         {showMainPanels && <DashboardMainPanels />}
         {!showMainPanels && selectedTeam === "security" && <TeamGraphs graphTypes={securityGraphTypes} />}
-        {/* 사업팀: BusinessGraphs 컴포넌트 렌더 */}
         {!showMainPanels && selectedTeam === "biz" && <BusinessGraphs />}
         {!showMainPanels && selectedTeam !== "security" && selectedTeam !== "biz" && <EmptyTeamPage teamLabel={selectedTeamLabel} />}
       </div>

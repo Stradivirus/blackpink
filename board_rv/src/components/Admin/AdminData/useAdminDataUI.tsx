@@ -1,5 +1,3 @@
-import React from "react";
-
 // DropdownButton 컴포넌트
 export const DropdownButton = ({ label, selected, onClick, children, disabled }: any) => (
   <div className="admin-data-table-dropdown">

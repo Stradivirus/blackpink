@@ -1,31 +1,30 @@
 import * as React from "react";
 import { API_URLS } from "../../api/urls";
 
-const BUSINESS_GRAPHS = [
-  { url: API_URLS.BUSINESS_BAR, label: "수익 바 차트" },
-  { url: API_URLS.BUSINESS_HEATMAP, label: "수익 히트맵" },
-  { url: API_URLS.BUSINESS_ANNUAL_SALES, label: "연도별 상위 7개 회사 매출" },
-  { url: API_URLS.BUSINESS_COMPANY_PLAN_HEATMAP, label: "회사별 연매출로 보는 계약종류" },
-  { url: API_URLS.BUSINESS_COMPANY_PLAN_DONUT_MULTI, label: "2023~2025년도 상위 10개 회사 계약종류별 비교" },
-  { url: API_URLS.BUSINESS_TERMINATED_DURATION, label: "완료된 계약의 계약종류별 계약기간" },
-  { url: API_URLS.BUSINESS_SUSPENDED_PLAN, label: "해지된 계약의 계약종류 분석" },
+const BUSINESS_GRAPH_TYPES = [
+  { type: "bar", label: "수익 바 차트" },
+  { type: "heatmap", label: "수익 히트맵" },
+  { type: "annual_sales", label: "연도별 상위 7개 회사 매출" },
+  { type: "company_plan_heatmap", label: "회사별 연매출로 보는 계약종류" },
+  { type: "company_plan_donut_multi", label: "2023~2025년도 상위 10개 회사 계약종류별 비교" },
+  { type: "terminated_duration", label: "완료된 계약의 계약종류별 계약기간" },
+  { type: "suspended_plan", label: "해지된 계약의 계약종류 분석" },
 ];
 
 const BusinessGraphs: React.FC = () => {
-  const [imgLoaded, setImgLoaded] = React.useState<boolean[]>(Array(BUSINESS_GRAPHS.length).fill(false));
-  const [imgKeys, setImgKeys] = React.useState<number[]>(BUSINESS_GRAPHS.map(() => Date.now()));
+  const [imgLoaded, setImgLoaded] = React.useState<boolean[]>(Array(BUSINESS_GRAPH_TYPES.length).fill(false));
+  const [imgKeys, setImgKeys] = React.useState<number[]>(BUSINESS_GRAPH_TYPES.map(() => Date.now()));
   const [modalImg, setModalImg] = React.useState<string | null>(null);
   const [modalAlt, setModalAlt] = React.useState<string>("");
-  // 각 이미지별 src를 순차적으로 할당
-  const [imgSrcs, setImgSrcs] = React.useState<(string | null)[]>(Array(BUSINESS_GRAPHS.length).fill(null));
+  const [imgSrcs, setImgSrcs] = React.useState<(string | null)[]>(Array(BUSINESS_GRAPH_TYPES.length).fill(null));
 
   React.useEffect(() => {
     // 1초 간격으로 각 이미지 src를 할당
-    BUSINESS_GRAPHS.forEach((g, idx) => {
+    BUSINESS_GRAPH_TYPES.forEach((g, idx) => {
       setTimeout(() => {
         setImgSrcs((prev) => {
           const arr = [...prev];
-          arr[idx] = `${g.url}?t=${imgKeys[idx]}`;
+          arr[idx] = `${API_URLS.BUSINESS_GRAPH}/${g.type}?t=${imgKeys[idx]}`;
           return arr;
         });
       }, idx * 1000);
@@ -63,7 +62,7 @@ const BusinessGraphs: React.FC = () => {
     setTimeout(() => {
       setImgSrcs((prev) => {
         const arr = [...prev];
-        arr[idx] = `${BUSINESS_GRAPHS[idx].url}?t=${Date.now()}`;
+        arr[idx] = `${API_URLS.BUSINESS_GRAPH}/${BUSINESS_GRAPH_TYPES[idx].type}?t=${Date.now()}`;
         return arr;
       });
     }, 1000);
@@ -72,9 +71,9 @@ const BusinessGraphs: React.FC = () => {
   return (
     <>
       <div className="admin-correlation-grid">
-        {BUSINESS_GRAPHS.map((g, idx) => (
+        {BUSINESS_GRAPH_TYPES.map((g, idx) => (
           <div
-            key={g.url}
+            key={g.type}
             className="admin-card admin-correlation-card"
             style={{ minWidth: 350, maxWidth: 500 }}
           >
