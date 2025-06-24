@@ -29,7 +29,7 @@ export function useAdminDataTableFilters(data: any[], columns: any[], selectedTe
   const excludedColumnsByTeam: { [key: string]: string[] } = {
     security: ["incident_no"],
     biz: ["manager_phone", "industry"],
-    dev: ["progress"],
+    dev: ["dev_days"],
   };
 
   // 필터 가능한 컬럼
@@ -64,12 +64,8 @@ export function useAdminDataTableFilters(data: any[], columns: any[], selectedTe
     return Array.from(monthsSet).sort();
   }, [data, dateFilterColumn]);
 
-  // 업종/OS/진행상태 등 필터 값
-  const getProgressRanges = () => ["1~20", "21~40", "41~60", "61~80", "81~100"];
   const getFilterValues = (colKey: string) => {
-    if (selectedTeam === "dev" && colKey === "progress") return getProgressRanges();
-
-    if (selectedTeam === "dev" && colKey === "os_version") {
+    if (selectedTeam === "dev" && colKey === "os_versions") {
       const selectedOS = filters.os?.[0];
       return selectedOS ? osVersionMap[selectedOS] || [] : [];
     }
@@ -93,18 +89,32 @@ export function useAdminDataTableFilters(data: any[], columns: any[], selectedTe
           }
         }
       });
-      // companyIdLabelToIdsMapRef에 저장
       companyIdLabelToIdsMapRef.current = labelToCompanyIds;
       return Object.keys(labelToCompanyIds).sort();
     }
 
-    const valuesSet = new Set<string>();
+    const valuesSet = new Set<number | string>();
     data.forEach((row) => {
-      const val = row[colKey];
-      if (val !== undefined && val !== null) valuesSet.add(val.toString());
+      let val = row[colKey];
+      if (val !== undefined && val !== null) {
+        // 숫자 형태일 경우 숫자로 저장 (중복 방지 목적)
+        const num = Number(val);
+        if (!isNaN(num)) {
+          valuesSet.add(num);
+        } else {
+          valuesSet.add(val.toString());
+        }
+      }
     });
-    return Array.from(valuesSet).sort();
+
+    const valuesArray = Array.from(valuesSet);
+    const areAllNumeric = valuesArray.every((v) => typeof v === "number");
+
+    return areAllNumeric
+      ? (valuesArray as number[]).sort((a, b) => a - b).map(String)
+      : valuesArray.map(String).sort();
   };
+
 
   // 필터링된 데이터
   const filteredData = data.filter((row) => {
@@ -136,15 +146,6 @@ export function useAdminDataTableFilters(data: any[], columns: any[], selectedTe
       if (colKey === "company_id") {
         const selectedIds = values.flatMap((label) => companyIdLabelToIdsMapRef.current[label] || []);
         return selectedIds.includes(val);
-      }
-
-      if (selectedTeam === "dev" && colKey === "progress") {
-        const numeric = Number(val);
-        if (isNaN(numeric)) return false;
-        return values.some((range) => {
-          const [min, max] = range.split("~").map(Number);
-          return numeric >= min && numeric <= max;
-        });
       }
 
       return values.includes(val.toString());

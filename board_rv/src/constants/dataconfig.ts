@@ -44,13 +44,16 @@ export const columnsByTeam: Record<string, { key: string; label: string }[]> = {
     { key: "manager_phone", label: "담당자 연락처" },
   ],
   dev: [
-    { key: "company_id", label: "회사명" }, // 기존: label: "company_id"
-    { key: "os", label: "OS" },
-    { key: "os_version", label: "OS 버전" },
-    { key: "dev_start_date", label: "개발 시작일" },
-    { key: "dev_end_date", label: "개발 종료일" },
-    { key: "progress", label: "진행 상태" },
-    { key: "maintenance", label: "유지보수 여부" },
+    { key: "company_id", label: "회사 코드" },
+    { key: "company_name", label: "회사명" },
+    { key: "os", label: "운영체제" },
+    { key: "os_versions", label: "OS 버전" },
+    { key: "start_date", label: "시작일" },
+    { key: "end_date_fin", label: "최종 종료일" },
+    { key: "dev_status", label: "상태" },
+    { key: "maintenance", label: "유지보수" },
+    { key: "error", label: "에러" },
+    { key: "handler_count", label: "담당자 수" },
   ],
   security: [
     { key: "company_id", label: "회사명" }, // 기존: label: "company_id"
@@ -78,8 +81,8 @@ export const dateColumnsByTeam: {
     { key: "contract_end", label: "계약 종료일" },
   ],
   dev: [
-    { key: "dev_start_date", label: "개발 시작일" },
-    { key: "dev_end_date", label: "개발 종료일" },
+    { key: "start_date", label: "시작일" },
+    { key: "end_date_fin", label: "최종 종료일" },
   ],
 };
 

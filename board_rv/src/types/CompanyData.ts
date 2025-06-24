@@ -14,12 +14,17 @@ export interface Companies {
 export interface Dev {
     id: string;
     company_id: string;
+    company_name: string;
     os: string;
-    os_version: string;
-    dev_start_date: string;
-    dev_end_date: string; 
-    progress: string;
-    maintenance: string;
+    os_versions: string;
+    start_date: string;
+    end_date: string;
+    end_date_fin?: string | null;
+    dev_days: number;
+    dev_status: string; 
+    maintenance?: string | null;
+    error?: string | null;
+    handler_count: number;
 };
 
 export interface Incident {
