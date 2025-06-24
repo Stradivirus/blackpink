@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { columnsByTeam, dateColumnsByTeam, osVersionMap } from "../../../constants/dataconfig";
 
 export function useAdminDataTableFilters(data: any[], columns: any[], selectedTeam: string) {
@@ -9,6 +9,11 @@ export function useAdminDataTableFilters(data: any[], columns: any[], selectedTe
   const [filters, setFilters] = useState<{ [key: string]: string[] }>({});
   const [companyNameQuery, setCompanyNameQuery] = useState<string>("");
   const [activeDropdown, setActiveDropdown] = useState<"dateColumn" | "year" | "month" | string | null>(null);
+  const itemsPerPage = 20;
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // companyIdLabelToIdsMap을 useRef로 관리
+  const companyIdLabelToIdsMapRef = useRef<Record<string, string[]>>({});
 
   // 팀이 바뀌면 필터 상태 초기화
   useEffect(() => {
@@ -60,14 +65,15 @@ export function useAdminDataTableFilters(data: any[], columns: any[], selectedTe
   }, [data, dateFilterColumn]);
 
   // 업종/OS/진행상태 등 필터 값
-  let companyIdLabelToIdsMap: Record<string, string[]> = {};
   const getProgressRanges = () => ["1~20", "21~40", "41~60", "61~80", "81~100"];
   const getFilterValues = (colKey: string) => {
     if (selectedTeam === "dev" && colKey === "progress") return getProgressRanges();
+
     if (selectedTeam === "dev" && colKey === "os_version") {
       const selectedOS = filters.os?.[0];
       return selectedOS ? osVersionMap[selectedOS] || [] : [];
     }
+
     if (colKey === "company_id") {
       const letterToLabelMap: Record<string, string> = {
         F: "금융",
@@ -87,9 +93,11 @@ export function useAdminDataTableFilters(data: any[], columns: any[], selectedTe
           }
         }
       });
-      companyIdLabelToIdsMap = labelToCompanyIds;
+      // companyIdLabelToIdsMapRef에 저장
+      companyIdLabelToIdsMapRef.current = labelToCompanyIds;
       return Object.keys(labelToCompanyIds).sort();
     }
+
     const valuesSet = new Set<string>();
     data.forEach((row) => {
       const val = row[colKey];
@@ -126,7 +134,7 @@ export function useAdminDataTableFilters(data: any[], columns: any[], selectedTe
       if (!val) return false;
 
       if (colKey === "company_id") {
-        const selectedIds = values.flatMap((label) => companyIdLabelToIdsMap[label] || []);
+        const selectedIds = values.flatMap((label) => companyIdLabelToIdsMapRef.current[label] || []);
         return selectedIds.includes(val);
       }
 
@@ -162,6 +170,27 @@ export function useAdminDataTableFilters(data: any[], columns: any[], selectedTe
     setMonthFilter(null);
   };
 
+  // 페이지네이션
+  const paginatedData = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return filteredData.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredData, currentPage]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filters, yearFilter, monthFilter, companyNameQuery, dateFilterColumn]);
+
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  const maxPageButtons = 10;
+  const currentGroup = Math.floor((currentPage - 1) / maxPageButtons);
+  const startPage = currentGroup * maxPageButtons + 1;
+  const endPage = Math.min(startPage + maxPageButtons - 1, totalPages);
+
+  const paginationPages = [];
+  for (let i = startPage; i <= endPage; i++) {
+    paginationPages.push(i);
+  }
+
   return {
     dateColumns,
     dateFilterColumn,
@@ -183,5 +212,13 @@ export function useAdminDataTableFilters(data: any[], columns: any[], selectedTe
     filteredData,
     handleResetFilters,
     handleDateColumnToggle,
+    paginatedData,
+    itemsPerPage,
+    currentPage,
+    setCurrentPage,
+    totalPages,
+    paginationPages,
+    startPage,
+    endPage,
   };
 }
