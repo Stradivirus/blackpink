@@ -45,6 +45,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({children}
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         setUser(null);
+        window.location.href = "/"; // 로그아웃 후 메인으로 이동
     };
 
     return (
@@ -55,23 +56,3 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({children}
 };
 
 export const useAuth = () => useContext(AuthContext);
-
-// Example function where the suggested code change would be applied
-const updatePassword = async (oldPassword: string, newPassword: string) => {
-    const response = await fetch('/api/update-password', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            userId: user?.userId,
-            old_password: oldPassword,
-            new_password: newPassword,
-            accountType: user?.type || "member", // user.type 사용
-        }),
-    });
-
-    if (!response.ok) {
-        throw new Error('Password update failed');
-    }
-};

@@ -38,7 +38,7 @@ const BoardHeader = () => {
             }}
         >
             <div>
-                <h1 className="board-header__title">Spring Board</h1>
+                <h1 className="board-header__title">고객 게시판</h1>
                 <p className="board-header__desc">
                     자유롭게 글을 작성하고 소통하는 공간입니다.
                 </p>

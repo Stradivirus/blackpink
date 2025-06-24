@@ -99,10 +99,14 @@ const Home: React.FC = () => {
 
   return (
     <div style={containerStyle}>
-      <h1 style={titleStyle}>SECURE BOARD</h1>
+      <h1 style={titleStyle}>SECURITY BOARD</h1>
       <div style={cardStyle}>
         <p style={{ color: "#fff", fontSize: "1.2rem", marginBottom: "1.5rem" }}>
-          신뢰와 안전을 최우선으로 하는 보안 게시판에 오신 것을 환영합니다.
+          신뢰와 안전을 최우선으로 하는{" "}
+          <span style={{ color: "#00ffe7", fontWeight: "bold", textShadow: "0 0 8px #00ffe7" }}>
+            BLACKPINK
+          </span>
+          에 오신 것을 환영합니다.
         </p>
         <button
           style={{

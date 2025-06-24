@@ -43,6 +43,13 @@ def create_comment(req: CommentCreateRequest):
     if team:
         comment["team"] = team
 
+    # 답변완료 체크: 관리자가 댓글 작성 + isAnswered true일 때 게시글에 반영
+    if hasattr(req, "isAnswered") and req.isAnswered and admin:
+        board_collection.update_one(
+            {"_id": ObjectId(req.postId)},
+            {"$set": {"isAnswered": True}}
+        )
+
     result = comment_collection.insert_one(comment)
     comment["id"] = str(result.inserted_id)
     return CommentResponse(

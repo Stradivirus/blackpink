@@ -5,6 +5,97 @@ import type { Admin } from "../../types/Admin";
 
 const ADMIN_TEAMS: Admin["team"][] = ["관리팀", "보안팀", "사업팀", "개발팀"];
 
+// 스타일 객체 추가
+const styles = {
+  card: {
+    maxWidth: 360,
+    margin: "3rem auto",
+    padding: 36,
+    borderRadius: 16,
+    background: "#fff",
+    boxShadow: "0 4px 24px 0 rgba(0,0,0,0.08)",
+    display: "flex",
+    flexDirection: "column" as const,
+    alignItems: "center",
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 700,
+    marginBottom: 24,
+    letterSpacing: -1,
+    color: "#222",
+  },
+  radioGroup: {
+    display: "flex",
+    justifyContent: "center",
+    gap: 24,
+    marginBottom: 20,
+  },
+  radioLabel: {
+    fontSize: 16,
+    fontWeight: 500,
+    color: "#444",
+    display: "flex",
+    alignItems: "center",
+    gap: 6,
+    cursor: "pointer",
+  },
+  select: {
+    width: "100%",
+    padding: "10px 12px",
+    borderRadius: 8,
+    border: "1px solid #d0d7de",
+    fontSize: 15,
+    marginBottom: 12,
+    background: "#f8fafc",
+    outline: "none",
+  },
+  input: {
+    width: "100%",
+    padding: "10px 12px",
+    borderRadius: 8,
+    border: "1px solid #d0d7de",
+    fontSize: 15,
+    marginBottom: 12,
+    background: "#f8fafc",
+    outline: "none",
+    transition: "border 0.2s",
+  },
+  inputError: {
+    border: "1.5px solid #e74c3c",
+    background: "#fff6f6",
+  },
+  error: {
+    color: "#e74c3c",
+    fontSize: 13,
+    margin: "-8px 0 8px 2px",
+    minHeight: 18,
+  },
+  button: {
+    width: "100%",
+    padding: "12px 0",
+    borderRadius: 8,
+    border: "none",
+    background: "#3b82f6",
+    color: "#fff",
+    fontWeight: 700,
+    fontSize: 16,
+    cursor: "pointer",
+    marginTop: 8,
+    transition: "background 0.2s",
+  },
+  buttonDisabled: {
+    background: "#b6c3d1",
+    cursor: "not-allowed",
+  },
+  message: {
+    marginTop: 18,
+    fontSize: 15,
+    fontWeight: 500,
+    textAlign: "center" as const,
+  },
+};
+
 const MemberInviteForm: React.FC = () => {
   const [userId, setUserId] = useState("");
   const [nickname, setNickname] = useState("");
@@ -85,87 +176,86 @@ const MemberInviteForm: React.FC = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ maxWidth: 300, margin: "2rem auto", padding: 30, border: "1px solid #eee", borderRadius: 8 }}>
-      <h2>신규 계정 발급</h2>
-      <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
-        <label style={{ marginRight: 16 }}>
+    <form onSubmit={handleSubmit} style={styles.card}>
+      <div style={styles.title}>신규 계정 발급</div>
+      <div style={styles.radioGroup}>
+        <label style={styles.radioLabel}>
           <input
             type="radio"
             name="accountType"
             value="member"
             checked={accountType === "member"}
             onChange={() => setAccountType("member")}
+            style={{ accentColor: "#3b82f6" }}
           />
           일반 회원
         </label>
-        <label>
+        <label style={styles.radioLabel}>
           <input
             type="radio"
             name="accountType"
             value="admin"
             checked={accountType === "admin"}
             onChange={() => setAccountType("admin")}
+            style={{ accentColor: "#3b82f6" }}
           />
           관리자
         </label>
       </div>
       {accountType === "admin" && (
-        <div style={{ marginBottom: 12 }}>
-          <select
-            value={team}
-            onChange={e => setTeam(e.target.value as Admin["team"])}
-            style={{ width: "100%", padding: 8 }}
-            required
-          >
-            {ADMIN_TEAMS.map(t => (
-              <option key={t} value={t}>{t}</option>
-            ))}
-          </select>
-        </div>
+        <select
+          value={team}
+          onChange={e => setTeam(e.target.value as Admin["team"])}
+          style={styles.select}
+          required
+        >
+          {ADMIN_TEAMS.map(t => (
+            <option key={t} value={t}>{t}</option>
+          ))}
+        </select>
       )}
-      <div style={{ marginBottom: 12 }}>
-        <input
-          type="text"
-          placeholder="아이디"
-          value={userId}
-          onChange={e => setUserId(e.target.value)}
-          onBlur={e => checkDuplicate("userId", e.target.value)}
-          required
-          style={{ width: "100%", padding: 8 }}
-        />
-        {userIdError && <div style={{ color: "red", fontSize: 12 }}>{userIdError}</div>}
-      </div>
-      <div style={{ marginBottom: 12 }}>
-        <input
-          type="text"
-          placeholder="닉네임"
-          value={nickname}
-          onChange={e => setNickname(e.target.value)}
-          onBlur={e => checkDuplicate("nickname", e.target.value)}
-          required
-          style={{ width: "100%", padding: 8 }}
-        />
-        {nicknameError && <div style={{ color: "red", fontSize: 12 }}>{nicknameError}</div>}
-      </div>
-      <div style={{ marginBottom: 12 }}>
-        <input
-          type="email"
-          placeholder="이메일"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-          required
-          style={{ width: "100%", padding: 8 }}
-        />
-      </div>
+      <input
+        type="text"
+        placeholder="아이디"
+        value={userId}
+        onChange={e => setUserId(e.target.value)}
+        onBlur={e => checkDuplicate("userId", e.target.value)}
+        required
+        style={userIdError ? { ...styles.input, ...styles.inputError } : styles.input}
+      />
+      <div style={styles.error}>{userIdError || ""}</div>
+      <input
+        type="text"
+        placeholder="닉네임"
+        value={nickname}
+        onChange={e => setNickname(e.target.value)}
+        onBlur={e => checkDuplicate("nickname", e.target.value)}
+        required
+        style={nicknameError ? { ...styles.input, ...styles.inputError } : styles.input}
+      />
+      <div style={styles.error}>{nicknameError || ""}</div>
+      <input
+        type="email"
+        placeholder="이메일"
+        value={email}
+        onChange={e => setEmail(e.target.value)}
+        required
+        style={styles.input}
+      />
       <button
         type="submit"
         disabled={loading || !!userIdError || !!nicknameError}
-        style={{ width: "100%", padding: 10 }}
+        style={loading || !!userIdError || !!nicknameError ? { ...styles.button, ...styles.buttonDisabled } : styles.button}
       >
         {loading ? "발송 중..." : "초대 메일 발송"}
       </button>
       {message && (
-        <div style={{ marginTop: 16, color: message.includes("실패") ? "red" : "green" }}>
+        <div
+          style={{
+            ...styles.message,
+            color: message.includes("실패") ? "#e74c3c" : "#22c55e",
+          }}
+        >
           {message}
         </div>
       )}

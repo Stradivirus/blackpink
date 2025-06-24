@@ -13,18 +13,34 @@ export const API_URLS = {
     CHANGE_PASSWORD: `${API_BASE}/change-password`,
     CHECK_DUPLICATE: `${API_BASE}/admin/check-duplicate`,
     // 데이터
-    INCIDENT: `${API_BASE}/incident`,
-    INCIDENT_COLUMNS: `${API_BASE}/incident/columns`,
-    COMPANIES: `${API_BASE}/companies`,
-    COMPANIES_COLUMNS: `${API_BASE}/companies/columns`,
+    SECURITY: `${API_BASE}/security`,
+    SECURITY_COLUMNS: `${API_BASE}/security/columns`,
+    BIZ: `${API_BASE}/biz`,
+    BIZ_COLUMNS: `${API_BASE}/biz/columns`,
     DEV: `${API_BASE}/dev`,
     DEV_COLUMNS: `${API_BASE}/dev/columns`,
-    // 그래프
+    // 대시보드
     GCI_RANKINGS: `${API_BASE}/gci_rankings`,
     RISKY_COUNTRIES_MAP: `${API_BASE}/risky_countries/map_data`,
-    THREAT_REPORTS_COUNT: `${API_BASE}/threat_reports/count`,
-    GRAPH: `${API_BASE}/graph`,
+    // 그래프
+    SECURITY_GRAPH: `${API_BASE}/security/graph`,
+    BUSINESS_GRAPH: `${API_BASE}/business/graph`,
+    DEV_GRAPH: `${API_BASE}/dev/graph`,
+
     // 관리자/멤버 관련
     ADMIN_LIST: `${API_BASE}/admin/list`,
     MEMBER_LIST: `${API_BASE}/member/list`,
+};
+
+export const getCrudEndpoint = (selectedTeam: string): string => {
+    switch (selectedTeam) {
+        case "dev":
+            return API_URLS.DEV;
+        case "biz":
+            return API_URLS.BIZ;
+        case "security":
+            return API_URLS.SECURITY;
+        default:
+            throw new Error("잘못된 팀입니다.");
+    }
 };

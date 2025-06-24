@@ -5,3 +5,6 @@ passlib
 bcrypt==3.2.0
 pydantic[email]
 seaborn
+plotly
+kaleido
+networkx
