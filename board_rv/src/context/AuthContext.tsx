@@ -45,6 +45,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({children}
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         setUser(null);
+        window.location.href = "/"; // 로그아웃 후 메인으로 이동
     };
 
     return (

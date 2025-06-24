@@ -5,7 +5,7 @@ import {API_URLS} from "../../api/urls";
 import {useAuth} from "../../context/AuthContext";
 import "../../styles/Board.css";
 
-const PAGE_SIZE = 30;
+const PAGE_SIZE = 15;
 
 const PostList: React.FC = () => {
     const [posts, setPosts] = useState<Post[]>([]);
