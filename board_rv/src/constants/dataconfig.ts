@@ -92,3 +92,12 @@ export const osVersionMap: Record<string, string[]> = {
   iOS: ["15", "16", "17"],
   macOS: ["11", "12", "13", "14"],
 };
+
+// 팀명 매핑 객체 추가 (dataconfig에 없으므로 직접 추가)
+export const teamLabelMap: Record<string, string> = {
+  "보안팀": "보안팀",
+  "개발팀": "개발팀",
+  "사업팀": "사업팀",
+  "관리팀": "관리팀",
+  // 필요시 추가
+};

@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import TeamGraphs from "../../components/Admin/SecurityGraphs";
 import GCIRankingPanel from "../../components/Admin/GCIRankingPanel";
 import RiskyCountryMap from "../../components/Admin/RiskyCountryMap";
+import BusinessGraphs from "../../components/Admin/BusinessGraphs";
 import type { GraphType } from "../../components/Admin/SecurityGraphs";
 import { teamList, securityGraphTypes } from "../../constants/dataconfig";
 import "../../styles/admindashboard.css";
@@ -36,14 +37,17 @@ const AdminDashboard: React.FC = () => {
 
   let graphTypes: GraphType[] = [];
   if (selectedTeam === "security") graphTypes = securityGraphTypes;
+  // 사업팀 추가 (key: biz)
+  if (selectedTeam === "biz") graphTypes = [];
 
   const selectedTeamLabel = teamList.find((t) => t.key === selectedTeam)?.label || "";
 
   return (
-    <div className="admin-dashboard-container">
+    <div className={
+      selectedTeam ? "admin-dashboard-container admin-team-dashboard" : "admin-dashboard-container"
+    }>
       <div className="admin-dashboard-header">
         <h1>관리자 대시보드</h1>
-        <p>팀별 주요 현황 및 통계</p>
       </div>
       <div style={{ display: "flex", justifyContent: "center", gap: 16 }}>
         <button
@@ -65,7 +69,9 @@ const AdminDashboard: React.FC = () => {
       <div className="admin-grid-layout" style={{ textAlign: "center", marginTop: 48 }}>
         {showMainPanels && <DashboardMainPanels />}
         {!showMainPanels && selectedTeam === "security" && <TeamGraphs graphTypes={securityGraphTypes} />}
-        {!showMainPanels && selectedTeam !== "security" && <EmptyTeamPage teamLabel={selectedTeamLabel} />}
+        {/* 사업팀: BusinessGraphs 컴포넌트 렌더 */}
+        {!showMainPanels && selectedTeam === "biz" && <BusinessGraphs />}
+        {!showMainPanels && selectedTeam !== "security" && selectedTeam !== "biz" && <EmptyTeamPage teamLabel={selectedTeamLabel} />}
       </div>
     </div>
   );

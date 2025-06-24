@@ -14,7 +14,7 @@ const GCIRankingPanel: React.FC = () => {
   }, []);
 
   return (
-    <div className="panel" style={{ flex: 1, minWidth: 320 }}>
+    <div className="panel admin-table-panel" style={{ flex: 1, minWidth: 320 }}>
       <h2 className="text-2xl font-semibold mb-2">GCI 사이버보안 순위</h2>
       {loading ? (
         <div>로딩 중...</div>
