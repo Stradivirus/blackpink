@@ -1,5 +1,5 @@
 import * as React from "react";
-import { API_URLS } from "../../api/urls";
+import { API_URLS } from "../../../api/urls";
 
 const BUSINESS_GRAPH_TYPES = [
   { type: "bar", label: "수익 바 차트" },

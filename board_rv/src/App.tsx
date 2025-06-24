@@ -15,7 +15,7 @@ import AdminDataPage from "./pages/Admin/AdminDataPage";
 import MembersList from "./pages/Admin/MembersList";
 import AdminsList from "./pages/Admin/AdminsList";
 import MemberInvitePage from "./pages/Admin/MemberInvitePage";
-import BusinessGraphs from "./components/Admin/BusinessGraphs";
+import BusinessGraphs from "./components/Admin/AdminDashBoard/BusinessGraphs";
 
 // AdminDashboard 컴포넌트는 지연로딩(lazy loading)으로 불러옵니다.
 // 지연로딩이란, 애플리케이션에서 필요한 리소스(컴포넌트, 이미지, 데이터 등)를

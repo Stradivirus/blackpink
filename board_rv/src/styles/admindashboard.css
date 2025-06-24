@@ -18,18 +18,58 @@
 }
 
 .admin-dashboard-header h1 {
-    color: white;
-    font-size: 2.5rem;
-    font-weight: 700;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-    margin-bottom: 10px;
-    letter-spacing: -0.5px;
+    color: #fff;
+    font-size: 3rem;
+    font-weight: 800;
+    text-shadow: 0 4px 24px rgba(0,0,0,0.25), 0 1px 0 #fff;
+    margin-bottom: 18px;
+    letter-spacing: 2px;
+    background: linear-gradient(90deg, #ffecd2 0%, #fcb69f 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 .admin-dashboard-header p {
     color: rgba(255,255,255,0.9);
     font-size: 1.1rem;
     font-weight: 300;
+}
+
+/* 팀 선택 버튼 영역 */
+.admin-dashboard-header .admin-team-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 18px;
+    margin-bottom: 8px;
+}
+
+/* 팀 버튼 스타일 */
+.admin-team-tab {
+    background: #fff;
+    color: #333;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 22px;
+    font-size: 1.08rem;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, transform 0.15s;
+    outline: none;
+}
+.admin-team-tab:hover {
+    background: #fcb69f;
+    color: #fff;
+    transform: translateY(-2px) scale(1.04);
+}
+.admin-tab-selected, .admin-team-tab.selected {
+    background: linear-gradient(90deg, #fcb69f 0%, #ffecd2 100%);
+    color: #222;
+    font-weight: 700;
+    box-shadow: 0 4px 16px rgba(252,182,159,0.15);
+    border: 2px solid #fcb69f;
+    transform: scale(1.06);
 }
 
 .admin-section-title {

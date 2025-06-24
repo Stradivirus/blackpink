@@ -1,6 +1,6 @@
 import * as React from "react";
-import { API_URLS } from "../../api/urls";
-import { threatTypes } from "../../constants/dataconfig";
+import { API_URLS } from "../../../api/urls";
+import { threatTypes } from "../../../constants/dataconfig";
 
 export type GraphType = {
   type: string;

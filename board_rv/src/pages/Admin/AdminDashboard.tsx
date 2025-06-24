@@ -1,10 +1,10 @@
 import * as React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import SecurityGraphs from "../../components/Admin/SecurityGraphs";
+import SecurityGraphs from "../../components/Admin/AdminDashBoard/SecurityGraphs";
 import GCIRankingPanel from "../../components/Admin/GCIRankingPanel";
 import RiskyCountryMap from "../../components/Admin/RiskyCountryMap";
-import BusinessGraphs from "../../components/Admin/BusinessGraphs";
-import type { GraphType } from "../../components/Admin/SecurityGraphs";
+import BusinessGraphs from "../../components/Admin/AdminDashBoard/BusinessGraphs";
+import type { GraphType } from "../../components/Admin/AdminDashBoard/SecurityGraphs";
 import { teamList, securityGraphTypes } from "../../constants/dataconfig";
 import "../../styles/admindashboard.css";
 
@@ -47,23 +47,28 @@ const AdminDashboard: React.FC = () => {
     }>
       <div className="admin-dashboard-header">
         <h1>관리자 대시보드</h1>
-      </div>
-      <div style={{ display: "flex", justifyContent: "center", gap: 16 }}>
-        <button
-          className={showMainPanels ? "admin-tab-selected" : "admin-tab"}
-          onClick={() => navigate("/admin")}
-        >
-          대시보드
-        </button>
-        {teamList.map((team) => (
+        <div className="admin-team-tabs">
           <button
-            key={team.key}
-            className={selectedTeam === team.key ? "admin-tab-selected" : "admin-tab"}
-            onClick={() => navigate(`/admin?team=${team.key}`)}
+            className={showMainPanels ? "admin-team-tab admin-tab-selected" : "admin-team-tab"}
+            onClick={() => navigate("/admin")}
+            style={{ marginRight: 12 }}
           >
-            {team.label}
+            대시보드
           </button>
-        ))}
+          {teamList.map((team) => (
+            <button
+              key={team.key}
+              className={
+                selectedTeam === team.key
+                  ? "admin-team-tab admin-tab-selected"
+                  : "admin-team-tab"
+              }
+              onClick={() => navigate(`/admin?team=${team.key}`)}
+            >
+              {team.label}
+            </button>
+          ))}
+        </div>
       </div>
       <div className="admin-grid-layout" style={{ textAlign: "center", marginTop: 48 }}>
         {showMainPanels && <DashboardMainPanels />}
