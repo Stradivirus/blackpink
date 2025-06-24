@@ -18,7 +18,6 @@ const AdminDataTable: React.FC<AdminDataTableProps> = ({
   const {
     dateColumns,
     dateFilterColumn,
-    // setDateFilterColumn,
     yearFilter,
     setYearFilter,
     monthFilter,
@@ -36,6 +35,13 @@ const AdminDataTable: React.FC<AdminDataTableProps> = ({
     filteredData,
     handleResetFilters,
     handleDateColumnToggle,
+    paginatedData,
+    currentPage,
+    setCurrentPage,
+    totalPages,
+    paginationPages,
+    startPage,
+    endPage,
   } = useAdminDataTableFilters(data, columns, selectedTeam);
 
   // CRUD 및 선택 관련 훅
@@ -245,7 +251,7 @@ const AdminDataTable: React.FC<AdminDataTableProps> = ({
           </tr>
         </thead>
         <tbody>
-          {filteredData.map((row, idx) => {
+          {paginatedData.map((row, idx) => {
             const rowId = getRowId(row, idx);
             return (
               <tr key={rowId}>
@@ -275,6 +281,38 @@ const AdminDataTable: React.FC<AdminDataTableProps> = ({
           })}
         </tbody>
       </table>
+
+      <div className="admin-data-table-pagination">
+        {startPage > 1 && (
+          <button
+            className="admin-data-table-page-btn-group-nav"
+            onClick={() => setCurrentPage(startPage - 1)}
+          >
+            &lt;
+          </button>
+        )}
+
+        {paginationPages.map((page) => (
+          <button
+            key={page}
+            onClick={() => setCurrentPage(page)}
+            className={`admin-data-table-page-btn${
+              currentPage === page ? " active" : ""
+            }`}
+          >
+            {page}
+          </button>
+        ))}
+
+        {endPage < totalPages && (
+          <button
+            className="admin-data-table-page-btn-group-nav"
+            onClick={() => setCurrentPage(endPage + 1)}
+          >
+            &gt;
+          </button>
+        )}
+      </div>
 
       {/* 우측 하단 고정 버튼 */}
       <div className="admin-data-table-fixed-buttons">
