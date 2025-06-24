@@ -4,6 +4,7 @@ import SecurityGraphs from "../../components/Admin/AdminDashBoard/SecurityGraphs
 import GCIRankingPanel from "../../components/Admin/GCIRankingPanel";
 import RiskyCountryMap from "../../components/Admin/RiskyCountryMap";
 import BusinessGraphs from "../../components/Admin/AdminDashBoard/BusinessGraphs";
+import SysDevGraphs from "../../components/Admin/AdminDashBoard/SysDevGraphs";
 import type { GraphType } from "../../components/Admin/AdminDashBoard/SecurityGraphs";
 import { teamList, securityGraphTypes } from "../../constants/dataconfig";
 import "../../styles/admindashboard.css";
@@ -74,7 +75,8 @@ const AdminDashboard: React.FC = () => {
         {showMainPanels && <DashboardMainPanels />}
         {!showMainPanels && selectedTeam === "security" && <SecurityGraphs graphTypes={securityGraphTypes} />}
         {!showMainPanels && selectedTeam === "biz" && <BusinessGraphs />}
-        {!showMainPanels && selectedTeam !== "security" && selectedTeam !== "biz" && <EmptyTeamPage teamLabel={selectedTeamLabel} />}
+        {!showMainPanels && selectedTeam === "sys_dev" && <SysDevGraphs />}
+        {!showMainPanels && selectedTeam !== "security" && selectedTeam !== "biz" && selectedTeam !== "sys_dev" && <EmptyTeamPage teamLabel={selectedTeamLabel} />}
       </div>
     </div>
   );

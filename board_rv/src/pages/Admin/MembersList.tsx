@@ -80,7 +80,7 @@ const MembersList: React.FC = () => {
           <thead>
             <tr>
               <th style={styles.th}>ID</th>
-              <th style={styles.th}>유저ID</th>
+              <th style={styles.th}>고객 ID</th>
               <th style={styles.th}>닉네임</th>
               <th style={styles.th}>이메일</th>
               <th style={styles.th}>가입일</th>

@@ -122,7 +122,7 @@ const AdminsList: React.FC = () => {
           <thead>
             <tr>
               <th style={styles.th}>ID</th>
-              <th style={styles.th}>유저ID</th>
+              <th style={styles.th}>관리자 ID</th>
               <th style={styles.th}>닉네임</th>
               <th style={styles.th}>팀</th>
             </tr>

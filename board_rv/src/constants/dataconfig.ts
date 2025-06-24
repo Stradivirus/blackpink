@@ -3,7 +3,7 @@
 // 팀 정의
 export const teamList = [
   { key: "biz", label: "사업팀" },
-  { key: "dev", label: "개발팀" },
+  { key: "sys_dev", label: "개발팀" },
   { key: "security", label: "보안팀" },
 ];
 

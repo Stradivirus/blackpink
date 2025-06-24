@@ -109,3 +109,14 @@ class RiskyCountry(BaseModel):
     latitude: float
     longitude: float
     timestamp: datetime
+
+class Project(BaseModel):
+    company_id: str
+    os: str
+    os_versions: str
+    start_date: date
+    end_date: date
+    dev_start_date: Optional[date] = None
+    dev_end_date: Optional[date] = None
+    maintenance: Optional[str] = None
+    # 필요에 따라 필드 추가

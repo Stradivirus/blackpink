@@ -1,6 +1,6 @@
 # admin/team_data.py
 from fastapi import APIRouter, HTTPException, Request, Body
-from db import companies_collection, dev_collection, incident_collection
+from db import companies_collection, dev_collection, incident_collection, project_collection
 from bson import ObjectId
 
 router = APIRouter(prefix="/api")
@@ -72,6 +72,16 @@ async def get_security():
 async def get_security_columns():
     return fetch_columns(incident_collection)
 
+# sys_dev 전체 데이터 조회 (company_id → company_name 조인)
+@router.get("/sys_dev")
+async def get_sys_dev_data():
+    return fetch_all_data_with_company_name(project_collection, "sys_dev")
+
+# sys_dev 컬럼 정보 조회
+@router.get("/sys_dev/columns")
+async def get_sys_dev_columns():
+    return fetch_columns(project_collection)
+
 # 사업팀 등록
 @router.post("/biz")
 async def create_company(item: dict):
@@ -133,6 +143,25 @@ async def update_security(item_id: str, item: dict):
         raise HTTPException(status_code=404, detail="Item not found")
     return {"status": "success"}
 
+# sys_dev 등록
+@router.post("/sys_dev")
+async def create_sys_dev_item(item: dict):
+    item.pop("_id", None)
+    result = project_collection.insert_one(item)
+    return {"id": str(result.inserted_id)}
+
+@router.put("/sys_dev/{item_id}")
+async def update_sys_dev_item(item_id: str, item: dict):
+    item.pop("_id", None)
+    try:
+        object_id = ObjectId(item_id)
+    except Exception:
+        raise HTTPException(status_code=400, detail="유효하지 않은 ObjectId입니다.")
+    result = project_collection.update_one({"_id": object_id}, {"$set": item})
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Item not found")
+    return {"status": "success"}
+
 @router.delete("/{team}")
 async def delete_items(team: str, request: Request):
     try:
@@ -157,6 +186,7 @@ async def delete_items(team: str, request: Request):
         "dev": dev_collection,
         "biz": companies_collection,
         "security": incident_collection,
+        "sys_dev": project_collection,
     }
     collection = collection_map.get(team)
     if collection is None:

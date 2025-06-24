@@ -27,7 +27,7 @@ const ThreatMGraph: React.FC<{ onImgClick?: (src: string, alt: string) => void }
   }, [idx]);
 
   const currentType = threatTypes[idx];
-  const imgSrc = `${API_URLS.GRAPH}/threat_m?threat_type=${encodeURIComponent(currentType)}`;
+  const imgSrc = `${API_URLS.SECURITY_GRAPH}/threat_m?threat_type=${encodeURIComponent(currentType)}`;
 
   return (
     <div style={{ minHeight: 340, position: 'relative' }}>
@@ -55,7 +55,7 @@ const ThreatMGraph: React.FC<{ onImgClick?: (src: string, alt: string) => void }
 
 const ManpowerGraph: React.FC<{ onImgClick?: (src: string, alt: string) => void }> = ({ onImgClick }) => {
   const [imgLoaded, setImgLoaded] = React.useState(false);
-  const imgSrc = `${API_URLS.GRAPH}/manpower`;
+  const imgSrc = `${API_URLS.SECURITY_GRAPH}/manpower`;
 
   return (
     <div style={{ minHeight: 340, position: 'relative' }}>
@@ -121,9 +121,9 @@ const SecurityGraphs: React.FC<SecurityGraphsProps> = ({ graphTypes }) => {
               <h4 className="admin-card-title">{g.label}</h4>
               <div className="admin-image-container">
                 <img
-                  src={`${API_URLS.GRAPH}/${g.type}`}
+                  src={`${API_URLS.SECURITY_GRAPH}/${g.type}`}
                   alt={g.label}
-                  onClick={() => handleImgClick(`${API_URLS.GRAPH}/${g.type}`, g.label)}
+                  onClick={() => handleImgClick(`${API_URLS.SECURITY_GRAPH}/${g.type}`, g.label)}
                   style={{ cursor: "zoom-in", maxWidth: "100%" }}
                   onError={(e) => {
                     e.currentTarget.style.display = "none";
