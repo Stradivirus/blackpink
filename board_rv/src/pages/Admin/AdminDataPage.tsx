@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { API_URLS } from "../../api/urls";
 import { teamList, columnsByTeam } from "../../constants/dataconfig";
 import AdminDataTable from "../../components/Admin/AdminDataTable";
+import type { TeamData } from "../../types/CompanyData";
 import "../../styles/AdminDataPage.css";
 
 const AdminDataPage: React.FC = () => {
@@ -55,6 +56,21 @@ const AdminDataPage: React.FC = () => {
         } else if (selectedTeam === "dev") {
           result = res.dev || [];
         }
+
+        // 팀별 기준 날짜 컬럼명
+        const dateKey = selectedTeam === "biz"
+          ? "contract_start"
+          : selectedTeam === "dev"
+            ? "start_date"
+            : "incident_date";
+
+        // 최신순(내림차순) 정렬
+        (result as TeamData[]).sort((a, b) => {
+          const aDate = (a as any)[dateKey] || "";
+          const bDate = (b as any)[dateKey] || "";
+          return bDate.localeCompare(aDate);
+        });
+
         setData(result);
         setLoading(false);
       })

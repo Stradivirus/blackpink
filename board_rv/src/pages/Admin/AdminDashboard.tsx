@@ -34,8 +34,6 @@ const AdminDashboard: React.FC = () => {
   if (selectedTeam === "security") graphTypes = securityGraphTypes;
   if (selectedTeam === "biz") graphTypes = [];
 
-  const selectedTeamLabel = teamList.find((t) => t.key === selectedTeam)?.label || "";
-
   return (
     <div className={
       selectedTeam ? "admin-dashboard-container admin-team-dashboard" : "admin-dashboard-container"

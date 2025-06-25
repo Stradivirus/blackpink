@@ -43,3 +43,5 @@ export interface Incident {
 export interface IncidentListResponse {
   incidents: Incident[];
 }
+
+export type TeamData = Companies | Dev | Incident;

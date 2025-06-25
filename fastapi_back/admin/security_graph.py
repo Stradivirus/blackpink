@@ -125,25 +125,41 @@ def plot_correl_threat_handler(df, font_prop):
     return save_fig_to_png(fig, backend="matplotlib")
 
 def plot_threat_m(df, font_prop, threat_type):
-    filtered = df[df['threat_type'] == threat_type]
-    if filtered.empty:
+    if threat_type is None:
         return None
-    monthly_counts = filtered.groupby('month').size().reset_index(name='count')
-    import plotly.express as px
-    fig = px.line(
-        monthly_counts,
-        x='month',
-        y='count',
-        markers=True,
-        title=f"{threat_type} 월별 발생 추이"
+    # 상위 5개 위협 유형 추출
+    top_threats = df['threat_type'].value_counts().nlargest(5).index.tolist()
+    color_map = {
+        top_threats[0]: "#F54343",
+        top_threats[1]: "#0C81F5",
+        top_threats[2]: "#F5A608",
+        top_threats[3]: "#08FA08",
+        top_threats[4]: "#7F09F5"
+    } if len(top_threats) >= 5 else {}
+    linestyle_map = {top_threats[i]: s for i, s in enumerate(["-", "--", "-", "--", (0, (5, 1))])} if len(top_threats) >= 5 else {}
+    threat_df = df[df['threat_type'] == threat_type]
+    if threat_df.empty:
+        return None
+    import matplotlib.pyplot as plt
+    import seaborn as sns
+    fig, ax = plt.subplots(figsize=(10, 6))
+    monthly_counts = threat_df.groupby(['month']).size().reset_index(name='count')
+    sns.lineplot(
+        x='month', y='count', data=monthly_counts,
+        marker='o', ax=ax,
+        color=color_map.get(threat_type, "#000000"),
+        linestyle=linestyle_map.get(threat_type, '-'),
+        alpha=1.0
     )
-    fig.update_layout(
-        font_family="Malgun Gothic",
-        xaxis_title="월",
-        yaxis_title="발생 건수",
-        title_font_size=22
-    )
-    return save_fig_to_png(fig, backend="plotly")
+    ax.set_title(f"{threat_type} 월별 발생 추이", fontproperties=font_prop, fontsize=16, fontweight='bold',
+                 color=color_map.get(threat_type, "#000000"))
+    ax.set_xlabel("월", fontproperties=font_prop, fontsize=14)
+    ax.set_ylabel("발생 횟수", fontproperties=font_prop, fontsize=14)
+    ax.grid(True, alpha=0.3)
+    # x축 월 범위 자동 지정
+    if not monthly_counts['month'].empty:
+        ax.set_xticks(sorted(monthly_counts['month'].unique()))
+    return save_fig_to_png(fig, backend="matplotlib")
 
 def plot_manpower(df, font_prop, threat_type=None):
     if threat_type is None:
