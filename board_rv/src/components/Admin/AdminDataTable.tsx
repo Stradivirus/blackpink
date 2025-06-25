@@ -213,6 +213,7 @@ const AdminDataTable: React.FC<AdminDataTableProps> = ({
               </button>
             )}
           </div>
+          
           {(selectedTeam === "biz" || selectedTeam === "dev") && (
             <CompanySearchInput
               value={companyNameQuery}
