@@ -26,10 +26,10 @@ export const API_URLS = {
     SECURITY_GRAPH: `${API_BASE}/security/graph`,
     BUSINESS_GRAPH: `${API_BASE}/business/graph`,
     DEV_GRAPH: `${API_BASE}/dev/graph`,
-
     // 관리자/멤버 관련
     ADMIN_LIST: `${API_BASE}/admin/list`,
     MEMBER_LIST: `${API_BASE}/member/list`,
+    CHANGE_NICKNAME: `${API_BASE}/change-nickname`
 };
 
 export const getCrudEndpoint = (selectedTeam: string): string => {
