@@ -112,11 +112,15 @@ class RiskyCountry(BaseModel):
 
 class Project(BaseModel):
     company_id: str
+    company_name: str
     os: str
     os_versions: str
     start_date: date
     end_date: date
-    dev_start_date: Optional[date] = None
-    dev_end_date: Optional[date] = None
-    maintenance: Optional[str] = None
+    end_date_fin: Optional [date]
+    dev_days: int
+    dev_status: str
+    maintenance: Optional[str]
+    error: Optional[str]
+    handler_count: int
     # 필요에 따라 필드 추가
