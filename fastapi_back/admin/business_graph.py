@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Response
+from fastapi import APIRouter
 import pandas as pd
 import numpy as np
 import matplotlib
@@ -8,20 +8,9 @@ import seaborn as sns
 import io
 from matplotlib import font_manager as fm
 from db import companies_collection
+from .graph_utils import set_plot_style, image_response, save_fig_to_png
 
 router = APIRouter()
-
-def set_plot_style():
-    font_path = 'C:/Windows/Fonts/malgun.ttf'
-    font_prop = fm.FontProperties(fname=font_path)
-    matplotlib.rcParams['font.family'] = font_prop.get_name()
-    matplotlib.rcParams['axes.unicode_minus'] = False
-    matplotlib.rcParams['axes.titlesize'] = 20
-    matplotlib.rcParams['axes.labelsize'] = 16
-    matplotlib.rcParams['xtick.labelsize'] = 12
-    matplotlib.rcParams['ytick.labelsize'] = 12
-    sns.set_style("whitegrid")
-    return font_prop
 
 def load_data():
     data = list(companies_collection.find())
@@ -56,12 +45,7 @@ def create_bar_plot(df):
     for label in ax.get_yticklabels():
         label.set_fontproperties(font_prop)
         label.set_fontsize(16)
-    buf = io.BytesIO()
-    plt.tight_layout()
-    plt.savefig(buf, format="png")
-    plt.close()
-    buf.seek(0)
-    return buf.getvalue()
+    return save_fig_to_png(fig, backend="matplotlib")
 
 def create_heatmap(df):
     font_prop = set_plot_style()
@@ -81,12 +65,7 @@ def create_heatmap(df):
     for label in ax.get_yticklabels():
         label.set_fontproperties(font_prop)
         label.set_fontsize(16)
-    buf = io.BytesIO()
-    plt.tight_layout()
-    plt.savefig(buf, format="png")
-    plt.close()
-    buf.seek(0)
-    return buf.getvalue()
+    return save_fig_to_png(fig, backend="matplotlib")
 
 def create_annual_sales_plot(df):
     font_prop = set_plot_style()
@@ -110,12 +89,7 @@ def create_annual_sales_plot(df):
     for text in legend.get_texts():
         text.set_fontproperties(font_prop)
         text.set_fontsize(14)
-    buf = io.BytesIO()
-    plt.tight_layout()
-    plt.savefig(buf, format="png")
-    plt.close()
-    buf.seek(0)
-    return buf.getvalue()
+    return save_fig_to_png(fig, backend="matplotlib")
 
 def create_company_plan_heatmap(df):
     font_prop = set_plot_style()
@@ -134,12 +108,7 @@ def create_company_plan_heatmap(df):
     for label in ax.get_yticklabels():
         label.set_fontproperties(font_prop)
         label.set_fontsize(20)
-    buf = io.BytesIO()
-    plt.tight_layout()
-    plt.savefig(buf, format="png")
-    plt.close()
-    buf.seek(0)
-    return buf.getvalue()
+    return save_fig_to_png(fig, backend="matplotlib")
 
 def create_nested_pie_chart(df):
     font_prop = set_plot_style()
@@ -182,12 +151,7 @@ def create_nested_pie_chart(df):
     ax.legend(handles=handles, loc='upper right', bbox_to_anchor=(1.25, 1), prop=font_prop, fontsize=12)
     ax.set(aspect="equal")
     ax.set_title("2025 vs 2023+2024 계약종류별 비교", fontproperties=font_prop, fontsize=20)
-    buf = io.BytesIO()
-    plt.tight_layout()
-    plt.savefig(buf, format="png")
-    plt.close()
-    buf.seek(0)
-    return buf.getvalue()
+    return save_fig_to_png(fig, backend="matplotlib")
 
 def create_terminated_contract_duration_plot(df):
     font_prop = set_plot_style()
@@ -204,12 +168,7 @@ def create_terminated_contract_duration_plot(df):
     for label in ax.get_yticklabels():
         label.set_fontproperties(font_prop)
         label.set_fontsize(16)
-    buf = io.BytesIO()
-    plt.tight_layout()
-    plt.savefig(buf, format="png")
-    plt.close()
-    buf.seek(0)
-    return buf.getvalue()
+    return save_fig_to_png(fig, backend="matplotlib")
 
 def create_suspended_contract_plan_plot(df):
     font_prop = set_plot_style()
@@ -237,12 +196,7 @@ def create_suspended_contract_plan_plot(df):
         wedgeprops=dict(width=0.4)
     )
     axs[1].set_title('해지된 계약 Plan 비율', fontproperties=font_prop, fontsize=24)
-    buf = io.BytesIO()
-    plt.tight_layout()
-    plt.savefig(buf, format="png")
-    plt.close()
-    buf.seek(0)
-    return buf.getvalue()
+    return save_fig_to_png(fig, backend="matplotlib")
 
 # --- 통합 라우터 및 함수 매핑 ---
 
@@ -264,11 +218,6 @@ def create_business_plot(graph_type):
     if func:
         return func(df)
     return None
-
-def image_response(img_data):
-    if img_data is None:
-        return Response(content="Unknown graph type or no data", status_code=404)
-    return Response(content=img_data, media_type="image/png")
 
 @router.get("/api/business/graph/{graph_type}")
 def plot_business_graph(graph_type: str):

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { getCrudEndpoint } from "../../../api/urls";
 
 export function useAdminDataCrud(selectedTeam: string, fetchData?: () => void) {
@@ -9,6 +9,9 @@ export function useAdminDataCrud(selectedTeam: string, fetchData?: () => void) {
 
   const endpoint = getCrudEndpoint(selectedTeam);
 
+  // 팀 이동 시 체크박스 해제
+  useEffect(() => { setSelectedIds(new Set()); }, [selectedTeam]);
+
   // 등록 버튼 클릭
   const handleRegisterClick = () => {
     setModalInitialData(null);
@@ -17,8 +20,11 @@ export function useAdminDataCrud(selectedTeam: string, fetchData?: () => void) {
 
   // 수정 버튼 클릭
   const handleEditClick = (selectedIds: Set<string>, filteredData: any[]) => {
-    if (selectedIds.size !== 1) {
+    if (selectedIds.size > 1) {
       alert("하나의 행만 선택해주세요.");
+      return;
+    } else if (selectedIds.size == 0) {
+      alert("행을 선택해주세요.");
       return;
     }
     const selectedId = Array.from(selectedIds)[0];
@@ -68,6 +74,7 @@ export function useAdminDataCrud(selectedTeam: string, fetchData?: () => void) {
       }
       alert("저장되었습니다.");
       setModalVisible(false);
+      setSelectedIds(new Set());
       fetchData?.();
     } catch (error) {
       console.error(error);
@@ -93,6 +100,7 @@ export function useAdminDataCrud(selectedTeam: string, fetchData?: () => void) {
       });
       if (!response.ok) throw new Error("삭제 실패");
       alert("삭제되었습니다.");
+      setSelectedIds(new Set());
       fetchData?.();
     } catch (error) {
       console.error(error);

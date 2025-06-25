@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { columnsByTeam, selectOptions, statusOptions, osVersionMap } from "../../../constants/dataconfig";
+import { columnsByTeam, selectOptions, statusOptions } from "../../../constants/dataconfig";
 import { isDateField, handleChangeFactory } from "./TeamFormDynamic";
 
 interface SecurityFormProps {
@@ -85,36 +85,6 @@ const SecurityFormDynamic: React.FC<SecurityFormProps> = ({ initialData = {}, on
           );
         }
         if (key === "company_name") return null;
-        if (key === "os") {
-          return (
-            <div key={key} style={{ marginBottom: 12 }}>
-              <label>{label}</label>
-              <select
-                value={formData[key]}
-                onChange={e => {
-                  handleChange("os", e.target.value);
-                  handleChange("os_version", "");
-                }}
-              >
-                <option value="">선택</option>
-                {Object.keys(osVersionMap).map((os) => (
-                  <option key={os} value={os}>{os}</option>
-                ))}
-              </select>
-              <label style={{ marginLeft: 8 }}>OS 버전</label>
-              <select
-                value={formData["os_version"]}
-                onChange={e => handleChange("os_version", e.target.value)}
-                disabled={!formData["os"]}
-              >
-                <option value="">선택</option>
-                {(osVersionMap[formData["os"]] || []).map((ver) => (
-                  <option key={ver} value={ver}>{ver}</option>
-                ))}
-              </select>
-            </div>
-          );
-        }
         if (key === "status") {
           const options = statusOptions["security"] || [];
           return (
@@ -171,6 +141,7 @@ const SecurityFormDynamic: React.FC<SecurityFormProps> = ({ initialData = {}, on
               type={isDateField(key) ? "date" : "text"}
               value={formData[key]}
               onChange={e => handleChange(key, e.target.value)}
+              min={key === "handled_date" && formData["incident_date"] ? formData["incident_date"] : undefined}
             />
           </div>
         );

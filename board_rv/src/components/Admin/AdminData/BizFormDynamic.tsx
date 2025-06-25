@@ -126,6 +126,7 @@ const BizFormDynamic: React.FC<BizFormProps> = ({ initialData = {}, onChange }) 
               type={isDateField(key) ? "date" : "text"}
               value={formData[key]}
               onChange={e => handleChange(key, e.target.value)}
+              min={key === "contract_end" && formData["contract_start"] ? formData["contract_start"] : undefined}
             />
           </div>
         );
