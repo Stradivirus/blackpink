@@ -62,15 +62,21 @@ html {  /* 스크롤바 항상 유지시켜 화면 고정*/
 }
 .admin-data-table-multi-filter-row {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-between; /* 좌우 정렬 핵심 */
   align-items: center;
   flex-wrap: wrap;
-  margin-bottom: 16px;
+  margin-bottom: 1rem;
 }
+
 .admin-data-table-multi-filter-group {
   display: flex;
-  flex-wrap: wrap;
   gap: 10px;
+  flex-wrap: wrap;
+}
+
+.admin-data-table-company-search-wrapper {
+  display: flex;
+  align-items: center;
 }
 .admin-data-table-dropdown-checkbox-label {
   display: block;
@@ -89,13 +95,15 @@ html {  /* 스크롤바 항상 유지시켜 화면 고정*/
   align-self: center;
 }
 .admin-data-table-company-search {
-  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  margin-left: 8px;
 }
 .admin-data-table-company-search input {
-  padding: 10px 20px;
+  height: 26px;
+  padding: 4px 8px;
+  border-radius: 6px;
   border: 1px solid #ccc;
-  border-radius: 4px;
-  min-width: 200px;
 }
 .admin-data-table-table {
   table-layout: fixed;
@@ -181,4 +189,18 @@ html {  /* 스크롤바 항상 유지시켜 화면 고정*/
   border-radius: 4px;
   background-color: #eee;
   cursor: pointer;
+}
+.admin-data-table-search-area-relative {
+    position: relative;
+}
+
+.total-count-independent {
+    position: absolute;
+    bottom: 100%;
+    right: 0;
+    font-size: 25px;
+    color: #000;
+    white-space: nowrap;
+    margin-bottom: 15px;
+    z-index: 10;
 }
