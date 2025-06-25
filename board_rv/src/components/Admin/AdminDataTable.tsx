@@ -167,61 +167,75 @@ const AdminDataTable: React.FC<AdminDataTableProps> = ({
       </div>
 
       {/* 다중 필터 영역 */}
-      {filterableColumns.length > 0 && (
-        <div className="admin-data-table-multi-filter-row">
-          <div className="admin-data-table-multi-filter-group">
-            {filterableColumns.map((col) => {
-              const selected = filters[col.key] || [];
-              return (
-                <DropdownButton
-                  key={col.key}
-                  label={
-                    col.key === "company_id" && selectedTeam === "dev"
-                      ? "업종 ▼"
-                      : `${col.label} ▼`
-                  }
-                  selected={selected.length > 0}
-                  onClick={() => setActiveDropdown((prev) => (prev === col.key ? null : col.key))}
-                >
-                  {activeDropdown === col.key && (
-                    <FilterCheckboxList
-                      values={getFilterValues(col.key)}
-                      selected={selected}
-                      onChange={(newVals: string[]) => {
-                        setFilters((prev) => ({ ...prev, [col.key]: newVals }));
-                        setActiveDropdown(null);
-                      }}
-                      labelRender={
-                        col.key === "company_id"
-                          ? (value: string) => (value !== "" ? value : "(비어있음)")
-                          : undefined
-                      }
-                    />
-                  )}
-                </DropdownButton>
-              );
-            })}
-            {(Object.values(filters).some((vals) => vals.length > 0) ||
-              yearFilter !== null ||
-              monthFilter !== null) && (
-              <button
-                onClick={handleResetFilters}
-                className="admin-data-table-reset-btn"
-                type="button"
+      <div className="admin-data-table-multi-filter-row">
+        <div className="admin-data-table-multi-filter-group">
+          {/* 왼쪽: 필터 버튼들 */}
+          {filterableColumns.map((col) => {
+            const selected = filters[col.key] || [];
+            return (
+              <DropdownButton
+                key={col.key}
+                label={
+                  col.key === "company_id" && selectedTeam === "dev"
+                    ? "회사코드 ▼"
+                    : `${col.label} ▼`
+                }
+                selected={selected.length > 0}
+                onClick={() => setActiveDropdown((prev) => (prev === col.key ? null : col.key))}
               >
-                초기화
-              </button>
-            )}
-          </div>
-          
-          {(selectedTeam === "biz" || selectedTeam === "dev") && (
-            <CompanySearchInput
-              value={companyNameQuery}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCompanyNameQuery(e.target.value)}
-            />
+                {activeDropdown === col.key && (
+                  <FilterCheckboxList
+                    values={getFilterValues(col.key)}
+                    selected={selected}
+                    onChange={(newVals: string[]) => {
+                      setFilters((prev) => ({ ...prev, [col.key]: newVals }));
+                      setActiveDropdown(null);
+                    }}
+                    labelRender={
+                      col.key === "company_id"
+                        ? (value: string) => (value !== "" ? value : "(비어있음)")
+                        : undefined
+                    }
+                  />
+                )}
+              </DropdownButton>
+            );
+          })}
+
+          {/* 초기화 버튼 */}
+          {(Object.values(filters).some((vals) => vals.length > 0) ||
+            yearFilter !== null ||
+            monthFilter !== null) && (
+            <button
+              onClick={handleResetFilters}
+              className="admin-data-table-reset-btn"
+              type="button"
+            >
+              초기화
+            </button>
           )}
         </div>
-      )}
+
+        {(selectedTeam === "biz" || selectedTeam === "dev" || selectedTeam === "security") && ( 
+          <div className="admin-data-table-search-area-relative">
+            <div className="total-count-independent">
+              총 개수 : {filteredData.length}개
+            </div>
+            {(selectedTeam === "biz" || selectedTeam === "dev") && (
+              <div className="admin-data-table-company-search-wrapper">
+                <CompanySearchInput
+                  value={companyNameQuery}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setCompanyNameQuery(e.target.value)
+                  }
+                />
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+
 
       {/* 테이블 렌더링 */}
       <table className="admin-data-table-table">

@@ -11,6 +11,7 @@ export function useAdminDataTableFilters(data: any[], columns: any[], selectedTe
   const [activeDropdown, setActiveDropdown] = useState<"dateColumn" | "year" | "month" | string | null>(null);
   const itemsPerPage = 20;
   const [currentPage, setCurrentPage] = useState(1);
+  const companyNameFilterKey = "company_name";
 
   // companyIdLabelToIdsMap을 useRef로 관리
   const companyIdLabelToIdsMapRef = useRef<Record<string, string[]>>({});
@@ -37,7 +38,8 @@ export function useAdminDataTableFilters(data: any[], columns: any[], selectedTe
     columnsByTeam[selectedTeam]?.filter(
       (col) =>
         !excludedColumnsByTeam[selectedTeam]?.includes(col.key) &&
-        !dateColumns.some((d) => d.key === col.key)
+        !dateColumns.some((d) => d.key === col.key) &&
+        !((selectedTeam === "biz" || selectedTeam === "dev") && col.key === companyNameFilterKey)
     ) || [];
 
   // 연도/월 목록
