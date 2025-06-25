@@ -117,10 +117,10 @@ class Project(BaseModel):
     os_versions: str
     start_date: date
     end_date: date
-    end_date_fin: Optional [date]
+    end_date_fin: Optional[date] = None
     dev_days: int
     dev_status: str
-    maintenance: Optional[str]
-    error: Optional[str]
+    maintenance: Optional[str] = None
+    error: Optional[str] = None
     handler_count: int
     # 필요에 따라 필드 추가

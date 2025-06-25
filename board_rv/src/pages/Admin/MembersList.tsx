@@ -25,7 +25,7 @@ const MembersList: React.FC = () => {
       .catch(() => setLoading(false));
   }, []);
 
-  const handleNicknameUpdate = async (id: number, nickname: string) => {
+  const handleNicknameUpdate = async (id: string, nickname: string) => {
     try {
       const res = await fetch(API_URLS.CHANGE_NICKNAME, {
         method: "POST",
@@ -51,6 +51,7 @@ const MembersList: React.FC = () => {
       title="고객 명단"
       columns={columns}
       data={members}
+      setData={setMembers}
       loading={loading}
       accountType="member"
       onAfterNicknameUpdate={(id, nickname) =>

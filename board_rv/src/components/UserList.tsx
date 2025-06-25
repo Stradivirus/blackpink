@@ -11,9 +11,11 @@ interface UserListProps<T> {
   title: string;
   columns: Column<T>[];
   data: T[];
+  setData: React.Dispatch<React.SetStateAction<T[]>>; // 추가
   loading: boolean;
   accountType: "member" | "admin";
-  onAfterNicknameUpdate?: (id: number, nickname: string) => void; // 상태 갱신용 콜백(선택)
+  onAfterNicknameUpdate?: (id: string, nickname: string) => void;
+  // onAfterDelete는 제거 (내부에서 직접 처리)
 }
 
 const styles = {
@@ -93,17 +95,28 @@ const styles = {
     background: "#f8fafc",
     color: "#222",
   },
+  deleteBtn: {
+    color: "#ef4444",
+    background: "none",
+    border: "none",
+    fontSize: 18,
+    cursor: "pointer",
+    marginRight: 8,
+  },
 };
 
-function UserList<T extends { id: number; nickname: string }>({
-  title,
-  columns,
-  data,
-  loading,
-  accountType,
-  onAfterNicknameUpdate,
-}: UserListProps<T>) {
-  const [editingId, setEditingId] = useState<number | null>(null);
+function UserList<T extends { id: string; nickname: string; userId?: string }>(
+  {
+    title,
+    columns,
+    data,
+    setData, // 추가
+    loading,
+    accountType,
+    onAfterNicknameUpdate,
+  }: UserListProps<T>
+) {
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [nicknameValue, setNicknameValue] = useState<string>("");
 
   const handleNicknameClick = (row: T) => {
@@ -122,14 +135,14 @@ function UserList<T extends { id: number; nickname: string }>({
     setEditingId(null);
   };
 
-  const handleNicknameUpdate = async (id: number, nickname: string) => {
+  const handleNicknameUpdate = async (id: string, nickname: string) => {
     const user = data.find(u => u.id === id);
     try {
       const res = await fetch(API_URLS.CHANGE_NICKNAME, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          userId: user?.userId, // userId로!
+          userId: user?.userId, // userId(로그인ID)로 전송
           new_nickname: nickname,
           accountType,
         }),
@@ -138,6 +151,38 @@ function UserList<T extends { id: number; nickname: string }>({
       if (onAfterNicknameUpdate) onAfterNicknameUpdate(id, nickname);
     } catch (e) {
       alert("닉네임 변경에 실패했습니다.");
+    }
+  };
+
+  // 탈퇴(삭제) 처리 함수
+  const handleDelete = async (row: T) => {
+    if (!window.confirm("정말 탈퇴하시겠습니까?")) return;
+    if (!row.userId || typeof row.userId !== "string") {
+      alert("userId가 올바르지 않습니다.");
+      return;
+    }
+    try {
+      let res;
+      if (accountType === "admin") {
+        res = await fetch(API_URLS.ADMIN_DELETE, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId: row.userId }),
+        });
+      } else {
+        res = await fetch(API_URLS.MEMBER_DELETE, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId: row.userId }),
+        });
+      }
+      if (!res.ok) {
+        alert("탈퇴에 실패했습니다.");
+        return;
+      }
+      setData(prev => prev.filter(item => item.id !== row.id));
+    } catch (e) {
+      alert("네트워크 오류로 탈퇴에 실패했습니다.");
     }
   };
 
@@ -170,8 +215,25 @@ function UserList<T extends { id: number; nickname: string }>({
     return col.render(row);
   };
 
+  // '탈퇴' 컬럼을 맨 뒤에 추가
+  const columnsWithDelete: Column<T>[] = [
+    ...columns, // 기존 컬럼 먼저
+    {
+      label: "탈퇴",
+      render: (row: T) => (
+        <button
+          style={styles.deleteBtn}
+          title="탈퇴"
+          onClick={() => handleDelete(row)}
+        >
+          ×
+        </button>
+      ),
+    },
+  ];
+
   // hidden이 true인 칼럼은 표시하지 않음
-  const visibleColumns = columns.filter(col => !col.hidden);
+  const visibleColumns = columnsWithDelete.filter(col => !col.hidden);
 
   return (
     <div style={styles.card}>

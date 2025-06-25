@@ -29,7 +29,9 @@ export const API_URLS = {
     // 관리자/멤버 관련
     ADMIN_LIST: `${API_BASE}/admin/list`,
     MEMBER_LIST: `${API_BASE}/member/list`,
-    CHANGE_NICKNAME: `${API_BASE}/change-nickname`
+    CHANGE_NICKNAME: `${API_BASE}/change-nickname`,
+    ADMIN_DELETE: `${API_BASE}/admin/delete`,
+    MEMBER_DELETE: `${API_BASE}/member/delete`,
 };
 
 export const getCrudEndpoint = (selectedTeam: string): string => {
