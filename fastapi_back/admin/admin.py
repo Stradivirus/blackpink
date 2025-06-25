@@ -4,8 +4,8 @@ from datetime import datetime
 from fastapi import APIRouter, HTTPException, Body
 from db import member_collection, admin_collection
 from passlib.hash import bcrypt
-from bson.objectid import ObjectId
 from models import AdminCreateRequest, AdminResponse, MemberResponse
+from pydantic import BaseModel
 
 import smtplib
 from email.mime.text import MIMEText
@@ -152,3 +152,26 @@ def member_list():
         )
         for m in members
     ]
+
+class UserIdRequest(BaseModel):
+    userId: str
+
+# 관리자 삭제 엔드포인트
+# - userId에 해당하는 관리자 계정 삭제
+# - 삭제된 문서 수에 따라 성공/실패 응답
+@router.post("/api/admin/delete")
+def admin_delete(req: UserIdRequest):
+    result = admin_collection.delete_one({"userId": req.userId})
+    if result.deleted_count == 0:
+        raise HTTPException(404, "관리자를 찾을 수 없습니다.")
+    return {"message": "삭제 완료"}
+
+# 멤버 삭제 엔드포인트
+# - userId에 해당하는 멤버 계정 삭제
+# - 삭제된 문서 수에 따라 성공/실패 응답
+@router.post("/api/member/delete")
+def member_delete(req: UserIdRequest):
+    result = member_collection.delete_one({"userId": req.userId})
+    if result.deleted_count == 0:
+        raise HTTPException(404, "회원을 찾을 수 없습니다.")
+    return {"message": "삭제 완료"}

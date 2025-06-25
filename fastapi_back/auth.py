@@ -52,3 +52,24 @@ def change_password(
         {"$set": {"password": hashed_new}}
     )
     return {"message": "비밀번호가 성공적으로 변경되었습니다."}
+
+# 회원/관리자 닉네임 변경 엔드포인트
+@router.post("/api/change-nickname")
+def change_nickname(
+    userId: str = Body(...),
+    new_nickname: str = Body(...),
+    accountType: str = Body("member")
+):
+    if accountType == "admin":
+        collection = admin_collection
+    else:
+        collection = member_collection
+
+    user = collection.find_one({"userId": userId})
+    if not user:
+        raise HTTPException(400, "사용자를 찾을 수 없습니다.")
+    collection.update_one(
+        {"userId": userId},
+        {"$set": {"nickname": new_nickname}}
+    )
+    return {"message": "닉네임이 성공적으로 변경되었습니다.", "nickname": new_nickname}

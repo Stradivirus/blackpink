@@ -1,5 +1,5 @@
 import {useEffect, useState} from "react";
-import {Link} from "react-router-dom";
+import {Link, useLocation, useNavigate} from "react-router-dom";
 import type {Post} from "../../types/Board";
 import {API_URLS} from "../../api/urls";
 import {useAuth} from "../../context/AuthContext";
@@ -8,10 +8,14 @@ import "../../styles/Board.css";
 const PAGE_SIZE = 12;
 
 const PostList: React.FC = () => {
+    const location = useLocation();
+    const navigate = useNavigate();
+    const query = new URLSearchParams(location.search);
+    const initialPage = parseInt(query.get("page") || "0", 10);
     const [posts, setPosts] = useState<Post[]>([]);
     const [totalPages, setTotalPages] = useState(1);
     const [totalElements, setTotalElements] = useState(0);
-    const [page, setPage] = useState(0);
+    const [page, setPage] = useState(initialPage);
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const {user} = useAuth();
@@ -38,8 +42,23 @@ const PostList: React.FC = () => {
             .finally(() => setIsLoading(false));
     }, [page]);
 
-    const handlePrev = () => setPage(p => Math.max(0, p - 1));
-    const handleNext = () => setPage(p => Math.min(totalPages - 1, p + 1));
+    // 페이지 쿼리 변경 시 page 상태 동기화
+    useEffect(() => {
+        const qPage = parseInt(new URLSearchParams(location.search).get("page") || "0", 10);
+        setPage(qPage);
+    }, [location.search]);
+
+    // 페이지 이동 시 URL 쿼리도 변경
+    const handlePrev = () => {
+        if (page > 0) {
+            navigate(`/postpage?page=${page - 1}`);
+        }
+    };
+    const handleNext = () => {
+        if (page + 1 < totalPages) {
+            navigate(`/postpage?page=${page + 1}`);
+        }
+    };
 
     const noticePosts = posts.filter(p => p.isNotice);
     const normalPosts = posts.filter(p => !p.isNotice);
@@ -94,7 +113,7 @@ const PostList: React.FC = () => {
                                         <td className="board-post-id" style={{color: "#d32f2f", fontWeight: 700}}>{displayNumber}</td>
                                         <td>
                                             <Link
-                                                to={`/posts/${post.id}`}
+                                                to={`/posts/${post.id}?page=${page}`}
                                                 className="board-post-title-link"
                                                 style={{fontWeight: 700, color: "#d32f2f"}}
                                             >
@@ -115,7 +134,7 @@ const PostList: React.FC = () => {
                                         <td className="board-post-id">{displayNumber}</td>
                                         <td>
                                             <Link
-                                                to={`/posts/${post.id}`}
+                                                to={`/posts/${post.id}?page=${page}`}
                                                 className="board-post-title-link"
                                             >
                                                 {post.title}

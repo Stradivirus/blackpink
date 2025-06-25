@@ -5,6 +5,8 @@ const SYS_DEV_GRAPH_TYPES = [
   { type: "os_version_by_os", label: "OS별 버전 분포" },
   { type: "maintenance_by_os", label: "OS별 관리 현황" },
   { type: "dev_duration_by_os", label: "OS별 개발기간" },
+  { type: "error_by_os", label: "OS별 에러 유형 분포" },
+  { type: "dev_by_handler", label: "담당 인원 수와 개발기간 관계" },
 ];
 
 const SysDevGraphs: React.FC = () => {

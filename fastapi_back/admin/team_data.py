@@ -1,6 +1,7 @@
 # admin/team_data.py
 from fastapi import APIRouter, HTTPException, Request, Body
 from db import companies_collection, dev_collection, incident_collection
+from bson import ObjectId
 
 router = APIRouter(prefix="/api")
 
@@ -70,16 +71,6 @@ async def get_security():
 @router.get("/security/columns")
 async def get_security_columns():
     return fetch_columns(incident_collection)
-
-# sys_dev 전체 데이터 조회 (company_id → company_name 조인)
-@router.get("/sys_dev")
-async def get_sys_dev_data():
-    return fetch_all_data_with_company_name(project_collection, "sys_dev")
-
-# sys_dev 컬럼 정보 조회
-@router.get("/sys_dev/columns")
-async def get_sys_dev_columns():
-    return fetch_columns(project_collection)
 
 # 사업팀 등록
 @router.post("/biz")

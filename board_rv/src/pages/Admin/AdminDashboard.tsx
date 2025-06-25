@@ -34,14 +34,11 @@ const AdminDashboard: React.FC = () => {
   if (selectedTeam === "security") graphTypes = securityGraphTypes;
   if (selectedTeam === "biz") graphTypes = [];
 
-  const selectedTeamLabel = teamList.find((t) => t.key === selectedTeam)?.label || "";
-
   return (
     <div className={
       selectedTeam ? "admin-dashboard-container admin-team-dashboard" : "admin-dashboard-container"
     }>
       <div className="admin-dashboard-header">
-        <h1>관리자 대시보드</h1>
         <div className="admin-team-tabs">
           <button
             className={showMainPanels ? "admin-team-tab admin-tab-selected" : "admin-team-tab"}

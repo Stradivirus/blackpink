@@ -84,9 +84,9 @@ const DevFormDynamic: React.FC<DevFormProps> = ({ initialData = {}, onChange }) 
             </div>
           );
         }
-        if (key === "company_name") return null;
+        if (["company_name", "os_versions"].includes(key)) return null; // company_name 과 os_versions 에 대한 중복 방지
         // os, progress, maintenance, status: select로 처리
-        if (["os", "progress", "maintenance", "status"].includes(key)) {
+        if (["os", "maintenance", "status"].includes(key)) {
           let options: string[] = [];
           if (key === "os") options = Object.keys(osVersionMap);
           else if (key === "status") options = statusOptions["dev"] || [];
@@ -99,7 +99,7 @@ const DevFormDynamic: React.FC<DevFormProps> = ({ initialData = {}, onChange }) 
                 onChange={e => {
                   if (key === "os") {
                     handleChange("os", e.target.value);
-                    handleChange("os_version", "");
+                    handleChange("os_versions", "");
                   } else {
                     handleChange(key, e.target.value);
                   }
@@ -115,8 +115,8 @@ const DevFormDynamic: React.FC<DevFormProps> = ({ initialData = {}, onChange }) 
                 <>
                   <label style={{ marginLeft: 8 }}>OS 버전</label>
                   <select
-                    value={formData["os_version"]}
-                    onChange={e => handleChange("os_version", e.target.value)}
+                    value={formData["os_versions"]}
+                    onChange={e => handleChange("os_versions", e.target.value)}
                     disabled={!formData["os"]}
                   >
                     <option value="">선택</option>
@@ -137,6 +137,7 @@ const DevFormDynamic: React.FC<DevFormProps> = ({ initialData = {}, onChange }) 
               type={isDateField(key) ? "date" : "text"}
               value={formData[key]}
               onChange={e => handleChange(key, e.target.value)}
+              min={key === "end_date_fin" && formData["start_date"] ? formData["start_date"] : undefined}
             />
           </div>
         );
