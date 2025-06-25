@@ -1,7 +1,9 @@
 # admin/team_data.py
-from fastapi import APIRouter, HTTPException, Request, Body
+from fastapi import APIRouter, HTTPException, Request, Body, Query
 from db import companies_collection, dev_collection, incident_collection
 from bson import ObjectId
+from datetime import datetime, date, time
+from models import Project, Incident
 
 router = APIRouter(prefix="/api")
 
@@ -211,3 +213,39 @@ async def get_next_company_id(industry: str):
 
     next_id = prefix + str(next_num).zfill(5)
     return {"next_company_id": next_id}
+
+@router.get("/dashboard/summary")
+async def dashboard_summary(today: str = Query(None)):
+    """
+    대시보드용 요약 통계 (날짜 조건 없이 전체)
+    """
+    # 1. 사업팀: 플랜별 계약 건수 (companies)
+    biz_docs = list(companies_collection.find({}))
+    biz = {}
+    for doc in biz_docs:
+        plan = doc.get("plan", "미지정")
+        biz[plan] = biz.get(plan, 0) + 1
+
+    # 2. 개발팀: 진행중(dev_status=="개발 진행중") 프로젝트 수 (sys_dev)
+    dev_docs = list(dev_collection.find({"dev_status": "개발 진행중"}))
+    dev_count = len(dev_docs)
+    dev_os = {}
+    for doc in dev_docs:
+        os_name = doc.get("os") or "미지정"
+        dev_os[os_name] = dev_os.get(os_name, 0) + 1
+
+    # 3. 보안팀: 진행중(status=="진행중") 사고를 risk_level별로 group by (incident_logs)
+    incident_docs = list(incident_collection.find({"status": "진행중"}))
+    security = {}
+    for doc in incident_docs:
+        level = doc.get("risk_level") or "미지정"
+        security[level] = security.get(level, 0) + 1
+
+    return {
+        "biz": biz,
+        "dev": {
+            "total": dev_count,
+            "os": dev_os
+        },
+        "security": security
+    }
