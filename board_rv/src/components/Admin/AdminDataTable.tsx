@@ -221,7 +221,6 @@ const AdminDataTable: React.FC<AdminDataTableProps> = ({
             <div className="total-count-independent">
               총 개수 : {filteredData.length}개
             </div>
-            {(selectedTeam === "biz" || selectedTeam === "dev") && (
               <div className="admin-data-table-company-search-wrapper">
                 <CompanySearchInput
                   value={companyNameQuery}
@@ -230,7 +229,6 @@ const AdminDataTable: React.FC<AdminDataTableProps> = ({
                   }
                 />
               </div>
-            )}
           </div>
         )}
       </div>

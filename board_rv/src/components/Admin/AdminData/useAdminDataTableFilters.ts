@@ -72,7 +72,7 @@ export function useAdminDataTableFilters(data: any[], columns: any[], selectedTe
       return selectedOS ? osVersionMap[selectedOS] || [] : [];
     }
 
-    if (colKey === "company_id") {
+    if (colKey === "company_id") { // 회사명으로 변경예정
       const letterToLabelMap: Record<string, string> = {
         F: "금융",
         M: "제조",
@@ -128,7 +128,9 @@ export function useAdminDataTableFilters(data: any[], columns: any[], selectedTe
     if (monthFilter && String(d.getMonth() + 1).padStart(2, "0") !== monthFilter) return false;
 
     if (
-      (selectedTeam === "biz" || selectedTeam === "dev") &&
+      (selectedTeam === "biz" || selectedTeam === "dev"
+//        || selectedTeam === "security" DB에서 보안팀에 회사명 추가 후 주석해제
+        ) &&
       companyNameQuery
     ) {
       const companyName = row["company_name"];
