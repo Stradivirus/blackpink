@@ -38,7 +38,7 @@ const RegisterEditModal: React.FC<RegisterEditModalProps> = ({
 
   const teamLabelMap: Record<string, string> = {
     dev: "개발",
-    biz: "비즈니스",
+    biz: "사업",
     security: "보안",
   };
 
