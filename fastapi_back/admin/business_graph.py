@@ -159,7 +159,9 @@ def create_terminated_contract_duration_plot(df):
     df_term['duration_months'] = (df_term['contract_end'].dt.to_period('M') - df_term['contract_start'].dt.to_period('M')).apply(lambda x: x.n + 1)
     fig, ax = plt.subplots(figsize=(10, 8))
     sns.boxplot(x='plan', y='duration_months', data=df_term, palette=['#66b3ff', '#99ff99', '#ff9999'], ax=ax)
-    ax.set_title('계약 종료된 계약의 계약기간 분포 (개월)', fontproperties=font_prop, fontsize=24)
+    # 산점도 추가
+    sns.stripplot(x='plan', y='duration_months', data=df_term, color='black', size=7, jitter=True, alpha=0.5, ax=ax)
+    ax.set_title('계약 종료된 계약의 계약기간 분포', fontproperties=font_prop, fontsize=24)
     ax.set_xlabel("계약종류", fontproperties=font_prop, fontsize=20)
     ax.set_ylabel("계약기간 (개월)", fontproperties=font_prop, fontsize=20)
     for label in ax.get_xticklabels():
