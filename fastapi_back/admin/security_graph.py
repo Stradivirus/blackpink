@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Response
+from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 import pandas as pd
 import seaborn as sns
@@ -10,27 +10,10 @@ import plotly.express as px
 import plotly.io as pio
 import networkx as nx
 from db import incident_collection
+from .graph_utils import set_plot_style, image_response
 
 router = APIRouter()  # prefix 제거
 collection = incident_collection
-
-# 스타일/폰트 설정
-FONT_PATH = 'C:/Windows/Fonts/malgun.ttf'
-def set_plot_style():
-    font_prop = fm.FontProperties(fname=FONT_PATH)
-    matplotlib.rcParams.update({
-        'font.family': font_prop.get_name(),
-        'axes.unicode_minus': False,
-        'font.size': 14,
-        'axes.titlesize': 18,
-        'axes.labelsize': 18,
-        'xtick.labelsize': 16,
-        'ytick.labelsize': 16,
-        'legend.fontsize': 16
-    })
-    sns.set_style("whitegrid")
-    sns.set_palette("Set2")
-    return font_prop
 
 def get_dataframe():
     data = list(collection.find())
@@ -221,12 +204,6 @@ def create_plot(graph_type, threat_type=None):
         else:
             return func(df, font_prop)
     return None
-
-# 공통 Response 처리
-def image_response(img_data):
-    if img_data is None:
-        return Response(content="Unknown graph type or no data", status_code=404)
-    return Response(content=img_data, media_type="image/png")
 
 @router.get("/api/security/graph/{graph_type}")
 async def plot(graph_type: str, threat_type: str = None):

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Response
+from fastapi import APIRouter
 from models import Project
 import pandas as pd
 import seaborn as sns
@@ -6,18 +6,10 @@ import matplotlib.pyplot as plt
 from matplotlib import font_manager as fm
 import io
 from db import dev_collection
+from .graph_utils import set_plot_style, image_response
 
 router = APIRouter()  # prefix 제거
 collection = dev_collection
-
-def set_plot_style():
-    font_path = 'C:/Windows/Fonts/malgun.ttf'
-    font_prop = fm.FontProperties(fname=font_path)
-    plt.rcParams['font.family'] = font_prop.get_name()
-    plt.rcParams['axes.unicode_minus'] = False
-    sns.set_style("whitegrid")
-    sns.set_palette("Set2")
-    return font_prop
 
 def get_dataframe():
     data = list(collection.find())
@@ -97,11 +89,6 @@ def create_plot(graph_type):
     if not func:
         return None
     return func(df, font_prop)
-
-def image_response(img_data):
-    if img_data is None:
-        return Response(content="Unknown graph type or no data", status_code=404)
-    return Response(content=img_data, media_type="image/png")
 
 @router.get("/api/dev/graph/{graph_type}")
 async def plot(graph_type: str):

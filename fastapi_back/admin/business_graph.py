@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Response
+from fastapi import APIRouter
 import pandas as pd
 import numpy as np
 import matplotlib
@@ -8,20 +8,9 @@ import seaborn as sns
 import io
 from matplotlib import font_manager as fm
 from db import companies_collection
+from .graph_utils import set_plot_style, image_response
 
 router = APIRouter()
-
-def set_plot_style():
-    font_path = 'C:/Windows/Fonts/malgun.ttf'
-    font_prop = fm.FontProperties(fname=font_path)
-    matplotlib.rcParams['font.family'] = font_prop.get_name()
-    matplotlib.rcParams['axes.unicode_minus'] = False
-    matplotlib.rcParams['axes.titlesize'] = 20
-    matplotlib.rcParams['axes.labelsize'] = 16
-    matplotlib.rcParams['xtick.labelsize'] = 12
-    matplotlib.rcParams['ytick.labelsize'] = 12
-    sns.set_style("whitegrid")
-    return font_prop
 
 def load_data():
     data = list(companies_collection.find())
@@ -264,11 +253,6 @@ def create_business_plot(graph_type):
     if func:
         return func(df)
     return None
-
-def image_response(img_data):
-    if img_data is None:
-        return Response(content="Unknown graph type or no data", status_code=404)
-    return Response(content=img_data, media_type="image/png")
 
 @router.get("/api/business/graph/{graph_type}")
 def plot_business_graph(graph_type: str):
