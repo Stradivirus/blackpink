@@ -25,27 +25,6 @@ const MembersList: React.FC = () => {
       .catch(() => setLoading(false));
   }, []);
 
-  const handleNicknameUpdate = async (id: string, nickname: string) => {
-    try {
-      const res = await fetch(API_URLS.CHANGE_NICKNAME, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId: id, // 또는 userId 필드명에 맞게
-          new_nickname: nickname,
-          accountType: "member", // 또는 "admin"
-        }),
-      });
-      if (!res.ok) throw new Error("닉네임 변경 실패");
-      // 성공 시 프론트 상태도 갱신
-      setMembers((members) =>
-        members.map((m) => (m.id === id ? { ...m, nickname } : m))
-      );
-    } catch (e) {
-      alert("닉네임 변경에 실패했습니다.");
-    }
-  };
-
   return (
     <UserList
       title="고객 명단"

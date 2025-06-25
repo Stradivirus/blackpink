@@ -104,6 +104,7 @@ const AdminsList: React.FC = () => {
           data={filteredAdmins}
           loading={loading}
           accountType="admin"
+          setData={setAdmins}
           onAfterNicknameUpdate={(id, nickname) =>
             setAdmins((admins) =>
               admins.map((a) => (a.id === id ? { ...a, nickname } : a))
