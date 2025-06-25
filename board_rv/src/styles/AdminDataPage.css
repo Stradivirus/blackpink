@@ -157,8 +157,8 @@ html {  /* 스크롤바 항상 유지시켜 화면 고정*/
 }
 
 .admin-data-table-table input[type="checkbox"] {
-  width: 14px;
-  height: 14px;
+  width: 18px;
+  height: 18px;
 }
 
 .admin-data-table-pagination {

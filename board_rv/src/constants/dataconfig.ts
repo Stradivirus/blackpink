@@ -57,7 +57,8 @@ export const columnsByTeam: Record<string, { key: string; label: string }[]> = {
     { key: "handler_count", label: "담당자 수" },
   ],
   security: [
-    { key: "company_id", label: "회사코드" }, // 기존: label: "company_id"
+    { key: "company_id", label: "회사코드" }, // 기존: label: "company_id" 
+    // { key: "company_name", label: "회사명" }, 추가예정
     { key: "threat_type", label: "위협 유형" },
     { key: "risk_level", label: "위험 등급" },
     { key: "server_type", label: "서버 종류" },
