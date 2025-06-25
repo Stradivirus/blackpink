@@ -60,11 +60,32 @@ def plot_dev_duration_by_os(df, font_prop):
     ax.set_ylabel("개발기간(일)", fontproperties=font_prop)
     return save_fig_to_png(fig, backend="matplotlib")
 
+def plot_error_by_os(df, font_prop):
+    df_valid = df[df['error'].notnull()]
+    fig, ax = plt.subplots(figsize=(12, 6))
+    sns.countplot(data=df_valid, x='os', hue='error', ax=ax)
+    ax.set_title("OS별 에러 유형 분포", fontproperties=font_prop)
+    ax.set_xlabel("OS", fontproperties=font_prop)
+    ax.set_ylabel("에러 수", fontproperties=font_prop)
+    ax.legend(title='에러 유형', prop=font_prop)
+    return save_to_png(fig)
+
+def scatter_dev_days_by_handler_count(df, font_prop):
+    df_valid = df[df['dev_days'].notnull()]
+    fig, ax = plt.subplots(figsize=(10, 6))
+    sns.scatterplot(data=df_valid, x='handler_count', y='dev_days', ax=ax)
+    ax.set_title("담당 인원 수와 개발기간 관계", fontproperties=font_prop)
+    ax.set_xlabel("담당 인원 수", fontproperties=font_prop)
+    ax.set_ylabel("개발기간(일)", fontproperties=font_prop)
+    return save_to_png(fig)
+
 # --- 그래프 타입별 함수 매핑 ---
 dev_graph_func_map = {
     'os_version_by_os': plot_os_version_by_os,
     'maintenance_by_os': plot_maintenance_by_os,
     'dev_duration_by_os': plot_dev_duration_by_os,
+    'error_by_ps': plot_error_by_os,
+    'dev_by_handler': scatter_dev_days_by_handler_count
 }
 
 def create_plot(graph_type):
