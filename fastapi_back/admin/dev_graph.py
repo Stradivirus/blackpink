@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from matplotlib import font_manager as fm
 import io
 from db import dev_collection
-from .graph_utils import set_plot_style, image_response
+from .graph_utils import set_plot_style, image_response, save_fig_to_png
 
 router = APIRouter()  # prefix 제거
 collection = dev_collection
@@ -30,14 +30,6 @@ def get_dataframe():
     df = pd.DataFrame(projects)
     return df
 
-def save_to_png(fig):
-    buf = io.BytesIO()
-    plt.tight_layout()
-    fig.savefig(buf, format="png")
-    plt.close(fig)
-    buf.seek(0)
-    return buf.getvalue()
-
 # --- 그래프별 함수 분리 ---
 def plot_os_version_by_os(df, font_prop):
     fig, ax = plt.subplots(figsize=(10, 6))
@@ -47,7 +39,7 @@ def plot_os_version_by_os(df, font_prop):
     ax.set_xlabel("OS", fontproperties=font_prop)
     ax.set_ylabel("Count", fontproperties=font_prop)
     ax.legend(title="OS Version", bbox_to_anchor=(1.05, 1), loc='upper left')
-    return save_to_png(fig)
+    return save_fig_to_png(fig, backend="matplotlib")
 
 def plot_maintenance_by_os(df, font_prop):
     fig, ax = plt.subplots(figsize=(10, 6))
@@ -57,7 +49,7 @@ def plot_maintenance_by_os(df, font_prop):
     ax.set_xlabel("OS", fontproperties=font_prop)
     ax.set_ylabel("Count", fontproperties=font_prop)
     ax.legend(title="관리 현황", bbox_to_anchor=(1.05, 1), loc='upper left')
-    return save_to_png(fig)
+    return save_fig_to_png(fig, backend="matplotlib")
 
 def plot_dev_duration_by_os(df, font_prop):
     fig, ax = plt.subplots(figsize=(10, 6))
@@ -66,7 +58,7 @@ def plot_dev_duration_by_os(df, font_prop):
     ax.set_title("OS별 개발기간", fontproperties=font_prop)
     ax.set_xlabel("OS", fontproperties=font_prop)
     ax.set_ylabel("개발기간(일)", fontproperties=font_prop)
-    return save_to_png(fig)
+    return save_fig_to_png(fig, backend="matplotlib")
 
 # --- 그래프 타입별 함수 매핑 ---
 dev_graph_func_map = {

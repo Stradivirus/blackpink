@@ -10,7 +10,7 @@ import plotly.express as px
 import plotly.io as pio
 import networkx as nx
 from db import incident_collection
-from .graph_utils import set_plot_style, image_response
+from .graph_utils import set_plot_style, image_response, save_fig_to_png
 
 router = APIRouter()  # prefix 제거
 collection = incident_collection
@@ -25,16 +25,6 @@ def get_dataframe():
     df['month'] = df['incident_date'].dt.month
     return df
 
-def save_to_png(fig):
-    buf = io.BytesIO()
-    plt.tight_layout()
-    fig.savefig(buf, format="png")
-    plt.close(fig)
-    buf.seek(0)
-    return buf.getvalue()
-
-def save_plotly_to_png(fig):
-    return pio.to_image(fig, format="png")
 
 def set_font_all(ax, font_prop):
     ax.set_title(ax.get_title(), fontproperties=font_prop)
@@ -50,18 +40,21 @@ def set_font_all(ax, font_prop):
 def plot_risk(df, font_prop):
     risk_counts = df['risk_level'].value_counts().reset_index()
     risk_counts.columns = ['risk_level', 'count']
+    pull_values = [0.1 if i == 2 else 0 for i in range(len(risk_counts))]
+    import plotly.express as px
     fig = px.pie(risk_counts, names='risk_level', values='count', title="위험 등급 비율",
-                 color_discrete_sequence=px.colors.qualitative.Set2)
-    fig.update_traces(textposition='inside', textinfo='percent+label')
+                  color_discrete_sequence=px.colors.qualitative.Set2)
+    fig.update_traces(textposition='inside', textinfo='percent+label', pull=pull_values, rotation=90)
     fig.update_layout(font_family="Malgun Gothic", title_font_size=22)
-    return save_plotly_to_png(fig)
+    return save_fig_to_png(fig, backend="plotly")
 
 def plot_threat_y(df, font_prop):
     yearly_counts = df.groupby(['year', 'threat_type']).size().reset_index(name='count')
+    import plotly.express as px
     fig = px.bar(yearly_counts, x='year', y='count', color='threat_type',
                  barmode='group', title="연도별 침해 현황")
     fig.update_layout(font_family="Malgun Gothic", xaxis_title="연도", yaxis_title="발생 건수", title_font_size=22)
-    return save_plotly_to_png(fig)
+    return save_fig_to_png(fig, backend="plotly")
 
 
 def plot_processed_threats(df, font_prop):
@@ -76,7 +69,7 @@ def plot_processed_threats(df, font_prop):
     ax.set_ylabel("건수", fontproperties=font_prop)
     ax.tick_params(axis='x', rotation=45)
     set_font_all(ax, font_prop)
-    return save_to_png(fig)
+    return save_fig_to_png(fig, backend="matplotlib")
 
 def plot_correl_threats_server(df, font_prop):
     fig, ax = plt.subplots(figsize=(10,6))
@@ -87,7 +80,7 @@ def plot_correl_threats_server(df, font_prop):
     ax.set_ylabel("위협종류", fontproperties=font_prop)
     ax.tick_params(axis='x', rotation=45)
     set_font_all(ax, font_prop)
-    return save_to_png(fig)
+    return save_fig_to_png(fig, backend="matplotlib")
 
 def plot_correl_risk_status(df, font_prop):
     fig, ax = plt.subplots(figsize=(10, 6))
@@ -101,7 +94,7 @@ def plot_correl_risk_status(df, font_prop):
     legend = ax.legend()
     for text in legend.get_texts():
         text.set_fontproperties(font_prop)
-    return save_to_png(fig)
+    return save_fig_to_png(fig, backend="matplotlib")
 
 def plot_correl_threat_action(df, font_prop):
     fig, ax = plt.subplots(figsize=(10, 6))
@@ -110,7 +103,7 @@ def plot_correl_threat_action(df, font_prop):
     ax.set_title('위협 유형과 조치 방법', fontproperties=font_prop)
     ax.tick_params(axis='x', rotation=45)
     set_font_all(ax, font_prop)
-    return save_to_png(fig)
+    return save_fig_to_png(fig, backend="matplotlib")
 
 def plot_correl_threat_handler(df, font_prop):
     fig, ax = plt.subplots(figsize=(10, 6))
@@ -129,13 +122,14 @@ def plot_correl_threat_handler(df, font_prop):
     for node, (x, y) in pos.items():
         ax.text(x, y, labels[node], fontsize=12, fontfamily=font_name, ha='center', va='center', color=label_colors[node])
     ax.set_title('위협 유형별 투입 인원', fontproperties=font_prop)
-    return save_to_png(fig)
+    return save_fig_to_png(fig, backend="matplotlib")
 
 def plot_threat_m(df, font_prop, threat_type):
     filtered = df[df['threat_type'] == threat_type]
     if filtered.empty:
         return None
     monthly_counts = filtered.groupby('month').size().reset_index(name='count')
+    import plotly.express as px
     fig = px.line(
         monthly_counts,
         x='month',
@@ -149,35 +143,56 @@ def plot_threat_m(df, font_prop, threat_type):
         yaxis_title="발생 건수",
         title_font_size=22
     )
-    return save_plotly_to_png(fig)
+    return save_fig_to_png(fig, backend="plotly")
 
-def plot_manpower(df, font_prop):
-    df['incident_date'] = pd.to_datetime(df['incident_date'])
-    df['processed_date'] = pd.to_datetime(df['handled_date'])
-    df['처리기간(일)'] = (df['processed_date'] - df['incident_date']).dt.days
-    df['투입인원'] = df['handler_count'].astype(int)
-
-    if df['처리기간(일)'].isnull().all():
+def plot_manpower(df, font_prop, threat_type=None):
+    if threat_type is None:
         return None
-
+    if threat_type == "전체보기":
+        filtered_df = df.copy()
+    else:
+        filtered_df = df[df['threat_type'] == threat_type].copy()
+    if filtered_df.empty:
+        return None
+    filtered_df['incident_date'] = pd.to_datetime(filtered_df['incident_date'])
+    filtered_df['processed_date'] = pd.to_datetime(filtered_df['handled_date'])
+    filtered_df['처리기간(일)'] = (filtered_df['processed_date'] - filtered_df['incident_date']).dt.days
+    filtered_df['투입인원'] = filtered_df['handler_count'].astype(int)
+    if filtered_df['처리기간(일)'].isnull().all():
+        return None
     set_plot_style()
-    jp = sns.jointplot(
-        data=df,
-        x='처리기간(일)',
-        y='투입인원',
-        hue='threat_type',
-        kind='scatter',
-        palette='Set2',
-        height=8
-    )
-    jp.fig.suptitle('처리기간 vs 투입인원 (위협유형별)', fontproperties=font_prop, fontsize=18)
-    jp.fig.tight_layout()
-    jp.fig.subplots_adjust(top=0.95)
+    import matplotlib.pyplot as plt
+    import seaborn as sns
+    if threat_type == "전체보기":
+        jp = sns.jointplot(
+            data=filtered_df,
+            x='처리기간(일)',
+            y='투입인원',
+            hue='threat_type',
+            kind='scatter',
+            palette='Set2',
+            height=8
+        )
+    else:
+        jp = sns.jointplot(
+            data=filtered_df,
+            x='처리기간(일)',
+            y='투입인원',
+            kind='scatter',
+            height=8,
+            color="#0C81F5"
+        )
+    jp.fig.suptitle('위협유형별: 처리기간 vs 투입인원', fontproperties=font_prop, fontsize=20)
     jp.ax_joint.set_xlabel('처리기간(일)', fontproperties=font_prop, fontsize=20)
     jp.ax_joint.set_ylabel('투입인원', fontproperties=font_prop, fontsize=20)
-    for text in jp.ax_joint.legend_.get_texts():
-        text.set_fontproperties(font_prop)
-    return save_to_png(jp.fig)
+    if threat_type != "전체보기":
+        jp.ax_joint.set_title(f"{threat_type}", fontproperties=font_prop, fontsize=18)
+    jp.fig.tight_layout()
+    jp.fig.subplots_adjust(top=0.9)
+    if jp.ax_joint.legend_:
+        for text in jp.ax_joint.legend_.get_texts():
+            text.set_fontproperties(font_prop)
+    return save_fig_to_png(jp.fig, backend="matplotlib")
 
 # 그래프 타입별 함수 매핑
 graph_func_map = {
@@ -199,7 +214,7 @@ def create_plot(graph_type, threat_type=None):
     font_prop = set_plot_style()
     func = graph_func_map.get(graph_type)
     if func:
-        if graph_type == "threat_m":
+        if graph_type == "threat_m" or graph_type == "manpower":
             return func(df, font_prop, threat_type)
         else:
             return func(df, font_prop)

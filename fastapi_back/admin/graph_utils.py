@@ -30,3 +30,22 @@ def image_response(img_data):
     if img_data is None:
         return Response(content="Unknown graph type or no data", status_code=404)
     return Response(content=img_data, media_type="image/png")
+
+def save_fig_to_png(fig, backend="matplotlib"):
+    import io
+    if backend == "matplotlib":
+        buf = io.BytesIO()
+        import matplotlib.pyplot as plt
+        plt.tight_layout()
+        fig.savefig(buf, format="png")
+        plt.close(fig)
+        buf.seek(0)
+        return buf.getvalue()
+    elif backend == "plotly":
+        import plotly.io as pio
+        buf = io.BytesIO()
+        buf.write(pio.to_image(fig, format="png"))
+        buf.seek(0)
+        return buf.getvalue()
+    else:
+        raise ValueError("Unknown backend: " + str(backend))

@@ -53,13 +53,28 @@ const ThreatMGraph: React.FC<{ onImgClick?: (src: string, alt: string) => void }
   );
 };
 
+const threatTypeList = ["전체보기", ...threatTypes];
+
 const ManpowerGraph: React.FC<{ onImgClick?: (src: string, alt: string) => void }> = ({ onImgClick }) => {
+  const [selectedType, setSelectedType] = React.useState("전체보기");
   const [imgLoaded, setImgLoaded] = React.useState(false);
-  const imgSrc = `${API_URLS.SECURITY_GRAPH}/manpower`;
+  const imgSrc = `${API_URLS.SECURITY_GRAPH}/manpower?threat_type=${encodeURIComponent(selectedType)}&t=${Date.now()}`;
 
   return (
     <div style={{ minHeight: 340, position: 'relative' }}>
       <h4>처리기간 vs 투입인원 (위협유형별)</h4>
+      <div style={{ marginBottom: 8 }}>
+        <label htmlFor="threatTypeSelect">위협유형 선택: </label>
+        <select
+          id="threatTypeSelect"
+          value={selectedType}
+          onChange={e => { setSelectedType(e.target.value); setImgLoaded(false); }}
+        >
+          {threatTypeList.map(type => (
+            <option key={type} value={type}>{type}</option>
+          ))}
+        </select>
+      </div>
       {!imgLoaded && (
         <div style={{
           position: 'absolute', left: 0, right: 0, top: 60, bottom: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1
@@ -69,9 +84,9 @@ const ManpowerGraph: React.FC<{ onImgClick?: (src: string, alt: string) => void 
       )}
       <img
         src={imgSrc}
-        alt="처리기간 vs 투입인원 (위협유형별)"
+        alt={`처리기간 vs 투입인원 (${selectedType})`}
         style={{ minWidth: 350, maxWidth: 500, minHeight: 240, cursor: onImgClick ? 'zoom-in' : undefined, opacity: imgLoaded ? 1 : 0, transition: 'opacity 0.2s' }}
-        onClick={onImgClick ? () => onImgClick(imgSrc, '처리기간 vs 투입인원 (위협유형별)') : undefined}
+        onClick={onImgClick ? () => onImgClick(imgSrc, `처리기간 vs 투입인원 (${selectedType})`) : undefined}
         onLoad={() => setImgLoaded(true)}
       />
       <style>{`

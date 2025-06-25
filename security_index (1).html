@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>보안 위협 상관관계 대시보드</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #01030a 0%, #3e2657 100%);
+            min-height: 100vh; padding: 20px; color: #333;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 40px; padding: 30px 0; }
+        .header h1 {
+            color: white; font-size: 2.5rem; font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3); margin-bottom: 10px;
+        }
+        .header p { color: rgba(255,255,255,0.9); font-size: 1.1rem; font-weight: 300; }
+        .section-title {
+            color: white; font-size: 1.8rem; font-weight: 600;
+            margin-bottom: 25px; text-align: center;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.3); position: relative;
+        }
+        .section-title::after {
+            content: ''; position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%);
+            width: 60px; height: 3px;
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4); border-radius: 2px;
+        }
+        .grid { display: grid; gap: 25px; margin-bottom: 50px; }
+        .stats-grid { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+        .correlation-grid { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px; padding: 25px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1), 0 2px 8px rgba(0,0,0,0.05);
+            border: 1px solid rgba(255,255,255,0.2);
+            position: relative; overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15), 0 8px 16px rgba(0,0,0,0.1);
+        }
+        .card h3 { font-size: 1.3rem; font-weight: 600; color: #2d3748; margin-bottom: 20px; text-align: center; }
+        .card h4 { font-size: 1.1rem; font-weight: 600; color: #4a5568; margin-bottom: 15px; text-align: center; }
+        .image-container {
+            border-radius: 12px; overflow: hidden; background: #f8f9fa;
+            height: 250px; display: flex; align-items: center; justify-content: center;
+        }
+        .card img {
+            width: 100%; height: 100%; object-fit: contain; transition: transform 0.3s ease;
+        }
+        .card:hover img { transform: scale(1.02); }
+        .icon {
+            position: absolute; top: 15px; right: 15px; font-size: 22px;
+        }
+        @media (max-width: 768px) {
+            .header h1 { font-size: 2rem; }
+            .section-title { font-size: 1.5rem; }
+            body { padding: 15px; }
+        }
+        #imageModal {
+            display: none; position: fixed; z-index: 9999; left: 0; top: 0;
+            width: 100%; height: 100%; background-color: rgba(0,0,0,0.9);
+            justify-content: center; align-items: center;
+        }
+        #imageModal img { max-width: 90%; max-height: 80%; }
+        #closeModal {
+            position: absolute; top: 20px; right: 30px; color: #fff;
+            font-size: 40px; font-weight: bold; cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛡️ 보안 위협 상관관계 대시보드</h1>
+            <p>실시간 보안 위협 분석 및 상관관계 모니터링</p>
+        </div>
+
+        <div>
+            <h2 class="section-title">📈 통계 분석</h2>
+            <div class="grid stats-grid">
+                <div class="card">
+                    <h4>📅 위협 유형별 월간 추이</h4>
+                    <div class="image-container">
+                        <img id="threat-monthly-chart" src="/plot/threat_m" alt="월간 추이">
+                    </div>
+                </div>
+                <div class="card">
+                    <h4>⚠️ 위험 등급 비율</h4>
+                    <div class="image-container">
+                        <img src="/plot/risk" alt="위험 등급 비율">
+                    </div>
+                </div>
+                <div class="card">
+                    <h4>📊 연도별 침해 현황</h4>
+                    <div class="image-container">
+                        <img src="/plot/threat_y" alt="연도별 침해 현황">
+                    </div>
+                </div>
+                <div class="card">
+                    <h4>✅ 처리된 위협 종류</h4>
+                    <div class="image-container">
+                        <img src="/plot/processed_threats" alt="처리된 위협 종류">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <h2 class="section-title">📊 상관관계 분석</h2>
+            <div class="grid correlation-grid">
+                <div class="card">
+                    <h3>🖥️ 서버별 위협 발생</h3>
+                    <div class="image-container">
+                        <img src="/plot/correl_threats_server" alt="서버별 위협 발생">
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>📋 위협 등급별 처리 현황</h3>
+                    <div class="image-container">
+                        <img src="/plot/correl_risk_status" alt="위협 등급별 처리 현황">
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>🔧 위협 유형과 조치 방법</h3>
+                    <div class="image-container">
+                        <img src="/plot/correl_threat_action" alt="위협 유형과 조치">
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="icon"></div>
+                    <h3>👥 위협 유형별 필요 인원</h3>
+                    <div class="image-container">
+                        <img src="/plot/correl_threat_handler" alt="필요 인원">
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="icon"></div>
+                    <h3>📈 사고처리기간 vs 투입인원</h3>
+                    <div>
+                        <label for="threatType">위협유형 선택:</label>
+                        <select id="threatType" onchange="updateImage()">
+                            <option value="전체보기">전체보기</option>
+                            <option value="악성코드">악성코드</option>
+                            <option value="피싱">피싱</option>
+                            <option value="자격증명 탈취">자격증명 탈취</option>
+                            <option value="DDoS">DDoS</option>
+                            <option value="웹취약점">웹취약점</option>
+                            <option value="메시지 가로채기">메시지 가로채기</option>
+                            <option value="랜섬웨어">랜섬웨어</option>
+                            <option value="해킹공격">해킹공격</option>
+                        </select>
+                    </div>
+                    <div class="image-container">
+                        <img id="threatImage" src="/plot/manpower?threat_type=전체보기" alt="처리기간 vs 인원">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="imageModal">
+        <span id="closeModal">&times;</span>
+        <img id="modalImage">
+    </div>
+
+    <script>
+        async function fetchTopThreats() {
+            try {
+                const response = await fetch('/api/top_threats');
+                const data = await response.json();
+                window.threatTypes = data.top_threats || [];
+                window.currentThreatIndex = 0;
+                updateThreatMonthlyChart();
+                setInterval(updateThreatMonthlyChart, 2000);
+            } catch (e) {
+                console.error('서버 연결 실패');
+            }
+        }
+
+        function updateThreatMonthlyChart() {
+            if (!window.threatTypes || window.threatTypes.length === 0) return;
+            const img = document.getElementById('threat-monthly-chart');
+            const threat = window.threatTypes[window.currentThreatIndex];
+            img.src = `/plot/threat_m/${threat}?t=${Date.now()}`;
+            window.currentThreatIndex = (window.currentThreatIndex + 1) % window.threatTypes.length;
+        }
+
+        document.addEventListener('click', e => {
+            if (e.target.tagName === 'IMG') {
+                document.getElementById('modalImage').src = e.target.src;
+                document.getElementById('imageModal').style.display = 'flex';
+            }
+        });
+        document.getElementById('closeModal').onclick = () => {
+            document.getElementById('imageModal').style.display = 'none';
+        }
+        function updateImage() {
+            const type = document.getElementById('threatType').value;
+            document.getElementById('threatImage').src = `/plot/manpower?threat_type=${encodeURIComponent(type)}`;
+        }
+
+        fetchTopThreats();
+    </script>
+</body>
+</html>

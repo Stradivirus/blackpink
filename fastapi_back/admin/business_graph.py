@@ -8,7 +8,7 @@ import seaborn as sns
 import io
 from matplotlib import font_manager as fm
 from db import companies_collection
-from .graph_utils import set_plot_style, image_response
+from .graph_utils import set_plot_style, image_response, save_fig_to_png
 
 router = APIRouter()
 
@@ -45,12 +45,7 @@ def create_bar_plot(df):
     for label in ax.get_yticklabels():
         label.set_fontproperties(font_prop)
         label.set_fontsize(16)
-    buf = io.BytesIO()
-    plt.tight_layout()
-    plt.savefig(buf, format="png")
-    plt.close()
-    buf.seek(0)
-    return buf.getvalue()
+    return save_fig_to_png(fig, backend="matplotlib")
 
 def create_heatmap(df):
     font_prop = set_plot_style()
@@ -70,12 +65,7 @@ def create_heatmap(df):
     for label in ax.get_yticklabels():
         label.set_fontproperties(font_prop)
         label.set_fontsize(16)
-    buf = io.BytesIO()
-    plt.tight_layout()
-    plt.savefig(buf, format="png")
-    plt.close()
-    buf.seek(0)
-    return buf.getvalue()
+    return save_fig_to_png(fig, backend="matplotlib")
 
 def create_annual_sales_plot(df):
     font_prop = set_plot_style()
@@ -99,12 +89,7 @@ def create_annual_sales_plot(df):
     for text in legend.get_texts():
         text.set_fontproperties(font_prop)
         text.set_fontsize(14)
-    buf = io.BytesIO()
-    plt.tight_layout()
-    plt.savefig(buf, format="png")
-    plt.close()
-    buf.seek(0)
-    return buf.getvalue()
+    return save_fig_to_png(fig, backend="matplotlib")
 
 def create_company_plan_heatmap(df):
     font_prop = set_plot_style()
@@ -123,12 +108,7 @@ def create_company_plan_heatmap(df):
     for label in ax.get_yticklabels():
         label.set_fontproperties(font_prop)
         label.set_fontsize(20)
-    buf = io.BytesIO()
-    plt.tight_layout()
-    plt.savefig(buf, format="png")
-    plt.close()
-    buf.seek(0)
-    return buf.getvalue()
+    return save_fig_to_png(fig, backend="matplotlib")
 
 def create_nested_pie_chart(df):
     font_prop = set_plot_style()
@@ -171,12 +151,7 @@ def create_nested_pie_chart(df):
     ax.legend(handles=handles, loc='upper right', bbox_to_anchor=(1.25, 1), prop=font_prop, fontsize=12)
     ax.set(aspect="equal")
     ax.set_title("2025 vs 2023+2024 계약종류별 비교", fontproperties=font_prop, fontsize=20)
-    buf = io.BytesIO()
-    plt.tight_layout()
-    plt.savefig(buf, format="png")
-    plt.close()
-    buf.seek(0)
-    return buf.getvalue()
+    return save_fig_to_png(fig, backend="matplotlib")
 
 def create_terminated_contract_duration_plot(df):
     font_prop = set_plot_style()
@@ -193,12 +168,7 @@ def create_terminated_contract_duration_plot(df):
     for label in ax.get_yticklabels():
         label.set_fontproperties(font_prop)
         label.set_fontsize(16)
-    buf = io.BytesIO()
-    plt.tight_layout()
-    plt.savefig(buf, format="png")
-    plt.close()
-    buf.seek(0)
-    return buf.getvalue()
+    return save_fig_to_png(fig, backend="matplotlib")
 
 def create_suspended_contract_plan_plot(df):
     font_prop = set_plot_style()
@@ -226,12 +196,7 @@ def create_suspended_contract_plan_plot(df):
         wedgeprops=dict(width=0.4)
     )
     axs[1].set_title('해지된 계약 Plan 비율', fontproperties=font_prop, fontsize=24)
-    buf = io.BytesIO()
-    plt.tight_layout()
-    plt.savefig(buf, format="png")
-    plt.close()
-    buf.seek(0)
-    return buf.getvalue()
+    return save_fig_to_png(fig, backend="matplotlib")
 
 # --- 통합 라우터 및 함수 매핑 ---
 
