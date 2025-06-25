@@ -62,7 +62,7 @@ def plot_maintenance_by_os(df, font_prop):
 def plot_dev_duration_by_os(df, font_prop):
     fig, ax = plt.subplots(figsize=(10, 6))
     df['dev_days'] = pd.to_datetime(df['dev_days'])
-    sns.boxplot(data=df_valid, x='os', y='dev_days', ax=ax)
+    sns.boxplot(data=df, x='os', y='dev_days', ax=ax)
     ax.set_title("OS별 개발기간", fontproperties=font_prop)
     ax.set_xlabel("OS", fontproperties=font_prop)
     ax.set_ylabel("개발기간(일)", fontproperties=font_prop)
