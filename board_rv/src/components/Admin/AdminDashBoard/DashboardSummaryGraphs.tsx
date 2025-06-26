@@ -72,7 +72,7 @@ export const TeamInfoPanels: React.FC<{ summary: any }> = ({ summary }) => {
             {securityOrder
               .filter(level => summary.security[level])
               .map(level => (
-                <div key={level} style={{ color: planColors[level] || "#764ba2" }}>
+                <div key={level} style={{ color: riskColors[level] || "#764ba2" }}>
                   {level}: {summary.security[level]}
                 </div>
               ))}
