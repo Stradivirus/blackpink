@@ -7,14 +7,30 @@ interface SecurityFormProps {
   onChange: (data: Record<string, any>) => void;
 }
 
+const getToday = () => {
+  const d = new Date();
+  return d.toISOString().slice(0, 10);
+};
+
 const SecurityFormDynamic: React.FC<SecurityFormProps> = ({ initialData = {}, onChange }) => {
   const columns = columnsByTeam["security"] || [];
   const [companyOptions, setCompanyOptions] = useState<{ label: string; value: string }[]>([]);
   const [companySearch, setCompanySearch] = useState("");
+
   const [formData, setFormData] = useState<Record<string, any>>(() => {
     const init: Record<string, any> = {};
     columns.forEach(({ key }) => {
-      init[key] = initialData[key] ?? "";
+      if (initialData[key] !== undefined && initialData[key] !== null) {
+        init[key] = initialData[key];
+      } else {
+        if (key === "incident_date") {
+          init[key] = getToday();
+        } else if (key === "status") {
+          init[key] = "진행중";
+        } else {
+          init[key] = "";
+        }
+      }
     });
     return init;
   });
