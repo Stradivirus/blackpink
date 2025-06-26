@@ -8,7 +8,7 @@ import networkx as nx
 from db import incident_collection
 from .graph_utils import set_plot_style, image_response, save_fig_to_png
 
-router = APIRouter()  # prefix 제거
+router = APIRouter()
 collection = incident_collection
 
 def get_dataframe():
@@ -35,21 +35,43 @@ def set_font_all(ax, font_prop):
 def plot_risk(df, font_prop):
     risk_counts = df['risk_level'].value_counts().reset_index()
     risk_counts.columns = ['risk_level', 'count']
-    pull_values = [0.1 if i == 2 else 0 for i in range(len(risk_counts))]
-    import plotly.express as px
-    fig = px.pie(risk_counts, names='risk_level', values='count', title="위험 등급 비율",
-                  color_discrete_sequence=px.colors.qualitative.Set2)
-    fig.update_traces(textposition='inside', textinfo='percent+label', pull=pull_values, rotation=90)
-    fig.update_layout(font_family="Malgun Gothic", title_font_size=22)
-    return save_fig_to_png(fig, backend="plotly")
+    fig, ax = plt.subplots(figsize=(6, 6))
+    colors = ['#F54343', '#0C81F5', '#F5A608', '#08FA08', '#7F09F5']
+    # 가장 큰 부분만 강조
+    explode = [0.1 if i == risk_counts['count'].idxmax() else 0 for i in range(len(risk_counts))]
+    wedges, texts, autotexts = ax.pie(
+        risk_counts['count'],
+        labels=risk_counts['risk_level'],
+        autopct='%1.1f%%',
+        startangle=90,
+        colors=colors[:len(risk_counts)],
+        textprops={'fontsize': 14, 'fontproperties': font_prop},
+        explode=explode
+    )
+    ax.set_title("위험 등급 비율", fontproperties=font_prop, fontsize=22)
+    return save_fig_to_png(fig, backend="matplotlib")
 
 def plot_threat_y(df, font_prop):
+    # 연도별 침해 현황 (matplotlib/seaborn)
     yearly_counts = df.groupby(['year', 'threat_type']).size().reset_index(name='count')
-    import plotly.express as px
-    fig = px.bar(yearly_counts, x='year', y='count', color='threat_type',
-                 barmode='group', title="연도별 침해 현황")
-    fig.update_layout(font_family="Malgun Gothic", xaxis_title="연도", yaxis_title="발생 건수", title_font_size=22)
-    return save_fig_to_png(fig, backend="plotly")
+    fig, ax = plt.subplots(figsize=(10, 6))
+    sns.barplot(
+        data=yearly_counts,
+        x='year',
+        y='count',
+        hue='threat_type',
+        ax=ax
+    )
+    ax.set_title("연도별 침해 현황", fontproperties=font_prop, fontsize=22)
+    ax.set_xlabel("연도", fontproperties=font_prop, fontsize=16)
+    ax.set_ylabel("발생 건수", fontproperties=font_prop, fontsize=16)
+    ax.tick_params(axis='x', labelsize=12)
+    ax.tick_params(axis='y', labelsize=12)
+    set_font_all(ax, font_prop)
+    if ax.legend_:
+        for text in ax.legend_.get_texts():
+            text.set_fontproperties(font_prop)
+    return save_fig_to_png(fig, backend="matplotlib")
 
 
 def plot_processed_threats(df, font_prop):
