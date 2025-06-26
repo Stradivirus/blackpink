@@ -43,9 +43,13 @@ def send_email(to_email: str, user_id: str, temp_password: str):
 
 # 회원/관리자 계정 생성 및 초대 메일 발송 함수
 # - 임시 비밀번호 생성 및 해시 저장
-# - 중복 아이디 체크, DB 저장, 이메일 발송
+# - 관리자와 회원 컬렉션 모두에서 중복 아이디 체크, DB 저장, 이메일 발송
 # - accountType: "member" 또는 "admin"
 def create_member(userId: str, nickname: str, email: str, accountType: str = "member", team: str = None):
+    # 관리자와 회원 컬렉션 모두에서 아이디 중복 체크
+    if admin_collection.find_one({"userId": userId}) or member_collection.find_one({"userId": userId}):
+        raise ValueError("이미 존재하는 아이디입니다.")
+    
     temp_password = generate_temp_password()
     hashed_password = bcrypt.hash(temp_password)
     member = {
@@ -61,19 +65,19 @@ def create_member(userId: str, nickname: str, email: str, accountType: str = "me
             member["team"] = team
     else:
         collection = member_collection
-    if collection.find_one({"userId": userId}):
-        raise ValueError("이미 존재하는 아이디입니다.")
+    
     collection.insert_one(member)
     send_email(email, userId, temp_password)
     return member
 
 # 관리자 회원가입 엔드포인트
 # - 관리자 계정 신규 생성 (userId, password, nickname, team)
-# - 중복 체크 및 비밀번호 해시 저장
+# - 관리자와 회원 컬렉션 모두에서 중복 체크 및 비밀번호 해시 저장
 # - 생성된 관리자 정보를 AdminResponse로 반환
 @router.post("/api/admin/join", response_model=AdminResponse)
 def admin_join(req: AdminCreateRequest):
-    if admin_collection.find_one({"userId": req.userId}):
+    # 관리자와 회원 컬렉션 모두에서 아이디 중복 체크
+    if admin_collection.find_one({"userId": req.userId}) or member_collection.find_one({"userId": req.userId}):
         raise HTTPException(400, "이미 존재하는 관리자입니다.")
     hashed_pw = bcrypt.hash(req.password)
     admin = {
@@ -127,15 +131,20 @@ def admin_member_invite(
 
 # 아이디/닉네임 중복 체크 엔드포인트
 # - field: userId 또는 nickname
-# - accountType에 따라 컬렉션 분기
-# - 이미 존재하면 exists: true 반환
+# - 관리자와 회원 컬렉션 모두에서 중복 체크
+# - 어느 쪽에라도 존재하면 exists: true 반환
 @router.get("/api/admin/check-duplicate")
 def check_duplicate(field: str, value: str, accountType: str = "member"):
     if field not in ["userId", "nickname"]:
         raise HTTPException(400, "허용되지 않는 필드입니다.")
-    collection = admin_collection if accountType == "admin" else member_collection
-    exists = collection.find_one({field: value})
-    return {"exists": bool(exists)}
+    
+    # 관리자와 회원 컬렉션 모두에서 중복 체크
+    admin_exists = admin_collection.find_one({field: value})
+    member_exists = member_collection.find_one({field: value})
+    
+    # 어느 쪽에라도 존재하면 중복으로 처리
+    exists = bool(admin_exists or member_exists)
+    return {"exists": exists}
 
 # 회원 목록 조회 엔드포인트
 # - 모든 회원 계정 정보를 MemberResponse 리스트로 반환
