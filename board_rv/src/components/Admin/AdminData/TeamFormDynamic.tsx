@@ -21,7 +21,7 @@ const TeamFormDynamic: React.FC<TeamFormDynamicProps> = ({ team, initialData, on
     return <SecurityFormDynamic initialData={initialData} onChange={(d) => isAllFilled(d) && onChange(d)} />;
   }
   if (team === "dev") {
-    return <DevFormDynamic initialData={initialData} onChange={(d) => isAllFilled(d) && onChange(d)} />;
+    return <DevFormDynamic initialData={initialData} onChange={onChange} />;
   }
   return null;
 };

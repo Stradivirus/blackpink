@@ -7,6 +7,13 @@ interface DevFormProps {
   onChange: (data: Record<string, any>) => void;
 }
 
+const getToday = () => {
+  const d = new Date();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${d.getFullYear()}-${month}-${day}`;
+};
+
 const DevFormDynamic: React.FC<DevFormProps> = ({ initialData = {}, onChange }) => {
   const columns = columnsByTeam["dev"] || [];
   const [companyOptions, setCompanyOptions] = useState<{ label: string; value: string }[]>([]);
@@ -14,7 +21,16 @@ const DevFormDynamic: React.FC<DevFormProps> = ({ initialData = {}, onChange }) 
   const [formData, setFormData] = useState<Record<string, any>>(() => {
     const init: Record<string, any> = {};
     columns.forEach(({ key }) => {
-      init[key] = initialData[key] ?? "";
+      if (key === "start_date") {
+        init[key] = initialData[key] ?? getToday();
+      } else if (key === "dev_status") {
+        init[key] = initialData[key] ?? "개발 예정";
+      } else if (key === "error") {
+        // 등록 모드일 때만 "에러 없음" 기본값
+        init[key] = initialData[key] ?? (Object.keys(initialData).length === 0 ? "에러 없음" : "");
+      } else {
+        init[key] = initialData[key] ?? "";
+      }
     });
     return init;
   });
@@ -46,30 +62,35 @@ const DevFormDynamic: React.FC<DevFormProps> = ({ initialData = {}, onChange }) 
     }
   }, [initialData]);
 
-  // 부모 컴포넌트에 변경 데이터 전달
+  // company_id/company_name이 비어있으면 initialData로 보정
+  useEffect(() => {
+    if (
+      initialData &&
+      Object.keys(initialData).length > 0 &&
+      (
+        !formData.company_id ||
+        !formData.company_name
+      )
+    ) {
+      setFormData(prev => ({
+        ...prev,
+        company_id: prev.company_id || initialData.company_id || "",
+        company_name: prev.company_name || initialData.company_name || "",
+      }));
+    }
+    // eslint-disable-next-line
+  }, [initialData, formData.company_id, formData.company_name]);
+
+  // formData 변경 시 부모에 전달
   useEffect(() => {
     onChange(formData);
   }, [formData, onChange]);
 
-  const handleChange = handleChangeFactory(setFormData);
+  const handleChange = (key: string, value: any) => {
+    setFormData(prev => ({ ...prev, [key]: value }));
+  };
 
-  // dev_status 상태값
-  const devStatus = formData["dev_status"];
-  const endDate = formData["end_date_fin"];
-
-  // 상태별 필드 활성/비활성 로직
-  // const isDevDone = devStatus === "개발 완료";
-  const isDevStop = devStatus === "개발 중지";
-  const isDevPlannedOrInProgress = ["개발 예정", "개발 진행중"].includes(devStatus);
-
-  // 종료일 필드 비활성 조건 (개발 예정, 진행중일 때 비활성)
-  const disableEndDate = isDevPlannedOrInProgress;
-
-  // 유지보수 및 에러 필드 비활성 조건
-  // end_date_fin 없거나, 개발 중지 또는 개발 예정/진행중일 때 비활성
-  const disableMaintErr = !endDate || isDevStop || isDevPlannedOrInProgress;
-
-  // dev_status 변경 시 처리 (개발 중지면 maintenance, error 값 초기화)
+  // dev_status 변경 시 처리
   const handleDevStatusChange = (value: string) => {
     setFormData((prev) => {
       if (value === "개발 중지") {
@@ -84,6 +105,69 @@ const DevFormDynamic: React.FC<DevFormProps> = ({ initialData = {}, onChange }) 
     });
   };
 
+  // 회사명 검색 자동 선택 로직
+  useEffect(() => {
+    if (companySearch) {
+      const filtered = companyOptions.filter(
+        opt => typeof opt.label === "string" && opt.label.includes(companySearch)
+      );
+      if (filtered.length > 0 && formData["company_id"] !== filtered[0].value) {
+        setFormData(prev => ({
+          ...prev,
+          company_id: filtered[0].value,
+          company_name: filtered[0].label,
+        }));
+      }
+    }
+    if (!companySearch && formData["company_id"]) {
+      setFormData(prev => ({
+        ...prev,
+        company_id: "",
+        company_name: "",
+      }));
+    }
+    // eslint-disable-next-line
+  }, [companySearch, companyOptions]);
+
+  const processedData: any = {};
+  Object.entries(formData).forEach(([k, v]) => {
+    if (["maintenance", "error", "end_date_fin"].includes(k) && v === "") {
+      processedData[k] = null;
+    } else {
+      processedData[k] = v;
+    }
+  });
+
+  // dev_status 상태값
+  const devStatus = formData["dev_status"];
+  const endDate = formData["end_date_fin"];
+
+  // 상태별 필드 활성/비활성 로직
+  const isDevStop = devStatus === "개발 중지";
+  const isDevPlannedOrInProgress = ["개발 예정", "개발 진행중"].includes(devStatus);
+
+  // 종료일 필드 비활성 조건 (개발 예정, 진행중일 때 비활성)
+  const disableEndDate = isDevPlannedOrInProgress;
+
+  // 유지보수 및 에러 필드 비활성 조건
+  // const disableMaintErr = !endDate || isDevStop || isDevPlannedOrInProgress; // 기존 코드
+  const disableMaintErr = false; // 유지보수 항상 선택 가능
+
+  // "에러" 필드: 수정 모드에서 비어 있으면 "에러 없음"으로 설정
+  useEffect(() => {
+    if (
+      initialData &&
+      Object.keys(initialData).length > 0 &&
+      (!formData.error || formData.error === "")
+    ) {
+      setFormData(prev => ({
+        ...prev,
+        error: "에러 없음",
+      }));
+    }
+    // eslint-disable-next-line
+  }, [initialData, formData.error]);
+
   return (
     <div className="admin-modal-form-grid">
       <div className="admin-modal-form-field">
@@ -93,28 +177,44 @@ const DevFormDynamic: React.FC<DevFormProps> = ({ initialData = {}, onChange }) 
           placeholder="회사명 검색"
           value={companySearch}
           onChange={(e) => setCompanySearch(e.target.value)}
+          disabled={!!initialData && Object.keys(initialData).length > 0}
         />
       </div>
       <div className="admin-modal-form-field">
         <label>회사 선택</label>
-        <select
-          value={formData["company_id"]}
-          onChange={(e) => {
-            const selected = companyOptions.find(opt => opt.value === e.target.value);
-            setFormData(prev => ({
-              ...prev,
-              company_id: selected ? selected.value : "",
-              company_name: selected ? selected.label : "",
-            }));
-          }}
-        >
-          <option value="">선택</option>
-          {companyOptions
-            .filter(opt => typeof opt.label === "string" && opt.label.includes(companySearch))
-            .map((opt) => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
-          ))}
-        </select>
+        {initialData && Object.keys(initialData).length > 0 ? (
+          // 수정 모드: 회사명만 읽기전용, 값이 없으면 initialData에서 보여줌
+          <input
+            type="text"
+            value={
+              formData["company_name"] !== undefined && formData["company_name"] !== ""
+                ? formData["company_name"]
+                : initialData.company_name || ""
+            }
+            readOnly
+          />
+        ) : (
+          // 등록 모드: 드롭다운
+          <select
+            value={formData["company_id"]}
+            onChange={(e) => {
+              const selected = companyOptions.find(opt => opt.value === e.target.value);
+              setFormData(prev => ({
+                ...prev,
+                company_id: selected ? selected.value : "",
+                company_name: selected ? selected.label : "",
+              }));
+              if (selected) setCompanySearch(selected.label);
+            }}
+          >
+            <option value="">선택</option>
+            {companyOptions
+              .filter(opt => typeof opt.label === "string" && opt.label.includes(companySearch))
+              .map((opt) => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
+        )}
       </div>
 
       <div className="admin-modal-form-field">
@@ -156,10 +256,24 @@ const DevFormDynamic: React.FC<DevFormProps> = ({ initialData = {}, onChange }) 
       </div>
 
       <div className="admin-modal-form-field">
+        <label>종료일</label>
+        <input
+          type="date"
+          value={formData["end_date_fin"]}
+          onChange={(e) => handleChange("end_date_fin", e.target.value)}
+          // 등록 모드: 항상 활성화, 수정 모드: 항상 활성화
+          disabled={false}
+          min={formData["start_date"] || undefined}
+        />
+      </div>
+
+      <div className="admin-modal-form-field">
         <label>상태</label>
         <select
           value={formData["dev_status"]}
           onChange={(e) => handleDevStatusChange(e.target.value)}
+          // 등록/수정 모두 활성화
+          disabled={false}
         >
           <option value="">선택</option>
           {(statusOptions["dev"] || []).map((opt) => (
@@ -169,22 +283,11 @@ const DevFormDynamic: React.FC<DevFormProps> = ({ initialData = {}, onChange }) 
       </div>
 
       <div className="admin-modal-form-field">
-        <label>종료일</label>
-        <input
-          type="date"
-          value={formData["end_date_fin"]}
-          onChange={(e) => handleChange("end_date_fin", e.target.value)}
-          disabled={disableEndDate}
-          min={formData["start_date"] || undefined}
-        />
-      </div>
-
-      <div className="admin-modal-form-field">
         <label>유지보수</label>
         <select
           value={formData["maintenance"]}
           onChange={(e) => handleChange("maintenance", e.target.value)}
-          disabled={disableMaintErr}
+          disabled={false} // 항상 선택 가능
         >
           <option value="">선택</option>
           {(selectOptions["maintenance"] || []).map(opt => (
@@ -198,7 +301,8 @@ const DevFormDynamic: React.FC<DevFormProps> = ({ initialData = {}, onChange }) 
         <select
           value={formData["error"]}
           onChange={(e) => handleChange("error", e.target.value)}
-          disabled={disableMaintErr}
+          // 등록/수정 모두 활성화
+          disabled={false}
         >
           <option value="">선택</option>
           {(selectOptions["error"] || []).map(opt => (

@@ -74,6 +74,13 @@ async def update_company(item_id: str, item: dict = Body(...)):
 # 개발팀 등록
 @router.post("/dev")
 async def create_dev(item: dict):
+    # 최소 한 개 이상의 필수값이 있는지 체크 (예: company_id, start_date 등)
+    required_keys = ["company_id", "company_name", "start_date", "dev_status"]
+    if not any(item.get(k) for k in required_keys):
+        raise HTTPException(status_code=400, detail="필수값이 없습니다.")
+    # end_date_fin이 빈 문자열/None이면 아예 필드에서 제거 (MongoDB에 null로 저장 방지)
+    if not item.get("end_date_fin"):
+        item.pop("end_date_fin", None)
     return insert_item(dev_collection, item)
 
 @router.put("/dev/{item_id}")
