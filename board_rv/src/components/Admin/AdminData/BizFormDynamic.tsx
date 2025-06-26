@@ -17,13 +17,19 @@ const contractPeriods = [
   { value: 1095, label: "3년" },
 ];
 
+const getToday = () => {
+  const d = new Date();
+  return d.toISOString().slice(0, 10);
+};
+
 const BizFormDynamic: React.FC<BizFormProps> = ({ initialData = {}, onChange }) => {
   const columns = columnsByTeam["biz"] || [];
   const [formData, setFormData] = useState<Record<string, any>>(() => {
     const init: Record<string, any> = {};
     columns.forEach(({ key }) => {
-      if (key === "status" && !initialData[key]) {
-        // 등록 시 status 기본값 "진행중"
+      if (key === "contract_start" && !initialData[key]) {
+        init[key] = getToday(); // 오늘 날짜 기본값
+      } else if (key === "status" && !initialData[key]) {
         init[key] = statusOptions.biz[0];
       } else {
         init[key] = initialData[key] ?? "";
@@ -120,8 +126,8 @@ const BizFormDynamic: React.FC<BizFormProps> = ({ initialData = {}, onChange }) 
           type="text"
           value={formData["company_id"]}
           onChange={(e) => handleChange("company_id", e.target.value)}
-          placeholder="회사코드 입력"
-          readOnly // 자동입력이므로 읽기전용 처리(원하면 제거)
+          placeholder="업종을 선택하면 자동 입력"
+          readOnly
         />
       </div>
       {/* 회사명 */}
