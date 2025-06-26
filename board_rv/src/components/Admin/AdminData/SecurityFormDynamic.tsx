@@ -76,7 +76,7 @@ const SecurityFormDynamic: React.FC<SecurityFormProps> = ({ initialData = {}, on
         >
           <option value="">선택</option>
           {companyOptions
-            .filter((opt) => opt.label.includes(companySearch))
+            .filter((opt) => typeof opt.label === "string" && opt.label.includes(companySearch))
             .map((opt) => (
               <option key={opt.value} value={opt.value}>
                 {opt.label}
