@@ -101,18 +101,21 @@ const DashboardSummaryGraphs: React.FC = () => {
   // summary 데이터 선언 (return문 위에서)
   const summary = data.summary;
 
-  // 사업팀 그래프 데이터 (중복 데이터 dash 적용)
-  const bizAllDataArr = bizPlanKeys.map(plan => data.biz[plan].map((v: number) => Math.round(v)));
-  const bizDataStrArr = bizAllDataArr.map(arr => JSON.stringify(arr));
-  const bizGroupMap: Record<string, number[]> = {};
-  bizDataStrArr.forEach((str, idx) => {
-    if (!bizGroupMap[str]) bizGroupMap[str] = [];
-    bizGroupMap[str].push(idx);
-  });
-  const bizChartData = {
-    labels: data.biz.labels,
-    datasets: bizPlanKeys.map((plan, idx) => {
-      const group = bizGroupMap[bizDataStrArr[idx]];
+  // 중복 dash 처리 함수
+  function makeDashDatasets<T>(
+    keys: string[],
+    allDataArr: number[][],
+    colorMap: Record<string, string>,
+    labelMap?: Record<string, string>
+  ) {
+    const dataStrArr = allDataArr.map(arr => JSON.stringify(arr));
+    const groupMap: Record<string, number[]> = {};
+    dataStrArr.forEach((str, idx) => {
+      if (!groupMap[str]) groupMap[str] = [];
+      groupMap[str].push(idx);
+    });
+    return keys.map((key, idx) => {
+      const group = groupMap[dataStrArr[idx]];
       const isDuplicated = group.length > 1;
       let borderDash, borderDashOffset;
       if (isDuplicated) {
@@ -120,77 +123,35 @@ const DashboardSummaryGraphs: React.FC = () => {
         borderDashOffset = group.indexOf(idx) * 6;
       }
       return {
-        label: plan,
-        data: bizAllDataArr[idx],
-        borderColor: planColors[plan],
-        backgroundColor: planColors[plan],
+        label: labelMap?.[key] || key,
+        data: allDataArr[idx],
+        borderColor: colorMap[key] || "#764ba2",
+        backgroundColor: colorMap[key] || "#764ba2",
         tension: 0.3,
         borderDash,
         borderDashOffset
       };
-    })
+    });
+  }
+
+  // 사업팀 그래프 데이터
+  const bizAllDataArr = bizPlanKeys.map(plan => data.biz[plan].map((v: number) => Math.round(v)));
+  const bizChartData = {
+    labels: data.biz.labels,
+    datasets: makeDashDatasets(bizPlanKeys as unknown as string[], bizAllDataArr, planColors)
   };
   // 개발팀 그래프 데이터
   const devOsKeys = Object.keys(data.dev).filter(key => key !== "labels");
   const allDataArr = devOsKeys.map(os => data.dev[os].map((v: number) => Math.round(v)));
-  const dataStrArr = allDataArr.map(arr => JSON.stringify(arr));
-  const groupMap: Record<string, number[]> = {};
-  dataStrArr.forEach((str, idx) => {
-    if (!groupMap[str]) groupMap[str] = [];
-    groupMap[str].push(idx);
-  });
-
   const devChartData = {
     labels: data.dev.labels,
-    datasets: devOsKeys.map((os, idx) => {
-      const group = groupMap[dataStrArr[idx]];
-      const isDuplicated = group.length > 1;
-      // 중복된 데이터 그룹 내에서 각 라인마다 dash offset 다르게 적용
-      let borderDash, borderDashOffset;
-      if (isDuplicated) {
-        borderDash = [6, 6];
-        // 그룹 내에서 순서대로 offset 다르게 (예: 0, 6, 12...)
-        borderDashOffset = group.indexOf(idx) * 6;
-      }
-      return {
-        label: os,
-        data: allDataArr[idx],
-        borderColor: osColors[os] || "#764ba2",
-        backgroundColor: osColors[os] || "#764ba2",
-        tension: 0.3,
-        borderDash,
-        borderDashOffset
-      };
-    })
+    datasets: makeDashDatasets(devOsKeys, allDataArr, osColors)
   };
-  // 보안팀 그래프 데이터 (중복 데이터 dash 적용)
+  // 보안팀 그래프 데이터
   const secAllDataArr = secLevelKeys.map(level => data.security[level].map((v: number) => Math.round(v)));
-  const secDataStrArr = secAllDataArr.map(arr => JSON.stringify(arr));
-  const secGroupMap: Record<string, number[]> = {};
-  secDataStrArr.forEach((str, idx) => {
-    if (!secGroupMap[str]) secGroupMap[str] = [];
-    secGroupMap[str].push(idx);
-  });
   const securityChartData = {
     labels: data.security.labels,
-    datasets: secLevelKeys.map((level, idx) => {
-      const group = secGroupMap[secDataStrArr[idx]];
-      const isDuplicated = group.length > 1;
-      let borderDash, borderDashOffset;
-      if (isDuplicated) {
-        borderDash = [6, 6];
-        borderDashOffset = group.indexOf(idx) * 6;
-      }
-      return {
-        label: level,
-        data: secAllDataArr[idx],
-        borderColor: riskColors[level],
-        backgroundColor: riskColors[level],
-        tension: 0.3,
-        borderDash,
-        borderDashOffset
-      };
-    })
+    datasets: makeDashDatasets(secLevelKeys as unknown as string[], secAllDataArr, riskColors)
   };
   const options = {
     responsive: true,
@@ -219,11 +180,11 @@ const DashboardSummaryGraphs: React.FC = () => {
             <div className="dashboard-summary-label">진행 중인 프로젝트</div>
             <div className="dashboard-summary-number">{summary.totalProjects}</div>
             <div className="dashboard-summary-sub">
-              <span style={{ color: osColors[3] }}>Android: {summary.android}</span>&nbsp;
-              <span style={{ color: osColors[1] }}>iOS: {summary.ios}</span><br/>
-              <span style={{ color: osColors[2] }}>Linux: {summary.linux}</span>&nbsp;
-              <span style={{ color: osColors[5] }}>Windows: {summary.windows}</span>&nbsp;
-              <span style={{ color: osColors[0] }}>macOS: {summary.macos}</span>
+              <span style={{ color: osColors["Android"] }}>Android: {summary.android}</span>&nbsp;
+              <span style={{ color: osColors["iOS"] }}>iOS: {summary.ios}</span><br/>
+              <span style={{ color: osColors["Linux"] }}>Linux: {summary.linux}</span>&nbsp;
+              <span style={{ color: osColors["Windows"] }}>Windows: {summary.windows}</span>&nbsp;
+              <span style={{ color: osColors["macOS"] }}>macOS: {summary.macos}</span>
             </div>
           </div>
           <div className="dashboard-summary-card">

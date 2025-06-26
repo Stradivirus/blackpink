@@ -18,19 +18,6 @@ export const threatTypes = [
   "메시지 가로채기",
 ];
 
-// 보안팀 그래프 타입 정의
-export const securityGraphTypes = [
-  { type: "threat_m", label: "월별 침해 현황" },
-  { type: "manpower", label: "처리기간 vs 투입인원" },
-  { type: "risk", label: "위험 등급 비율" },
-  { type: "threat_y", label: "연도별 침해 현황" },
-  { type: "processed_threats", label: "처리된 위협 종류" },
-  { type: "correl_threats_server", label: "서버별 위협 발생(Heatmap)" },
-  { type: "correl_risk_status", label: "위협 등급별 처리 현황" },
-  { type: "correl_threat_action", label: "위협 유형과 조치 방법" },
-  { type: "correl_threat_handler", label: "위협 유형별 필요 인원" },
-];
-
 // 각 팀별 컬럼 정의
 export const columnsByTeam: Record<string, { key: string; label: string }[]> = {
   biz: [
@@ -141,6 +128,8 @@ export const industryPrefixMap: Record<string, string> = {
   유통: "D",
 };
 
+
+// 대시보드 데이터 타입 정의
 // 컬러맵 및 데이터 키 상수 추가 (DashboardSummaryGraphs.tsx에서 이동)
 export const planColors: Record<string, string> = {
   베이직: "#764ba2",
@@ -164,3 +153,36 @@ export const osColors: Record<string, string> = {
 export const securityOrder = ["LOW", "MEDIUM", "HIGH", "미지정"];
 export const bizPlanKeys = ["베이직", "프로", "엔터프라이즈"] as const;
 export const secLevelKeys = ["LOW", "MEDIUM", "HIGH"] as const;
+
+// 사업팀 그래프 타입 정의 추가
+export const businessGraphTypes = [
+  { type: "bar", label: "수익 바 차트" },
+  { type: "heatmap", label: "수익 히트맵" },
+  { type: "annual_sales", label: "연도별 상위 7개 회사 매출" },
+  { type: "company_plan_heatmap", label: "회사별 연매출로 보는 계약종류" },
+  { type: "company_plan_donut_multi", label: "2023~2025년도 상위 10개 회사 계약종류별 비교" },
+  { type: "terminated_duration", label: "완료된 계약의 계약종류별 계약기간" },
+  { type: "suspended_plan", label: "해지된 계약의 계약종류 분석" },
+];
+
+// 시스템 개발 그래프 타입 정의 추가
+export const sysDevGraphTypes = [
+  { type: "os_version_by_os", label: "OS별 버전 분포" },
+  { type: "maintenance_by_os", label: "OS별 관리 현황" },
+  { type: "dev_duration_by_os", label: "OS별 개발기간" },
+  { type: "error_by_os", label: "OS별 에러 유형 분포" },
+  { type: "dev_by_handler", label: "담당 인원 수와 개발기간 관계" },
+];
+
+// 보안팀 그래프 타입 정의
+export const securityGraphTypes = [
+  { type: "threat_m", label: "월별 침해 현황" },
+  { type: "manpower", label: "처리기간 vs 투입인원" },
+  { type: "risk", label: "위험 등급 비율" },
+  { type: "threat_y", label: "연도별 침해 현황" },
+  { type: "processed_threats", label: "처리된 위협 종류" },
+  { type: "correl_threats_server", label: "서버별 위협 발생(Heatmap)" },
+  { type: "correl_risk_status", label: "위협 등급별 처리 현황" },
+  { type: "correl_threat_action", label: "위협 유형과 조치 방법" },
+  { type: "correl_threat_handler", label: "위협 유형별 필요 인원" },
+];

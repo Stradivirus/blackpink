@@ -1,6 +1,6 @@
 // src/components/Admin/AdminDataTable.tsx
 import React, { useMemo } from "react";
-import type { AdminDataTableProps } from "../../types/Admin";
+import type { AdminDataTableProps } from "../../types/users";
 import RegisterEditModal from "./AdminData/RegisterEditModal";
 import { useAdminDataCrud } from "./AdminData/useAdminDataCrud";
 import { useAdminDataTableFilters } from "./AdminData/useAdminDataTableFilters";

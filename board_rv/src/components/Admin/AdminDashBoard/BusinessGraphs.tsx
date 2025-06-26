@@ -1,15 +1,8 @@
 import * as React from "react";
 import { API_URLS } from "../../../api/urls";
+import { businessGraphTypes } from "../../../constants/dataconfig";
 
-const BUSINESS_GRAPH_TYPES = [
-  { type: "bar", label: "수익 바 차트" },
-  { type: "heatmap", label: "수익 히트맵" },
-  { type: "annual_sales", label: "연도별 상위 7개 회사 매출" },
-  { type: "company_plan_heatmap", label: "회사별 연매출로 보는 계약종류" },
-  { type: "company_plan_donut_multi", label: "2023~2025년도 상위 10개 회사 계약종류별 비교" },
-  { type: "terminated_duration", label: "완료된 계약의 계약종류별 계약기간" },
-  { type: "suspended_plan", label: "해지된 계약의 계약종류 분석" },
-];
+const BUSINESS_GRAPH_TYPES = businessGraphTypes;
 
 const BusinessGraphs: React.FC = () => {
   const [imgLoaded, setImgLoaded] = React.useState<boolean[]>(Array(BUSINESS_GRAPH_TYPES.length).fill(false));
