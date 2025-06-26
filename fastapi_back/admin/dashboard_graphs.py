@@ -59,6 +59,8 @@ def get_dev_data(df_dev, recent_months):
         )
         df_valid = df_dev[mask].copy() if not df_dev.empty else pd.DataFrame()
         if not df_valid.empty:
+            # OS명을 'Linux' 등으로 통일 (대소문자, 공백 등)
+            df_valid['os'] = df_valid['os'].astype(str).str.strip().str.capitalize()
             df_valid.loc[df_valid['os'].isna(), 'os'] = '미지정'
             df_valid.loc[df_valid['os'] == '', 'os'] = '미지정'
         os_counts = df_valid['os'].value_counts().to_dict() if not df_valid.empty else {}

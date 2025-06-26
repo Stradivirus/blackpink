@@ -293,6 +293,54 @@
   letter-spacing: 1px;
 }
 
+/* DashboardSummaryGraphs 인라인 스타일 분리 */
+.dashboard-summary-card {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px 0 rgba(80,80,120,0.10);
+  padding: 32px 24px 24px 24px;
+  min-width: 240px;
+  text-align: center;
+  color: #3a2766;
+  font-weight: 500;
+  margin: 0 12px;
+}
+.dashboard-summary-number {
+  font-size: 44px;
+  font-weight: 700;
+  margin: 8px 0 12px 0;
+}
+.dashboard-summary-label {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.dashboard-summary-sub {
+  font-size: 15px;
+  margin-top: 4px;
+  line-height: 1.5;
+}
+.dashboard-graph-container {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px 0 rgba(80,80,120,0.10);
+  padding: 32px;
+  margin: 0 auto;
+  display: flex;
+  gap: 32px;
+  justify-content: center;
+}
+.dashboard-graph-card {
+  width: 340px;
+  background: #f8f7fc;
+  border-radius: 14px;
+  box-shadow: 0 2px 8px 0 rgba(80,80,120,0.06);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 /* 반응형 디자인 */
 @media (max-width: 768px) {
     .admin-dashboard-container { padding: 15px; }

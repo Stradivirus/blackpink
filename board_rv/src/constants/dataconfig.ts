@@ -138,3 +138,27 @@ export const industryPrefixMap: Record<string, string> = {
   금융: "F",
   유통: "D",
 };
+
+// 컬러맵 및 데이터 키 상수 추가 (DashboardSummaryGraphs.tsx에서 이동)
+export const planColors: Record<string, string> = {
+  베이직: "#764ba2",
+  프로: "#e67e22",
+  엔터프라이즈: "#3498db",
+  미지정: "#888"
+};
+export const riskColors: Record<string, string> = {
+  LOW: "#3498db",
+  MEDIUM: "#f1c40f",
+  HIGH: "#e74c3c"
+};
+export const osColors: Record<string, string> = {
+  Windows: "#3498db",
+  Linux: "#f1c40f",
+  macOS: "#9b59b6",
+  iOS: "#e67e22",
+  Android: "#16a085",
+  미지정: "#888"
+};
+export const securityOrder = ["LOW", "MEDIUM", "HIGH", "미지정"];
+export const bizPlanKeys = ["베이직", "프로", "엔터프라이즈"] as const;
+export const secLevelKeys = ["LOW", "MEDIUM", "HIGH"] as const;
