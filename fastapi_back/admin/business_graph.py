@@ -1,3 +1,6 @@
+import matplotlib
+matplotlib.use('Agg')  # 서버 환경에서 Tkinter 에러 방지
+
 from fastapi import APIRouter
 import pandas as pd
 import numpy as np

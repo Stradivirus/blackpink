@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from db import member_collection, dev_collection, incident_collection, companies_collection
+from db import dev_collection, incident_collection, companies_collection
 from datetime import datetime, timedelta
 from collections import defaultdict, Counter
 import pandas as pd
