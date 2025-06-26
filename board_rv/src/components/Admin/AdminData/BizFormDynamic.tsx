@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { columnsByTeam, selectOptions } from "../../../constants/dataconfig";
 import { isDateField, handleChangeFactory } from "./TeamFormDynamic";
+import axios from "axios";
+import { API_URLS } from "../../../api/urls";
 
 interface BizFormProps {
   initialData?: Record<string, any>;
@@ -16,6 +18,29 @@ const BizFormDynamic: React.FC<BizFormProps> = ({ initialData = {}, onChange }) 
     });
     return init;
   });
+
+  // 업종이 선택되면 회사코드 자동 할당
+  useEffect(() => {
+    const fetchCompanyId = async () => {
+      if (formData["industry"] && !formData["company_id"]) {
+        try {
+          const res = await axios.get(
+            `${API_URLS.BIZ}/next-company-id?industry=${encodeURIComponent(formData["industry"])}`
+          );
+          if (res.data?.next_company_id) {
+            setFormData((prev) => ({
+              ...prev,
+              company_id: res.data.next_company_id,
+            }));
+          }
+        } catch (e) {
+          // 에러 무시 또는 필요시 처리
+        }
+      }
+    };
+    fetchCompanyId();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formData["industry"]]);
 
   useEffect(() => {
     if (initialData && Object.keys(initialData).length > 0) {
@@ -43,6 +68,7 @@ const BizFormDynamic: React.FC<BizFormProps> = ({ initialData = {}, onChange }) 
           value={formData["company_id"]}
           onChange={(e) => handleChange("company_id", e.target.value)}
           placeholder="회사코드 입력"
+          readOnly // 자동입력이므로 읽기전용 처리(원하면 제거)
         />
       </div>
       {/* 회사명 */}

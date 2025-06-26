@@ -4,10 +4,6 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 from matplotlib import font_manager as fm
-import matplotlib
-import io
-import plotly.express as px
-import plotly.io as pio
 import networkx as nx
 from db import incident_collection
 from .graph_utils import set_plot_style, image_response, save_fig_to_png
@@ -24,7 +20,6 @@ def get_dataframe():
     df['year'] = df['incident_date'].dt.year
     df['month'] = df['incident_date'].dt.month
     return df
-
 
 def set_font_all(ax, font_prop):
     ax.set_title(ax.get_title(), fontproperties=font_prop)
@@ -82,6 +77,12 @@ def plot_correl_threats_server(df, font_prop):
     set_font_all(ax, font_prop)
     return save_fig_to_png(fig, backend="matplotlib")
 
+def set_legend_font(ax, font_prop):
+    legend = ax.legend()
+    if legend:
+        for text in legend.get_texts():
+            text.set_fontproperties(font_prop)
+
 def plot_correl_risk_status(df, font_prop):
     fig, ax = plt.subplots(figsize=(10, 6))
     crosstab = pd.crosstab(df['risk_level'], df['status'])
@@ -91,9 +92,7 @@ def plot_correl_risk_status(df, font_prop):
     ax.set_ylabel("건수", fontproperties=font_prop)
     ax.tick_params(axis='x', rotation=45)
     set_font_all(ax, font_prop)
-    legend = ax.legend()
-    for text in legend.get_texts():
-        text.set_fontproperties(font_prop)
+    set_legend_font(ax, font_prop)
     return save_fig_to_png(fig, backend="matplotlib")
 
 def plot_correl_threat_action(df, font_prop):
@@ -127,21 +126,14 @@ def plot_correl_threat_handler(df, font_prop):
 def plot_threat_m(df, font_prop, threat_type):
     if threat_type is None:
         return None
-    # 상위 5개 위협 유형 추출
     top_threats = df['threat_type'].value_counts().nlargest(5).index.tolist()
-    color_map = {
-        top_threats[0]: "#F54343",
-        top_threats[1]: "#0C81F5",
-        top_threats[2]: "#F5A608",
-        top_threats[3]: "#08FA08",
-        top_threats[4]: "#7F09F5"
-    } if len(top_threats) >= 5 else {}
-    linestyle_map = {top_threats[i]: s for i, s in enumerate(["-", "--", "-", "--", (0, (5, 1))])} if len(top_threats) >= 5 else {}
+    default_colors = ["#F54343", "#0C81F5", "#F5A608", "#08FA08", "#7F09F5"]
+    color_map = {t: default_colors[i] for i, t in enumerate(top_threats)}
+    default_styles = ["-", "--", "-", "--", (0, (5, 1))]
+    linestyle_map = {t: default_styles[i] for i, t in enumerate(top_threats)}
     threat_df = df[df['threat_type'] == threat_type]
     if threat_df.empty:
         return None
-    import matplotlib.pyplot as plt
-    import seaborn as sns
     fig, ax = plt.subplots(figsize=(10, 6))
     monthly_counts = threat_df.groupby(['month']).size().reset_index(name='count')
     sns.lineplot(
@@ -156,7 +148,6 @@ def plot_threat_m(df, font_prop, threat_type):
     ax.set_xlabel("월", fontproperties=font_prop, fontsize=14)
     ax.set_ylabel("발생 횟수", fontproperties=font_prop, fontsize=14)
     ax.grid(True, alpha=0.3)
-    # x축 월 범위 자동 지정
     if not monthly_counts['month'].empty:
         ax.set_xticks(sorted(monthly_counts['month'].unique()))
     return save_fig_to_png(fig, backend="matplotlib")
@@ -239,6 +230,8 @@ def create_plot(graph_type, threat_type=None):
 @router.get("/api/security/graph/{graph_type}")
 async def plot(graph_type: str, threat_type: str = None):
     img_data = create_plot(graph_type, threat_type)
+    if img_data is None:
+        return JSONResponse(content={"error": "데이터가 없습니다."}, status_code=404)
     return image_response(img_data)
 
 @router.get("/api/security/graph/threat_types")
