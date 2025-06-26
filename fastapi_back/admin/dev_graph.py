@@ -32,6 +32,7 @@ def get_dataframe():
 def plot_os_version_by_os(df, font_prop):
     fig, ax = plt.subplots(figsize=(10, 6))
     version_counts = df.groupby(['os', 'os_versions']).size().unstack(fill_value=0)
+    version_counts = version_counts.sort_index()
     version_counts.plot(kind='bar', stacked=True, ax=ax)
     ax.set_title("OS별 버전 분포", fontproperties=font_prop)
     ax.set_xlabel("OS", fontproperties=font_prop)
@@ -43,6 +44,7 @@ def plot_os_version_by_os(df, font_prop):
 def plot_maintenance_by_os(df, font_prop):
     fig, ax = plt.subplots(figsize=(10, 6))
     version_counts = df.groupby(['os', 'maintenance']).size().unstack(fill_value=0)
+    version_counts = version_counts.sort_index()
     version_counts.plot(kind='bar', stacked=True, ax=ax)
     ax.set_title("OS별 관리 현황", fontproperties=font_prop)
     ax.set_xlabel("OS", fontproperties=font_prop)
@@ -54,19 +56,23 @@ def plot_maintenance_by_os(df, font_prop):
 def plot_dev_duration_by_os(df, font_prop):
     fig, ax = plt.subplots(figsize=(10, 6))
     df['dev_days'] = pd.to_numeric(df['dev_days'], errors='coerce')
-    sns.boxplot(data=df, x='os', y='dev_days', hue='os', ax=ax, palette="Set2", dodge=False, legend=False)
+
+        # Sort OS names alphabetically
+    os_order = sorted(df['os'].dropna().unique())
+    sns.boxplot(data=df, x='os', y='dev_days', ax=ax, palette="Set1", order=os_order)
     ax.set_title("OS별 개발기간", fontproperties=font_prop, fontsize=16)
     ax.set_xlabel("OS", fontproperties=font_prop, fontsize=12)
     ax.set_ylabel("개발기간 (일)", fontproperties=font_prop, fontsize=12)
-    plt.xticks(rotation=30)
+    plt.xticks(rotation=45)
     sns.despine()
     plt.tight_layout()
     return save_fig_to_png(fig)
 
 def plot_error_by_os(df, font_prop):
-    df_valid = df[df['error'].notnull()]
+    df_valid = df[(df['error'].notnull()) & (df['error'] != "에러 없음")]
     fig, ax = plt.subplots(figsize=(12, 6))
-    sns.countplot(data=df_valid, x='os', hue='error', ax=ax)
+    os_order = sorted(df_valid['os'].dropna().unique())
+    sns.countplot(data=df_valid, x='os', hue='error', ax=ax, order=os_order)
     ax.set_title("OS별 에러 유형 분포", fontproperties=font_prop)
     ax.set_xlabel("OS", fontproperties=font_prop)
     ax.set_ylabel("에러 수", fontproperties=font_prop)
