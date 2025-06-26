@@ -48,7 +48,6 @@ export function useAdminDataCrud(selectedTeam: string, fetchData?: () => void) {
   // 등록/수정 제출
   const handleSubmit = async (formData: any) => {
     try {
-<<<<<<< HEAD
       // console.log("formData:", formData); // 디버깅 출력 제거
       // 빈 문자열을 null로 변환, 날짜 필드는 빈 값이면 아예 삭제
       const processedData: any = {};
@@ -65,8 +64,6 @@ export function useAdminDataCrud(selectedTeam: string, fetchData?: () => void) {
         }
       });
 
-=======
->>>>>>> origin/admin_dev
       if (modalInitialData) {
         // 수정
         const itemId =
@@ -76,7 +73,6 @@ export function useAdminDataCrud(selectedTeam: string, fetchData?: () => void) {
             ? modalInitialData._id
             : String(modalInitialData._id);
         if (!itemId) throw new Error("수정할 데이터 ID가 없습니다.");
-<<<<<<< HEAD
 
         // console.log("수정 요청, ID:", itemId); // 디버깅 출력 제거
 
@@ -105,21 +101,6 @@ export function useAdminDataCrud(selectedTeam: string, fetchData?: () => void) {
         const data = await response.json();
         // console.log("등록 응답 데이터:", data);
 
-=======
-        const response = await fetch(`${endpoint}/${itemId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
-        });
-        if (!response.ok) throw new Error("수정 실패");
-      } else {
-        // 등록
-        const response = await fetch(endpoint, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
-        });
->>>>>>> origin/admin_dev
         if (!response.ok) throw new Error("등록 실패");
       }
       alert("저장되었습니다.");
@@ -127,18 +108,10 @@ export function useAdminDataCrud(selectedTeam: string, fetchData?: () => void) {
       setSelectedIds(new Set());
       fetchData?.();
     } catch (error) {
-<<<<<<< HEAD
-      console.error("handleSubmit 에러:", error);
-      alert("에러가 발생했습니다.");
-    }
-  };
-
-=======
       console.error(error);
       alert("에러가 발생했습니다.");
     }
   };
->>>>>>> origin/admin_dev
 
   // 삭제
   const handleDeleteClick = async (selectedIds: Set<string>) => {
