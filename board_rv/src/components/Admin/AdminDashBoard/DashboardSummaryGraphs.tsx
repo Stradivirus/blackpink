@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { API_URLS } from "../../api/urls";
+import { API_URLS } from "../../../api/urls";
 import {
   planColors,
   riskColors,
@@ -7,7 +7,7 @@ import {
   securityOrder,
   bizPlanKeys,
   secLevelKeys
-} from "../../constants/dataconfig";
+} from "../../../constants/dataconfig";
 import {
   Chart as ChartJS,
   CategoryScale,

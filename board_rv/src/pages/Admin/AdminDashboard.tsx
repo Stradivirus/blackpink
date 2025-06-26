@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import SecurityGraphs from "../../components/Admin/AdminDashBoard/SecurityGraphs";
 import BusinessGraphs from "../../components/Admin/AdminDashBoard/BusinessGraphs";
 import SysDevGraphs from "../../components/Admin/AdminDashBoard/SysDevGraphs";
-import DashboardSummaryGraphs, { TeamInfoPanels } from "../../components/Admin/DashboardSummaryGraphs";
+import DashboardSummaryGraphs, { TeamInfoPanels } from "../../components/Admin/AdminDashBoard/DashboardSummaryGraphs";
 import { teamList, securityGraphTypes } from "../../constants/dataconfig";
 import { API_URLS } from "../../api/urls";
 import "../../styles/admindashboard.css";
