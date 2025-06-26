@@ -9,10 +9,6 @@ interface TeamFormDynamicProps {
   onChange: (data: Record<string, any>) => void;
 }
 
-// 모든 값이 null/빈값/undefined가 아니어야 등록 가능
-const isAllFilled = (data: Record<string, any>) =>
-  Object.values(data).every((v) => v !== null && v !== undefined && v !== "");
-
 const TeamFormDynamic: React.FC<TeamFormDynamicProps> = ({ team, initialData, onChange }) => {
   if (team === "biz") {
     return <BizFormDynamic initialData={initialData} onChange={(d) => onChange(d)} />;

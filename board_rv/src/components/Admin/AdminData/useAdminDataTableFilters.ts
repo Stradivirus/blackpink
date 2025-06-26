@@ -35,7 +35,7 @@ export function useAdminDataTableFilters(data: any[], columns: any[], selectedTe
 
   // 필터 가능한 컬럼
   const filterableColumns =
-    columnsByTeam[selectedTeam]?.filter(
+    columns?.filter(
       (col) =>
         !excludedColumnsByTeam[selectedTeam]?.includes(col.key) &&
         !dateColumns.some((d) => d.key === col.key) &&

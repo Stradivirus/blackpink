@@ -102,7 +102,7 @@ const DashboardSummaryGraphs: React.FC = () => {
   const summary = data.summary;
 
   // 중복 dash 처리 함수
-  function makeDashDatasets<T>(
+  function makeDashDatasets(
     keys: string[],
     allDataArr: number[][],
     colorMap: Record<string, string>,

@@ -82,14 +82,10 @@ export function useAdminDataCrud(selectedTeam: string, fetchData?: () => void) {
           body: JSON.stringify(processedData),
         });
 
-        // console.log("수정 응답 status:", response.status);
-        const data = await response.json();
-        // console.log("수정 응답 데이터:", data);
+        await response.json();
 
         if (!response.ok) throw new Error("수정 실패");
       } else {
-        // 등록
-        // console.log("등록 요청, endpoint:", endpoint);
 
         const response = await fetch(endpoint, {
           method: "POST",
@@ -97,9 +93,7 @@ export function useAdminDataCrud(selectedTeam: string, fetchData?: () => void) {
           body: JSON.stringify(processedData),
         });
 
-        // console.log("등록 응답 status:", response.status);
-        const data = await response.json();
-        // console.log("등록 응답 데이터:", data);
+        await response.json();
 
         if (!response.ok) throw new Error("등록 실패");
       }

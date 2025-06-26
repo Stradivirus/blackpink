@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import type { Member } from "../../types/Member";
+import type { Member } from "../../types/users";
 import { API_URLS } from "../../api/urls";
 import UserList from "../../components/UserList";
 

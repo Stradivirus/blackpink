@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { columnsByTeam, selectOptions, statusOptions } from "../../../constants/dataconfig";
-import { isDateField, handleChangeFactory } from "./TeamFormDynamic";
+import { handleChangeFactory } from "./TeamFormDynamic";
 
 interface SecurityFormProps {
   initialData?: Record<string, any>;

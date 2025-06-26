@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { columnsByTeam, selectOptions, statusOptions, osVersionMap } from "../../../constants/dataconfig";
-import { isDateField, handleChangeFactory } from "./TeamFormDynamic";
 
 interface DevFormProps {
   initialData?: Record<string, any>;
