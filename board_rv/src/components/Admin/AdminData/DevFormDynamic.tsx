@@ -25,10 +25,12 @@ const DevFormDynamic: React.FC<DevFormProps> = ({ initialData = {}, onChange }) 
       .then((res) => res.json())
       .then((data) => {
         setCompanyOptions(
-          (data.biz || []).map((c: any) => ({
-            label: c.company_name,
-            value: c.company_id,
-          }))
+          (data.biz || [])
+            .filter((c: any) => typeof c.company_name === "string" && typeof c.company_id === "string")
+            .map((c: any) => ({
+              label: c.company_name,  
+              value: c.company_id,
+            }))
         );
       });
   }, []);
@@ -107,8 +109,10 @@ const DevFormDynamic: React.FC<DevFormProps> = ({ initialData = {}, onChange }) 
           }}
         >
           <option value="">선택</option>
-          {companyOptions.filter(opt => opt.label.includes(companySearch)).map((opt) => (
-            <option key={opt.value} value={opt.value}>{opt.label}</option>
+          {companyOptions
+            .filter(opt => typeof opt.label === "string" && opt.label.includes(companySearch))
+            .map((opt) => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
           ))}
         </select>
       </div>

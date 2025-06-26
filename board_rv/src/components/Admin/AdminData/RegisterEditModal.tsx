@@ -56,7 +56,7 @@ const RegisterEditModal: React.FC<RegisterEditModalProps> = ({
         >
           <TeamFormDynamic
             team={team}
-            initialData={initialData}
+            initialData={initialData || {}}
             onChange={setFormData}
           />
           <div className="admin-modal-btn-row">

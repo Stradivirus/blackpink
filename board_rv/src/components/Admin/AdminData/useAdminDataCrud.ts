@@ -46,41 +46,58 @@ export function useAdminDataCrud(selectedTeam: string, fetchData?: () => void) {
   };
 
   // 등록/수정 제출
-  const handleSubmit = async (formData: any) => {
-    try {
-      if (modalInitialData) {
-        // 수정
-        const itemId =
-          typeof modalInitialData._id === "object" && "$oid" in modalInitialData._id
-            ? modalInitialData._id.$oid
-            : typeof modalInitialData._id === "string"
-            ? modalInitialData._id
-            : String(modalInitialData._id);
-        if (!itemId) throw new Error("수정할 데이터 ID가 없습니다.");
-        const response = await fetch(`${endpoint}/${itemId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
-        });
-        if (!response.ok) throw new Error("수정 실패");
-      } else {
-        // 등록
-        const response = await fetch(endpoint, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
-        });
-        if (!response.ok) throw new Error("등록 실패");
-      }
-      alert("저장되었습니다.");
-      setModalVisible(false);
-      setSelectedIds(new Set());
-      fetchData?.();
-    } catch (error) {
-      console.error(error);
-      alert("에러가 발생했습니다.");
+const handleSubmit = async (formData: any) => {
+  try {
+    console.log("handleSubmit 호출, formData:", formData);
+    if (modalInitialData) {
+      // 수정
+      const itemId =
+        typeof modalInitialData._id === "object" && "$oid" in modalInitialData._id
+          ? modalInitialData._id.$oid
+          : typeof modalInitialData._id === "string"
+          ? modalInitialData._id
+          : String(modalInitialData._id);
+      if (!itemId) throw new Error("수정할 데이터 ID가 없습니다.");
+
+      console.log("수정 요청, ID:", itemId);
+
+      const response = await fetch(`${endpoint}/${itemId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      console.log("수정 응답 status:", response.status);
+      const data = await response.json();
+      console.log("수정 응답 데이터:", data);
+
+      if (!response.ok) throw new Error("수정 실패");
+    } else {
+      // 등록
+      console.log("등록 요청, endpoint:", endpoint);
+
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      console.log("등록 응답 status:", response.status);
+      const data = await response.json();
+      console.log("등록 응답 데이터:", data);
+
+      if (!response.ok) throw new Error("등록 실패");
     }
-  };
+    alert("저장되었습니다.");
+    setModalVisible(false);
+    setSelectedIds(new Set());
+    fetchData?.();
+  } catch (error) {
+    console.error("handleSubmit 에러:", error);
+    alert("에러가 발생했습니다.");
+  }
+};
+
 
   // 삭제
   const handleDeleteClick = async (selectedIds: Set<string>) => {
