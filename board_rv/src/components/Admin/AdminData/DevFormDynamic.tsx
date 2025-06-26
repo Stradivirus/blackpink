@@ -137,21 +137,6 @@ const DevFormDynamic: React.FC<DevFormProps> = ({ initialData = {}, onChange }) 
     }
   });
 
-  // dev_status 상태값
-  const devStatus = formData["dev_status"];
-  const endDate = formData["end_date_fin"];
-
-  // 상태별 필드 활성/비활성 로직
-  const isDevStop = devStatus === "개발 중지";
-  const isDevPlannedOrInProgress = ["개발 예정", "개발 진행중"].includes(devStatus);
-
-  // 종료일 필드 비활성 조건 (개발 예정, 진행중일 때 비활성)
-  const disableEndDate = isDevPlannedOrInProgress;
-
-  // 유지보수 및 에러 필드 비활성 조건
-  // const disableMaintErr = !endDate || isDevStop || isDevPlannedOrInProgress; // 기존 코드
-  const disableMaintErr = false; // 유지보수 항상 선택 가능
-
   // "에러" 필드: 수정 모드에서 비어 있으면 "에러 없음"으로 설정
   useEffect(() => {
     if (

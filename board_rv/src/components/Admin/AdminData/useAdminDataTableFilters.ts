@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from "react";
-import { columnsByTeam, dateColumnsByTeam, osVersionMap } from "../../../constants/dataconfig";
+import { dateColumnsByTeam, osVersionMap } from "../../../constants/dataconfig";
 
 export function useAdminDataTableFilters(data: any[], columns: any[], selectedTeam: string) {
   const dateColumns = dateColumnsByTeam[selectedTeam] || [];
