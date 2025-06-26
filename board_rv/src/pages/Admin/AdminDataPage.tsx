@@ -8,7 +8,7 @@ import type { TeamData } from "../../types/CompanyData";
 import "../../styles/AdminDataPage.css";
 
 const AdminDataPage: React.FC = () => {
-  const [data, setData] = useState<any[]>([]);
+  const [data, setData] = useState<TeamData[]>([]);
   const [loading, setLoading] = useState(true);
 
   const location = useLocation();
@@ -42,9 +42,7 @@ const AdminDataPage: React.FC = () => {
 
     fetch(fetchUrl)
       .then((res) => {
-        if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`);
-        }
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         return res.json();
       })
       .then((res) => {
@@ -72,13 +70,12 @@ const AdminDataPage: React.FC = () => {
         });
 
         setData(result);
-        setLoading(false);
       })
       .catch((error) => {
         console.error("데이터 로딩 중 오류 발생:", error);
         setData([]);
-        setLoading(false);
-      });
+      })
+      .finally(() => setLoading(false));
   }, [selectedTeam, navigate]);
 
   useEffect(() => {

@@ -216,7 +216,7 @@ const AdminDataTable: React.FC<AdminDataTableProps> = ({
           )}
         </div>
 
-        {(selectedTeam === "biz" || selectedTeam === "dev" || selectedTeam === "security") && ( 
+        {["biz", "dev", "security"].includes(selectedTeam) && ( 
           <div className="admin-data-table-search-area-relative">
             <div className="total-count-independent">
               총 개수 : {filteredData.length}개
