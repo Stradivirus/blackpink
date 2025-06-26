@@ -94,71 +94,48 @@ def plot_error_by_os(df, font_prop):
     ax.legend(title='에러 유형', prop=font_prop)
     return save_to_png(fig)
 
-def scatter_dev_days_by_handler_count(df):
-    df = df[df['dev_days'].notnull() & df['handler_count'].notnull()]
+def scatter_dev_days_by_handler_count(df, font_prop):
+    # Keep only rows with valid dev_days and handler_count
+    df_valid = df[df['dev_days'].notnull() & df['handler_count'].notnull()]
 
-    # Create base figure with all data
-    fig = px.scatter(
-        df,
-        x="handler_count",
-        y="dev_days",
-        color="os",
-        hover_data=["company_name", "dev_status"],
-        title="담당 인원 수와 개발기간 관계 (OS별 필터 가능)",
-        labels={
-            "handler_count": "담당 인원 수",
-            "dev_days": "개발기간 (일)"
-        }
+    # Set clean seaborn theme
+    sns.set(style="whitegrid", palette="Set2", font="NanumGothic")
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+
+    # Scatter plot with optional hue (e.g. OS)
+    sns.scatterplot(
+        data=df_valid,
+        x='handler_count',
+        y='dev_days',
+        hue='os',          # Can change to 'dev_status' if preferred
+        palette='Set2',
+        alpha=0.7,
+        s=80,               # marker size
+        ax=ax
     )
 
-    # Create dropdown buttons for each OS
-    os_list = df["os"].dropna().unique().tolist()
-    buttons = []
-
-    for os_name in os_list:
-        visible = df["os"] == os_name
-        button = dict(
-            label=os_name,
-            method="update",
-            args=[
-                {"x": [df[visible]["handler_count"]],
-                "y": [df[visible]["dev_days"]],
-                "hovertext": [df[visible]["company_name"]],
-                "marker": {"color": px.colors.qualitative.Set2[os_list.index(os_name) % 8]}},
-                {"title": f"담당 인원 수와 개발기간 관계 — {os_name}"}
-            ]
-        )
-        buttons.append(button)
-
-    # Add a button to show all OS
-    buttons.insert(0, dict(
-        label="모두 보기",
-        method="update",
-        args=[
-            {"x": [df["handler_count"]],
-            "y": [df["dev_days"]],
-            "hovertext": [df["company_name"]],
-            "marker": {"color": "lightgrey"}},
-            {"title": "담당 인원 수와 개발기간 관계 (전체)"}
-        ]
-    ))
-
-    # Update layout with dropdown
-    fig.update_layout(
-        updatemenus=[dict(
-            buttons=buttons,
-            direction="down",
-            x=1.15,
-            y=1,
-            showactive=True
-        )],
-        xaxis=dict(title="담당 인원 수"),
-        yaxis=dict(title="개발기간 (일)"),
-        margin=dict(t=50, b=50, l=50, r=50)
+    # Optional: Add a regression line for general trend
+    sns.regplot(
+        data=df_valid,
+        x='handler_count',
+        y='dev_days',
+        scatter=False,
+        ax=ax,
+        line_kws={"color": "gray", "linestyle": "--"}
     )
 
-    fig.show()
+    # Titles and labels
+    ax.set_title("담당 인원 수와 개발기간 관계", fontproperties=font_prop, fontsize=16)
+    ax.set_xlabel("담당 인원 수", fontproperties=font_prop, fontsize=12)
+    ax.set_ylabel("개발기간 (일)", fontproperties=font_prop, fontsize=12)
 
+    # Style tweaks
+    ax.legend(title="OS", bbox_to_anchor=(1.05, 1), loc='upper left', prop=font_prop)
+    sns.despine()
+    plt.tight_layout()
+
+    return save_to_png(fig)
 
 
 

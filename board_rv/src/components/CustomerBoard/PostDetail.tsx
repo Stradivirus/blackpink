@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {useParams, Link, useNavigate} from "react-router-dom";
+import {useParams, Link, useNavigate, useLocation} from "react-router-dom";
 import type {Post} from "../../types/Board";
 import {API_URLS} from "../../api/urls";
 import {useAuth} from "../../context/AuthContext";
@@ -97,6 +97,9 @@ const ConfirmModal: React.FC<{
 
 const PostDetail: React.FC = () => {
     const {id} = useParams<{ id: string }>();
+    const location = useLocation();
+    const query = new URLSearchParams(location.search);
+    const page = query.get("page") || "0";
     const [post, setPost] = useState<Post | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
@@ -147,7 +150,7 @@ const PostDetail: React.FC = () => {
                 <div className="board-detail-container">
                     <div className="error-message">{error}</div>
                     <div className="board-detail-btn-group board-detail-btn-group-right">
-                        <Link to="/postpage" className="board-btn cancel">목록으로</Link>
+                        <Link to={`/postpage?page=${page}`} className="board-btn cancel">목록으로</Link>
                     </div>
                 </div>
             </>
@@ -175,7 +178,7 @@ const PostDetail: React.FC = () => {
                 <div className="board-detail-content board-detail-content-bg">
                     {post.content}
                 </div>
-                {user && String(user.userId) === post.writerId ? ( // userId로 비교
+                {user && String(user.userId) === post.writerId ? (
                     <div className="board-detail-btn-group board-detail-btn-group-right">
                         <Link to={`/posts/${post.id}/edit`}>
                             <button className="board-btn">수정</button>
@@ -187,11 +190,11 @@ const PostDetail: React.FC = () => {
                         >
                             {isDeleting ? "삭제 중..." : "삭제"}
                         </button>
-                        <Link to="/postpage" className="board-btn cancel">목록으로</Link>
+                        <Link to={`/postpage?page=${page}`} className="board-btn cancel">목록으로</Link>
                     </div>
                 ) : (
                     <div className="board-detail-btn-group board-detail-btn-group-right">
-                        <Link to="/postpage" className="board-btn cancel">목록으로</Link>
+                        <Link to={`/postpage?page=${page}`} className="board-btn cancel">목록으로</Link>
                     </div>
                 )}
                 <ConfirmModal

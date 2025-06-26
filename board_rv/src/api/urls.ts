@@ -22,14 +22,17 @@ export const API_URLS = {
     // 대시보드
     GCI_RANKINGS: `${API_BASE}/gci_rankings`,
     RISKY_COUNTRIES_MAP: `${API_BASE}/risky_countries/map_data`,
+    DASHBOARD_SUMMARY: `${API_BASE}/dashboard/summary`,
     // 그래프
     SECURITY_GRAPH: `${API_BASE}/security/graph`,
     BUSINESS_GRAPH: `${API_BASE}/business/graph`,
     DEV_GRAPH: `${API_BASE}/dev/graph`,
-
     // 관리자/멤버 관련
     ADMIN_LIST: `${API_BASE}/admin/list`,
     MEMBER_LIST: `${API_BASE}/member/list`,
+    CHANGE_NICKNAME: `${API_BASE}/change-nickname`,
+    ADMIN_DELETE: `${API_BASE}/admin/delete`,
+    MEMBER_DELETE: `${API_BASE}/member/delete`,
 };
 
 export const getCrudEndpoint = (selectedTeam: string): string => {

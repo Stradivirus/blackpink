@@ -21,6 +21,7 @@ export const threatTypes = [
 // 보안팀 그래프 타입 정의
 export const securityGraphTypes = [
   { type: "threat_m", label: "월별 침해 현황" },
+  { type: "manpower", label: "처리기간 vs 투입인원" },
   { type: "risk", label: "위험 등급 비율" },
   { type: "threat_y", label: "연도별 침해 현황" },
   { type: "processed_threats", label: "처리된 위협 종류" },
@@ -28,7 +29,6 @@ export const securityGraphTypes = [
   { type: "correl_risk_status", label: "위협 등급별 처리 현황" },
   { type: "correl_threat_action", label: "위협 유형과 조치 방법" },
   { type: "correl_threat_handler", label: "위협 유형별 필요 인원" },
-  { type: "manpower", label: "처리기간 vs 투입인원" }
 ];
 
 // 각 팀별 컬럼 정의
@@ -57,7 +57,8 @@ export const columnsByTeam: Record<string, { key: string; label: string }[]> = {
     { key: "handler_count", label: "담당자 수" },
   ],
   security: [
-    { key: "company_id", label: "회사명" }, // 기존: label: "company_id"
+    { key: "company_id", label: "회사코드" }, // 기존: label: "company_id" 
+    // { key: "company_name", label: "회사명" }, 추가예정
     { key: "threat_type", label: "위협 유형" },
     { key: "risk_level", label: "위험 등급" },
     { key: "server_type", label: "서버 종류" },
