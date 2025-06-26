@@ -33,7 +33,6 @@ const SecurityFormDynamic: React.FC<SecurityFormProps> = ({ initialData = {}, on
   }, []);
 
   useEffect(() => {
-    // 수정 모드(값이 있을 때)만 setFormData 실행
     if (initialData && Object.keys(initialData).length > 0) {
       const init: Record<string, any> = {};
       columns.forEach(({ key }) => {
@@ -41,7 +40,6 @@ const SecurityFormDynamic: React.FC<SecurityFormProps> = ({ initialData = {}, on
       });
       setFormData(init);
     }
-    // 등록 모드(빈 객체, undefined)일 때는 setFormData 실행하지 않음
   }, [initialData]);
 
   useEffect(() => {
@@ -51,102 +49,163 @@ const SecurityFormDynamic: React.FC<SecurityFormProps> = ({ initialData = {}, on
   const handleChange = handleChangeFactory(setFormData);
 
   return (
-    <>
-      {columns.map(({ key, label }) => {
-        if (key === "company_id") {
-          const filteredOptions = companyOptions.filter((opt) => opt.label.includes(companySearch));
-          return (
-            <div key={key} style={{ marginBottom: 12 }}>
-              <label>회사명</label>
-              <input
-                type="text"
-                placeholder="회사명 검색"
-                value={companySearch}
-                onChange={e => setCompanySearch(e.target.value)}
-                style={{ marginRight: 8 }}
-              />
-              <select
-                value={formData[key]}
-                onChange={e => {
-                  const selected = companyOptions.find(opt => opt.value === e.target.value);
-                  setFormData(prev => ({
-                    ...prev,
-                    company_id: selected ? selected.value : "",
-                    company_name: selected ? selected.label : "",
-                  }));
-                }}
-              >
-                <option value="">선택</option>
-                {filteredOptions.map((opt) => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
-                ))}
-              </select>
-            </div>
-          );
-        }
-        if (key === "company_name") return null;
-        if (key === "status") {
-          const options = statusOptions["security"] || [];
-          return (
-            <div key={key} style={{ marginBottom: 12 }}>
-              <label>{label}</label>
-              <select
-                value={formData[key]}
-                onChange={e => handleChange(key, e.target.value)}
-              >
-                <option value="">선택</option>
-                {options.map((opt) => (
-                  <option key={opt} value={opt}>{opt}</option>
-                ))}
-              </select>
-            </div>
-          );
-        }
-        if (key === "handler_count") {
-          return (
-            <div key={key} style={{ marginBottom: 12 }}>
-              <label>{label}</label>
-              <select
-                value={formData[key]}
-                onChange={e => handleChange(key, e.target.value)}
-              >
-                <option value="">선택</option>
-                {[...Array(10)].map((_, i) => (
-                  <option key={i + 1} value={i + 1}>{i + 1}</option>
-                ))}
-              </select>
-            </div>
-          );
-        }
-        if (selectOptions[key]) {
-          return (
-            <div key={key} style={{ marginBottom: 12 }}>
-              <label>{label}</label>
-              <select
-                value={formData[key]}
-                onChange={e => handleChange(key, e.target.value)}
-              >
-                <option value="">선택</option>
-                {selectOptions[key].map((opt) => (
-                  <option key={opt} value={opt}>{opt}</option>
-                ))}
-              </select>
-            </div>
-          );
-        }
-        return (
-          <div key={key} style={{ marginBottom: 12 }}>
-            <label>{label}</label>
-            <input
-              type={isDateField(key) ? "date" : "text"}
-              value={formData[key]}
-              onChange={e => handleChange(key, e.target.value)}
-              min={key === "handled_date" && formData["incident_date"] ? formData["incident_date"] : undefined}
-            />
-          </div>
-        );
-      })}
-    </>
+    <div className="admin-modal-form-grid">
+      {/* 회사명 검색 */}
+      <div className="admin-modal-form-field">
+        <label>회사명 검색</label>
+        <input
+          type="text"
+          placeholder="회사명 검색"
+          value={companySearch}
+          onChange={(e) => setCompanySearch(e.target.value)}
+        />
+      </div>
+      {/* 회사명 선택 */}
+      <div className="admin-modal-form-field">
+        <label>회사명 선택</label>
+        <select
+          value={formData["company_id"]}
+          onChange={(e) => {
+            const selected = companyOptions.find((opt) => opt.value === e.target.value);
+            setFormData((prev) => ({
+              ...prev,
+              company_id: selected ? selected.value : "",
+              company_name: selected ? selected.label : "",
+            }));
+          }}
+        >
+          <option value="">선택</option>
+          {companyOptions
+            .filter((opt) => opt.label.includes(companySearch))
+            .map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+        </select>
+      </div>
+
+      {/* 위협유형 */}
+      <div className="admin-modal-form-field">
+        <label>위협유형</label>
+        <select
+          value={formData["threat_type"]}
+          onChange={(e) => handleChange("threat_type", e.target.value)}
+        >
+          <option value="">선택</option>
+          {(selectOptions["threat_type"] || []).map((opt) => (
+            <option key={opt} value={opt}>
+              {opt}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* 위험등급 */}
+      <div className="admin-modal-form-field">
+        <label>위험등급</label>
+        <select
+          value={formData["risk_level"]}
+          onChange={(e) => handleChange("risk_level", e.target.value)}
+        >
+          <option value="">선택</option>
+          {(selectOptions["risk_level"] || []).map((opt) => (
+            <option key={opt} value={opt}>
+              {opt}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* 서버종류 */}
+      <div className="admin-modal-form-field">
+        <label>서버종류</label>
+        <select
+          value={formData["server_type"]}
+          onChange={(e) => handleChange("server_type", e.target.value)}
+        >
+          <option value="">선택</option>
+          {(selectOptions["server_type"] || []).map((opt) => (
+            <option key={opt} value={opt}>
+              {opt}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div className="admin-modal-form-field" />
+
+      {/* 사건일자 */}
+      <div className="admin-modal-form-field">
+        <label>사건일자</label>
+        <input
+          type="date"
+          value={formData["incident_date"]}
+          onChange={(e) => handleChange("incident_date", e.target.value)}
+        />
+      </div>
+
+      {/* 처리일자 */}
+      <div className="admin-modal-form-field">
+        <label>처리일자</label>
+        <input
+          type="date"
+          value={formData["handled_date"]}
+          onChange={(e) => handleChange("handled_date", e.target.value)}
+          min={formData["incident_date"] || undefined}
+        />
+      </div>
+
+      {/* 상태 */}
+      <div className="admin-modal-form-field">
+        <label>상태</label>
+        <select
+          value={formData["status"]}
+          onChange={(e) => handleChange("status", e.target.value)}
+        >
+          <option value="">선택</option>
+          {(statusOptions["security"] || []).map((opt) => (
+            <option key={opt} value={opt}>
+              {opt}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* 조치 */}
+      <div className="admin-modal-form-field">
+        <label>조치</label>
+        <select
+          value={formData["action"]}
+          onChange={(e) => handleChange("action", e.target.value)}
+        >
+          <option value="">선택</option>
+          {(selectOptions["action"] || []).map((opt) => (
+            <option key={opt} value={opt}>
+              {opt}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* 처리인원 수 */}
+      <div className="admin-modal-form-field">
+        <label>처리인원 수</label>
+        <select
+          value={formData["handler_count"]}
+          onChange={(e) => handleChange("handler_count", e.target.value)}
+        >
+          <option value="">선택</option>
+          {[...Array(10).keys()]
+            .map((num) => num + 1)
+            .map((num) => (
+              <option key={num} value={num}>
+                {num}
+              </option>
+            ))}
+        </select>
+      </div>
+      <div className="admin-modal-form-field" />
+    </div>
   );
 };
 

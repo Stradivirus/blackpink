@@ -117,7 +117,7 @@ export const actions = [
 
 export const statusOptions = {
   biz: ["진행중", "만료", "해지"],
-  dev: ["정상", "중지", "만료"],
+  dev: ["개발 예정", "개발 진행중", "개발 중지", "개발 완료"],
   security: ["진행중", "처리완료"],
 };
 
@@ -129,6 +129,8 @@ export const selectOptions: Record<string, string[]> = {
   threat_type: threatTypes,
   server_type: serverTypes,
   action: actions,
+  maintenance: ["정상 운영중", "점검 예정", "점검 진행중", "장애 발생"],
+  error: ["에러 없음", "서버 에러", "외부 에러", "네트워크 에러", "데이터베이스 에러", "클라이언트 에러"],
   // 필요시 추가
 };
 

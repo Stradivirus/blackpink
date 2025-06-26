@@ -18,7 +18,6 @@ const BizFormDynamic: React.FC<BizFormProps> = ({ initialData = {}, onChange }) 
   });
 
   useEffect(() => {
-    // 수정 모드(값이 있을 때)만 setFormData 실행
     if (initialData && Object.keys(initialData).length > 0) {
       const init: Record<string, any> = {};
       columns.forEach(({ key }) => {
@@ -26,113 +25,119 @@ const BizFormDynamic: React.FC<BizFormProps> = ({ initialData = {}, onChange }) 
       });
       setFormData(init);
     }
-    // 등록 모드(빈 객체)일 때는 setFormData 실행하지 않음
-  }, [initialData]); // columns는 의존성에서 제거
+  }, [initialData]);
 
   useEffect(() => {
     onChange(formData);
   }, [formData, onChange]);
 
-  const handleIndustryChange = async (value: string) => {
-    setFormData((prev) => ({ ...prev, industry: value, company_id: "" })); // 업종 바꿀 때 company_id만 초기화, 나머지 값 보존
-    if (value) {
-      try {
-        const res = await fetch(`/api/biz/next-company-id?industry=${encodeURIComponent(value)}`);
-        const data = await res.json();
-        if (data.next_company_id) {
-          setFormData((prev) => ({ ...prev, company_id: data.next_company_id })); // 기존 값 보존
-        }
-      } catch (e) {}
-    }
-  };
-
-  // 등록/수정 모드 구분
-  const isEdit = initialData && Object.keys(initialData).length > 0;
-
   const handleChange = handleChangeFactory(setFormData);
 
   return (
-    <>
-      {columns.map(({ key, label }) => {
-        // company_id: 등록 시에는 입력 가능, 수정 시에는 읽기전용
-        if (key === "company_id") {
-          return (
-            <div key={key} style={{ marginBottom: 12 }}>
-              <label>{label}</label>
-              <input
-                type="text"
-                value={formData[key]}
-                placeholder="업종 선택 시 자동 생성"
-                readOnly={isEdit}
-                onChange={!isEdit ? (e) => handleChange(key, e.target.value) : undefined}
-              />
-            </div>
-          );
-        }
-        // company_name: 등록/수정 모두 입력 가능, 조건 없이
-        if (key === "company_name") {
-          return (
-            <div key={key} style={{ marginBottom: 12 }}>
-              <label>{label}</label>
-              <input
-                type="text"
-                value={formData[key]}
-                onChange={e => handleChange(key, e.target.value)}
-                placeholder="회사명을 입력하세요"
-              />
-            </div>
-          );
-        }
-        // industry: 업종 선택 시 company_id 자동 할당
-        if (key === "industry") {
-          return (
-            <div key={key} style={{ marginBottom: 12 }}>
-              <label>{label}</label>
-              <select
-                value={formData[key]}
-                onChange={e => handleIndustryChange(e.target.value)}
-              >
-                <option value="">선택</option>
-                {selectOptions[key].map((opt) => (
-                  <option key={opt} value={opt}>{opt}</option>
-                ))}
-              </select>
-            </div>
-          );
-        }
-        // plan, status: 항상 선택 가능
-        if (["plan", "status"].includes(key)) {
-          const options = key === "status" ? (selectOptions[key].length > 0 ? selectOptions[key] : ["진행중", "만료", "해지"]) : selectOptions[key];
-          return (
-            <div key={key} style={{ marginBottom: 12 }}>
-              <label>{label}</label>
-              <select
-                value={formData[key]}
-                onChange={e => handleChange(key, e.target.value)}
-              >
-                <option value="">선택</option>
-                {options.map((opt) => (
-                  <option key={opt} value={opt}>{opt}</option>
-                ))}
-              </select>
-            </div>
-          );
-        }
-        // 날짜 관련 필드: 항상 입력 가능
-        return (
-          <div key={key} style={{ marginBottom: 12 }}>
-            <label>{label}</label>
-            <input
-              type={isDateField(key) ? "date" : "text"}
-              value={formData[key]}
-              onChange={e => handleChange(key, e.target.value)}
-              min={key === "contract_end" && formData["contract_start"] ? formData["contract_start"] : undefined}
-            />
-          </div>
-        );
-      })}
-    </>
-  );
+    <div className="admin-modal-form-grid">
+      {/* 회사코드 */}
+      <div className="admin-modal-form-field">
+        <label>회사코드</label>
+        <input
+          type="text"
+          value={formData["company_id"]}
+          onChange={(e) => handleChange("company_id", e.target.value)}
+          placeholder="회사코드 입력"
+        />
+      </div>
+      {/* 회사명 */}
+      <div className="admin-modal-form-field">
+        <label>회사명</label>
+        <input
+          type="text"
+          value={formData["company_name"]}
+          onChange={(e) => handleChange("company_name", e.target.value)}
+          placeholder="회사명 입력"
+        />
+      </div>
+
+      {/* 업종 */}
+      <div className="admin-modal-form-field">
+        <label>업종</label>
+        <select
+          value={formData["industry"]}
+          onChange={(e) => handleChange("industry", e.target.value)}
+        >
+          <option value="">선택</option>
+          {selectOptions["industry"].map((opt) => (
+            <option key={opt} value={opt}>{opt}</option>
+          ))}
+        </select>
+      </div>
+      {/* 플랜 */}
+      <div className="admin-modal-form-field">
+        <label>플랜</label>
+        <select
+          value={formData["plan"]}
+          onChange={(e) => handleChange("plan", e.target.value)}
+        >
+          <option value="">선택</option>
+          {selectOptions["plan"].map((opt) => (
+            <option key={opt} value={opt}>{opt}</option>
+          ))}
+        </select>
+      </div>
+
+      {/* 계약 시작일 */}
+      <div className="admin-modal-form-field">
+        <label>계약 시작일</label>
+        <input
+          type="date"
+          value={formData["contract_start"]}
+          onChange={(e) => handleChange("contract_start", e.target.value)}
+        />
+      </div>
+      {/* 계약 종료일 */}
+      <div className="admin-modal-form-field">
+        <label>계약 종료일</label>
+        <input
+          type="date"
+          value={formData["contract_end"]}
+          onChange={(e) => handleChange("contract_end", e.target.value)}
+          min={formData["contract_start"] || undefined}
+        />
+      </div>
+
+    {/* 상태: 한 칸만 차지 */}
+    <div className="admin-modal-form-field">
+      <label>상태</label>
+      <select
+        value={formData["status"]}
+        onChange={(e) => handleChange("status", e.target.value)}
+      >
+        <option value="">선택</option>
+        {selectOptions["status"].map((opt) => (
+          <option key={opt} value={opt}>{opt}</option>
+        ))}
+      </select>
+    </div>
+
+    {/* 담당자명과 연락처: 2칸 합쳐서 한 줄 */}
+    <div className="admin-modal-form-field" style={{ gridColumn: "1 / span 1" }}>
+      <label>담당자명</label>
+      <input
+        type="text"
+        value={formData["handler_name"]}
+        onChange={(e) => handleChange("handler_name", e.target.value)}
+        placeholder="담당자명 입력"
+      />
+    </div>
+    <div className="admin-modal-form-field" style={{ gridColumn: "2 / span 1" }}>
+      <label>담당자 연락처</label>
+      <input
+        type="text"
+        value={formData["handler_contact"]}
+        onChange={(e) => handleChange("handler_contact", e.target.value)}
+        placeholder="담당자 연락처 입력"
+      />
+    </div>
+  </div>
+);
 };
 
 export default BizFormDynamic;
