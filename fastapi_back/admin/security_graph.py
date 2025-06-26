@@ -134,14 +134,17 @@ def plot_correl_threat_handler(df, font_prop):
         G.add_node(f"{row['handler_count']}명")
         G.add_edge(row['threat_type'], f"{row['handler_count']}명")
     pos = nx.spring_layout(G, seed=42)
-    font_name = font_prop.get_name()
     node_colors = ['#FF9999' if node in df['threat_type'].unique() else 'skyblue' for node in G.nodes()]
     nx.draw_networkx_nodes(G, pos, node_color=node_colors, node_size=2000, ax=ax)
     nx.draw_networkx_edges(G, pos, ax=ax)
     labels = {node: node for node in G.nodes()}
     label_colors = {node: ('red' if node in df['threat_type'].unique() else 'black') for node in G.nodes()}
     for node, (x, y) in pos.items():
-        ax.text(x, y, labels[node], fontsize=12, fontfamily=font_name, ha='center', va='center', color=label_colors[node])
+        ax.text(
+            x, y, labels[node], fontsize=12,
+            fontproperties=font_prop,  # 한글 폰트 적용
+            ha='center', va='center', color=label_colors[node]
+        )
     ax.set_title('위협 유형별 투입 인원', fontproperties=font_prop)
     return save_fig_to_png(fig, backend="matplotlib")
 
