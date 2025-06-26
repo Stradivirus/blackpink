@@ -198,7 +198,9 @@ html {  /* 스크롤바 항상 유지시켜 화면 고정*/
     position: absolute;
     bottom: 100%;
     right: 0;
-    font-size: 25px;
+    font-size: 1.6rem;
+    font-weight: 800;
+    letter-spacing: 1px;
     color: #000;
     white-space: nowrap;
     margin-bottom: 15px;
