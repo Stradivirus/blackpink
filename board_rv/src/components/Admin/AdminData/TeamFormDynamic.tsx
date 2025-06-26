@@ -15,13 +15,13 @@ const isAllFilled = (data: Record<string, any>) =>
 
 const TeamFormDynamic: React.FC<TeamFormDynamicProps> = ({ team, initialData, onChange }) => {
   if (team === "biz") {
-    return <BizFormDynamic initialData={initialData} onChange={(d) => isAllFilled(d) && onChange(d)} />;
+    return <BizFormDynamic initialData={initialData} onChange={(d) => onChange(d)} />;
   }
   if (team === "security") {
-    return <SecurityFormDynamic initialData={initialData} onChange={(d) => isAllFilled(d) && onChange(d)} />;
+    return <SecurityFormDynamic initialData={initialData} onChange={(d) => onChange(d)} />;
   }
   if (team === "dev") {
-    return <DevFormDynamic initialData={initialData} onChange={(d) => isAllFilled(d) && onChange(d)} />;
+    return <DevFormDynamic initialData={initialData} onChange={(d) => onChange(d)} />;
   }
   return null;
 };
