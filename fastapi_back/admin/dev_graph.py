@@ -1,28 +1,28 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Response
 from models import Project
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+from matplotlib import font_manager as fm
+import io
 from db import dev_collection
-from .graph_utils import set_plot_style, image_response, save_fig_to_png
+from .graph_utils import set_plot_style, save_fig_to_png, image_response
 
-router = APIRouter()  # prefix 제거
+router = APIRouter()
 collection = dev_collection
 
 def get_dataframe():
     data = list(collection.find())
     if not data:
         return pd.DataFrame()
-    # Pydantic 모델로 검증
     projects = []
     for d in data:
         try:
-            # _id 등 불필요한 필드는 제거
             d.pop('_id', None)
             project = Project(**d)
             projects.append(project.dict())
         except Exception:
-            continue  # 검증 실패시 무시
+            continue
     if not projects:
         return pd.DataFrame()
     df = pd.DataFrame(projects)
@@ -32,58 +32,81 @@ def get_dataframe():
 def plot_os_version_by_os(df, font_prop):
     fig, ax = plt.subplots(figsize=(10, 6))
     version_counts = df.groupby(['os', 'os_versions']).size().unstack(fill_value=0)
+    version_counts = version_counts.sort_index()
     version_counts.plot(kind='bar', stacked=True, ax=ax)
     ax.set_title("OS별 버전 분포", fontproperties=font_prop)
     ax.set_xlabel("OS", fontproperties=font_prop)
     ax.set_ylabel("Count", fontproperties=font_prop)
-    ax.legend(title="OS Version", bbox_to_anchor=(1.05, 1), loc='upper left', prop=font_prop, title_fontproperties=font_prop)
-    for label in ax.get_xticklabels():
-        label.set_fontproperties(font_prop)
-    for label in ax.get_yticklabels():
-        label.set_fontproperties(font_prop)
-    return save_fig_to_png(fig, backend="matplotlib")
+    ax.legend(title="OS Version", bbox_to_anchor=(1.05, 1), loc='upper left', prop=font_prop)
+    plt.xticks(rotation=45)
+    return save_fig_to_png(fig)
 
 def plot_maintenance_by_os(df, font_prop):
     fig, ax = plt.subplots(figsize=(10, 6))
     version_counts = df.groupby(['os', 'maintenance']).size().unstack(fill_value=0)
+    version_counts = version_counts.sort_index()
     version_counts.plot(kind='bar', stacked=True, ax=ax)
     ax.set_title("OS별 관리 현황", fontproperties=font_prop)
     ax.set_xlabel("OS", fontproperties=font_prop)
     ax.set_ylabel("Count", fontproperties=font_prop)
     ax.legend(title="관리 현황", bbox_to_anchor=(1.05, 1), loc='upper left', prop=font_prop, title_fontproperties=font_prop)
-    return save_fig_to_png(fig, backend="matplotlib")
+    plt.xticks(rotation=45)
+    return save_fig_to_png(fig)
 
 def plot_dev_duration_by_os(df, font_prop):
     fig, ax = plt.subplots(figsize=(10, 6))
-    df['dev_days'] = pd.to_datetime(df['dev_days'])
-    sns.boxplot(data=df, x='os', y='dev_days', ax=ax)
-    ax.set_title("OS별 개발기간", fontproperties=font_prop)
-    ax.set_xlabel("OS", fontproperties=font_prop)
-    ax.set_ylabel("개발기간(일)", fontproperties=font_prop)
-    return save_fig_to_png(fig, backend="matplotlib")
+    df['dev_days'] = pd.to_numeric(df['dev_days'], errors='coerce')
+
+        # Sort OS names alphabetically
+    os_order = sorted(df['os'].dropna().unique())
+    sns.boxplot(data=df, x='os', y='dev_days', ax=ax, palette="Set1", order=os_order)
+    ax.set_title("OS별 개발기간", fontproperties=font_prop, fontsize=16)
+    ax.set_xlabel("OS", fontproperties=font_prop, fontsize=12)
+    ax.set_ylabel("개발기간 (일)", fontproperties=font_prop, fontsize=12)
+    plt.xticks(rotation=45)
+    sns.despine()
+    plt.tight_layout()
+    return save_fig_to_png(fig)
 
 def plot_error_by_os(df, font_prop):
-    df_valid = df[df['error'].notnull()]
+    df_valid = df[(df['error'].notnull()) & (df['error'] != "에러 없음")]
     fig, ax = plt.subplots(figsize=(12, 6))
-    sns.countplot(data=df_valid, x='os', hue='error', ax=ax)
+    os_order = sorted(df_valid['os'].dropna().unique())
+    sns.countplot(data=df_valid, x='os', hue='error', ax=ax, order=os_order)
     ax.set_title("OS별 에러 유형 분포", fontproperties=font_prop)
     ax.set_xlabel("OS", fontproperties=font_prop)
     ax.set_ylabel("에러 수", fontproperties=font_prop)
     ax.legend(title='에러 유형', prop=font_prop, title_fontproperties=font_prop)
-    for label in ax.get_xticklabels():
-        label.set_fontproperties(font_prop)
-    for label in ax.get_yticklabels():
-        label.set_fontproperties(font_prop)
-    return save_fig_to_png(fig, backend="matplotlib")
+    return save_fig_to_png(fig)
 
 def scatter_dev_days_by_handler_count(df, font_prop):
-    df_valid = df[df['dev_days'].notnull()]
+    df_valid = df[df['dev_days'].notnull() & df['handler_count'].notnull()]
     fig, ax = plt.subplots(figsize=(10, 6))
-    sns.scatterplot(data=df_valid, x='handler_count', y='dev_days', ax=ax)
-    ax.set_title("담당 인원 수와 개발기간 관계", fontproperties=font_prop)
-    ax.set_xlabel("담당 인원 수", fontproperties=font_prop)
-    ax.set_ylabel("개발기간(일)", fontproperties=font_prop)
-    return save_fig_to_png(fig, backend="matplotlib")
+    sns.scatterplot(
+        data=df_valid,
+        x='handler_count',
+        y='dev_days',
+        hue='os',
+        palette='Set2',
+        alpha=0.7,
+        s=80,
+        ax=ax
+    )
+    sns.regplot(
+        data=df_valid,
+        x='handler_count',
+        y='dev_days',
+        scatter=False,
+        ax=ax,
+        line_kws={"color": "gray", "linestyle": "--"}
+    )
+    ax.set_title("담당 인원 수와 개발기간 관계", fontproperties=font_prop, fontsize=16)
+    ax.set_xlabel("담당 인원 수", fontproperties=font_prop, fontsize=12)
+    ax.set_ylabel("개발기간 (일)", fontproperties=font_prop, fontsize=12)
+    ax.legend(title="OS", bbox_to_anchor=(1.05, 1), loc='upper left', prop=font_prop)
+    sns.despine()
+    plt.tight_layout()
+    return save_fig_to_png(fig)
 
 # --- 그래프 타입별 함수 매핑 ---
 dev_graph_func_map = {
@@ -91,7 +114,7 @@ dev_graph_func_map = {
     'maintenance_by_os': plot_maintenance_by_os,
     'dev_duration_by_os': plot_dev_duration_by_os,
     'error_by_os': plot_error_by_os,
-    'dev_by_handler': scatter_dev_days_by_handler_count
+    'dev_by_handler': scatter_dev_days_by_handler_count,
 }
 
 def create_plot(graph_type):

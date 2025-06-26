@@ -48,6 +48,22 @@ export function useAdminDataCrud(selectedTeam: string, fetchData?: () => void) {
   // 등록/수정 제출
   const handleSubmit = async (formData: any) => {
     try {
+      // console.log("formData:", formData); // 디버깅 출력 제거
+      // 빈 문자열을 null로 변환, 날짜 필드는 빈 값이면 아예 삭제
+      const processedData: any = {};
+      Object.entries(formData).forEach(([k, v]) => {
+        if (v === "") {
+          // end_date_fin 등 날짜 필드는 undefined로
+          if (k.includes("date")) {
+            // undefined로 보내면 FastAPI에서 필드 자체가 누락됨
+          } else {
+            processedData[k] = null;
+          }
+        } else {
+          processedData[k] = v;
+        }
+      });
+
       if (modalInitialData) {
         // 수정
         const itemId =
@@ -57,19 +73,28 @@ export function useAdminDataCrud(selectedTeam: string, fetchData?: () => void) {
             ? modalInitialData._id
             : String(modalInitialData._id);
         if (!itemId) throw new Error("수정할 데이터 ID가 없습니다.");
+
+        // console.log("수정 요청, ID:", itemId); // 디버깅 출력 제거
+
         const response = await fetch(`${endpoint}/${itemId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
+          body: JSON.stringify(processedData),
         });
+
+        await response.json();
+
         if (!response.ok) throw new Error("수정 실패");
       } else {
-        // 등록
+
         const response = await fetch(endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
+          body: JSON.stringify(processedData),
         });
+
+        await response.json();
+
         if (!response.ok) throw new Error("등록 실패");
       }
       alert("저장되었습니다.");

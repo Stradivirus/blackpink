@@ -1,7 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 import { API_URLS } from "../../api/urls";
-import type { Admin } from "../../types/Admin";
+import type { Admin } from "../../types/users";
 
 const ADMIN_TEAMS: Admin["team"][] = ["관리팀", "보안팀", "사업팀", "개발팀"];
 

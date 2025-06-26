@@ -7,7 +7,7 @@ from admin.security_graph import router as security_graph_router
 from admin.business_graph import router as business_graph_router
 from admin.dev_graph import router as dev_graph_router
 from admin.team_data import router as team_data_router
-from admin.risky_country import router as risky_country_router
+from admin.dashboard_graphs import router as dashboard_graphs_router
 from auth import router as auth_router
 
 app = FastAPI()
@@ -32,7 +32,7 @@ app.include_router(security_graph_router)
 app.include_router(business_graph_router)
 app.include_router(dev_graph_router)
 app.include_router(team_data_router)
-app.include_router(risky_country_router)
+app.include_router(dashboard_graphs_router)
 
 
 if __name__ == "__main__":

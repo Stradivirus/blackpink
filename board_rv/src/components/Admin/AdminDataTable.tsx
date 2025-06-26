@@ -1,6 +1,6 @@
 // src/components/Admin/AdminDataTable.tsx
 import React, { useMemo } from "react";
-import type { AdminDataTableProps } from "../../types/Admin";
+import type { AdminDataTableProps } from "../../types/users";
 import RegisterEditModal from "./AdminData/RegisterEditModal";
 import { useAdminDataCrud } from "./AdminData/useAdminDataCrud";
 import { useAdminDataTableFilters } from "./AdminData/useAdminDataTableFilters";
@@ -216,7 +216,7 @@ const AdminDataTable: React.FC<AdminDataTableProps> = ({
           )}
         </div>
 
-        {(selectedTeam === "biz" || selectedTeam === "dev" || selectedTeam === "security") && ( 
+        {["biz", "dev", "security"].includes(selectedTeam) && ( 
           <div className="admin-data-table-search-area-relative">
             <div className="total-count-independent">
               총 개수 : {filteredData.length}개

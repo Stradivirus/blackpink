@@ -3,6 +3,9 @@ from matplotlib import font_manager as fm
 import matplotlib
 import seaborn as sns
 import os
+import warnings
+
+warnings.filterwarnings("ignore", category=UserWarning, module="matplotlib")
 
 # 공통 스타일/폰트 설정 함수
 def set_plot_style(font_path='../font/malgun.ttf'):
@@ -33,19 +36,10 @@ def image_response(img_data):
 
 def save_fig_to_png(fig, backend="matplotlib"):
     import io
-    if backend == "matplotlib":
-        buf = io.BytesIO()
-        import matplotlib.pyplot as plt
-        plt.tight_layout()
-        fig.savefig(buf, format="png")
-        plt.close(fig)
-        buf.seek(0)
-        return buf.getvalue()
-    elif backend == "plotly":
-        import plotly.io as pio
-        buf = io.BytesIO()
-        buf.write(pio.to_image(fig, format="png"))
-        buf.seek(0)
-        return buf.getvalue()
-    else:
-        raise ValueError("Unknown backend: " + str(backend))
+    buf = io.BytesIO()
+    import matplotlib.pyplot as plt
+    plt.tight_layout()
+    fig.savefig(buf, format="png")
+    plt.close(fig)
+    buf.seek(0)
+    return buf.getvalue()

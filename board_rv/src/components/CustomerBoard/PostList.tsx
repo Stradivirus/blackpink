@@ -1,8 +1,8 @@
-import {useEffect, useState} from "react";
-import {Link, useLocation, useNavigate} from "react-router-dom";
-import type {Post} from "../../types/Board";
-import {API_URLS} from "../../api/urls";
-import {useAuth} from "../../context/AuthContext";
+import { useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import type { Post } from "../../types/Board";
+import { API_URLS } from "../../api/urls";
+import { useAuth } from "../../context/AuthContext";
 import "../../styles/Board.css";
 
 const PAGE_SIZE = 12;
@@ -11,14 +11,13 @@ const PostList: React.FC = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const query = new URLSearchParams(location.search);
-    const initialPage = parseInt(query.get("page") || "0", 10);
+    const page = parseInt(query.get("page") || "0", 10);
     const [posts, setPosts] = useState<Post[]>([]);
     const [totalPages, setTotalPages] = useState(1);
     const [totalElements, setTotalElements] = useState(0);
-    const [page, setPage] = useState(initialPage);
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
-    const {user} = useAuth();
+    const { user } = useAuth();
 
     useEffect(() => {
         setIsLoading(true);
@@ -40,15 +39,8 @@ const PostList: React.FC = () => {
                 setError(err.message || "게시글을 불러오는 중 오류가 발생했습니다.");
             })
             .finally(() => setIsLoading(false));
-    }, [page]);
+    }, [page, location.search]);
 
-    // 페이지 쿼리 변경 시 page 상태 동기화
-    useEffect(() => {
-        const qPage = parseInt(new URLSearchParams(location.search).get("page") || "0", 10);
-        setPage(qPage);
-    }, [location.search]);
-
-    // 페이지 이동 시 URL 쿼리도 변경
     const handlePrev = () => {
         if (page > 0) {
             navigate(`/postpage?page=${page - 1}`);
@@ -73,49 +65,46 @@ const PostList: React.FC = () => {
                             <button className="board-write-btn">글쓰기</button>
                         </Link>
                     ) : (
-                        <button className="board-write-btn" disabled style={{opacity: 0.5, cursor: "not-allowed"}}>
+                        <button className="board-write-btn" disabled style={{ opacity: 0.5, cursor: "not-allowed" }}>
                             글쓰기 (로그인 필요)
                         </button>
                     )}
                 </div>
-                {error && <div className="error-message" style={{marginBottom: 16}}>{error}</div>}
+                {error && <div className="error-message" style={{ marginBottom: 16 }}>{error}</div>}
                 <table className="board-table">
                     <thead>
-                    <tr>
-                        <th style={{width: "7%"}}>번호</th>
-                        <th style={{width: "45%"}}>제목</th>
-                        <th>작성자</th>
-                        <th>작성일</th>
-                        <th>작성시간</th>
-                        <th>조회수</th>
-                    </tr>
+                        <tr>
+                            <th style={{ width: "7%" }}>번호</th>
+                            <th style={{ width: "45%" }}>제목</th>
+                            <th>작성자</th>
+                            <th>작성일</th>
+                            <th>작성시간</th>
+                            <th>조회수</th>
+                        </tr>
                     </thead>
                     <tbody>
-                    {isLoading ? (
-                        <tr>
-                            <td colSpan={6} style={{textAlign: 'center', color: '#aaa'}}>
-                                불러오는 중...
-                            </td>
-                        </tr>
-                    ) : posts.length === 0 ? (
-                        <tr>
-                            <td colSpan={6} style={{textAlign: 'center', color: '#aaa'}}>
-                                게시글이 없습니다.
-                            </td>
-                        </tr>
-                    ) : (
-                        // 공지글 먼저, 일반글 나중에 렌더링
-                        <>
-                            {noticePosts.map((post) => {
-                                const displayNumber = "공지";
-                                return (
+                        {isLoading ? (
+                            <tr>
+                                <td colSpan={6} style={{ textAlign: 'center', color: '#aaa' }}>
+                                    불러오는 중...
+                                </td>
+                            </tr>
+                        ) : posts.length === 0 ? (
+                            <tr>
+                                <td colSpan={6} style={{ textAlign: 'center', color: '#aaa' }}>
+                                    게시글이 없습니다.
+                                </td>
+                            </tr>
+                        ) : (
+                            <>
+                                {noticePosts.map((post) => (
                                     <tr key={post.id} className="notice-row">
-                                        <td className="board-post-id" style={{color: "#d32f2f", fontWeight: 700}}>{displayNumber}</td>
+                                        <td className="board-post-id" style={{ color: "#d32f2f", fontWeight: 700 }}>공지</td>
                                         <td>
                                             <Link
                                                 to={`/posts/${post.id}?page=${page}`}
                                                 className="board-post-title-link"
-                                                style={{fontWeight: 700, color: "#d32f2f"}}
+                                                style={{ fontWeight: 700, color: "#d32f2f" }}
                                             >
                                                 📢 {post.title}
                                             </Link>
@@ -125,33 +114,32 @@ const PostList: React.FC = () => {
                                         <td className="board-post-date">{post.createdTime}</td>
                                         <td className="board-post-views">{post.viewCount}</td>
                                     </tr>
-                                );
-                            })}
-                            {normalPosts.map((post, idx) => {
-                                const displayNumber = totalElements - (page * PAGE_SIZE) - idx - noticePosts.length;
-                                return (
-                                    <tr key={post.id}>
-                                        <td className="board-post-id">{displayNumber}</td>
-                                        <td>
-                                            <Link
-                                                to={`/posts/${post.id}?page=${page}`}
-                                                className="board-post-title-link"
-                                            >
-                                                {post.title}
-                                                {post.isAnswered && (
-                                                    <span style={{ color: '#555', fontWeight: 700, marginLeft: 8, fontStyle: 'italic' }}>(답변완료)</span>
-                                                )}
-                                            </Link>
-                                        </td>
-                                        <td className="board-post-author">{post.writerNickname || "-"}</td>
-                                        <td className="board-post-date">{post.createdDate}</td>
-                                        <td className="board-post-date">{post.createdTime}</td>
-                                        <td className="board-post-views">{post.viewCount}</td>
-                                    </tr>
-                                );
-                            })}
-                        </>
-                    )}
+                                ))}
+                                {normalPosts.map((post, idx) => {
+                                    const displayNumber = totalElements - (page * PAGE_SIZE) - idx;
+                                    return (
+                                        <tr key={post.id}>
+                                            <td className="board-post-id">{displayNumber}</td>
+                                            <td>
+                                                <Link
+                                                    to={`/posts/${post.id}?page=${page}`}
+                                                    className="board-post-title-link"
+                                                >
+                                                    {post.title}
+                                                    {post.isAnswered && (
+                                                        <span style={{ color: '#555', fontWeight: 700, marginLeft: 8, fontStyle: 'italic' }}>(답변완료)</span>
+                                                    )}
+                                                </Link>
+                                            </td>
+                                            <td className="board-post-author">{post.writerNickname || "-"}</td>
+                                            <td className="board-post-date">{post.createdDate}</td>
+                                            <td className="board-post-date">{post.createdTime}</td>
+                                            <td className="board-post-views">{post.viewCount}</td>
+                                        </tr>
+                                    );
+                                })}
+                            </>
+                        )}
                     </tbody>
                 </table>
                 <div className="board-pagination">

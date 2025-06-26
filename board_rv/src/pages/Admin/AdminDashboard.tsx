@@ -1,20 +1,12 @@
 import * as React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import SecurityGraphs from "../../components/Admin/AdminDashBoard/SecurityGraphs";
-import GCIRankingPanel from "../../components/Admin/GCIRankingPanel";
-import RiskyCountryMap from "../../components/Admin/RiskyCountryMap";
 import BusinessGraphs from "../../components/Admin/AdminDashBoard/BusinessGraphs";
 import SysDevGraphs from "../../components/Admin/AdminDashBoard/SysDevGraphs";
-import type { GraphType } from "../../components/Admin/AdminDashBoard/SecurityGraphs";
+import DashboardSummaryGraphs, { TeamInfoPanels } from "../../components/Admin/AdminDashBoard/DashboardSummaryGraphs";
 import { teamList, securityGraphTypes } from "../../constants/dataconfig";
+import { API_URLS } from "../../api/urls";
 import "../../styles/admindashboard.css";
-
-const DashboardMainPanels: React.FC = () => (
-  <div style={{ display: "flex", gap: 24, justifyContent: "center", marginTop: 32 }}>
-    <GCIRankingPanel />
-    <RiskyCountryMap />
-  </div>
-);
 
 const AdminDashboard: React.FC = () => {
   const location = useLocation();
@@ -22,6 +14,8 @@ const AdminDashboard: React.FC = () => {
   const params = new URLSearchParams(location.search);
   const selectedTeam = params.get("team") || "";
   const [showMainPanels, setShowMainPanels] = React.useState(selectedTeam === "");
+  const [summary, setSummary] = React.useState<any>(null);
+  const [loading, setLoading] = React.useState(false);
 
   React.useEffect(() => {
     setShowMainPanels(selectedTeam === "");
@@ -30,9 +24,15 @@ const AdminDashboard: React.FC = () => {
     }
   }, [selectedTeam, navigate]);
 
-  let graphTypes: GraphType[] = [];
-  if (selectedTeam === "security") graphTypes = securityGraphTypes;
-  if (selectedTeam === "biz") graphTypes = [];
+  React.useEffect(() => {
+    if (showMainPanels) {
+      setLoading(true);
+      fetch(API_URLS.DASHBOARD_SUMMARY)
+        .then((res) => res.json())
+        .then((data) => setSummary(data))
+        .finally(() => setLoading(false));
+    }
+  }, [showMainPanels]);
 
   return (
     <div className={
@@ -63,7 +63,9 @@ const AdminDashboard: React.FC = () => {
         </div>
       </div>
       <div className="admin-grid-layout" style={{ textAlign: "center", marginTop: 48 }}>
-        {showMainPanels && <DashboardMainPanels />}
+        {showMainPanels && !loading && <TeamInfoPanels summary={summary} />}
+        {showMainPanels && <DashboardSummaryGraphs />}
+        {showMainPanels && loading && <div style={{marginTop:32, fontSize:'1.2rem'}}>로딩중...</div>}
         {!showMainPanels && selectedTeam === "security" && <SecurityGraphs graphTypes={securityGraphTypes} />}
         {!showMainPanels && selectedTeam === "biz" && <BusinessGraphs />}
         {!showMainPanels && (selectedTeam === "dev" || selectedTeam === "sys_dev") && <SysDevGraphs />}
