@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { columnsByTeam, selectOptions } from "../../../constants/dataconfig";
+import { columnsByTeam, selectOptions, statusOptions } from "../../../constants/dataconfig";
 import { isDateField, handleChangeFactory } from "./TeamFormDynamic";
 import axios from "axios";
 import { API_URLS } from "../../../api/urls";
@@ -9,12 +9,25 @@ interface BizFormProps {
   onChange: (data: Record<string, any>) => void;
 }
 
+const contractPeriods = [
+  { value: 30, label: "1개월" },
+  { value: 90, label: "3개월" },
+  { value: 180, label: "6개월" },
+  { value: 365, label: "1년" },
+  { value: 1095, label: "3년" },
+];
+
 const BizFormDynamic: React.FC<BizFormProps> = ({ initialData = {}, onChange }) => {
   const columns = columnsByTeam["biz"] || [];
   const [formData, setFormData] = useState<Record<string, any>>(() => {
     const init: Record<string, any> = {};
     columns.forEach(({ key }) => {
-      init[key] = initialData[key] ?? "";
+      if (key === "status" && !initialData[key]) {
+        // 등록 시 status 기본값 "진행중"
+        init[key] = statusOptions.biz[0];
+      } else {
+        init[key] = initialData[key] ?? "";
+      }
     });
     return init;
   });
@@ -57,6 +70,46 @@ const BizFormDynamic: React.FC<BizFormProps> = ({ initialData = {}, onChange }) 
   }, [formData, onChange]);
 
   const handleChange = handleChangeFactory(setFormData);
+
+  // 계약 기간 버튼 클릭 시
+  const handlePeriodClick = (days: number) => {
+    const start = formData["contract_start"];
+    if (start) {
+      const startDate = new Date(start);
+      const endDate = new Date(startDate);
+      endDate.setDate(startDate.getDate() + days);
+      const endStr = endDate.toISOString().slice(0, 10);
+      setFormData((prev) => ({
+        ...prev,
+        contract_period: days,
+        contract_end: endStr,
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        contract_period: days,
+      }));
+    }
+  };
+
+  // 계약 시작일 변경 시, 계약 기간이 선택되어 있으면 종료일 자동 계산
+  useEffect(() => {
+    if (formData["contract_start"] && formData["contract_period"]) {
+      handlePeriodClick(Number(formData["contract_period"]));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formData["contract_start"]]);
+
+  // 전화번호 자동 하이픈 함수
+  function formatPhoneNumber(value: string) {
+    // 숫자만 남기기
+    const onlyNums = value.replace(/[^0-9]/g, "");
+    if (onlyNums.length < 4) return onlyNums;
+    if (onlyNums.length < 8) {
+      return onlyNums.replace(/(\d{2,3})(\d{3,4})/, "$1-$2");
+    }
+    return onlyNums.replace(/(\d{2,3})(\d{3,4})(\d{4})/, "$1-$2-$3");
+  }
 
   return (
     <div className="admin-modal-form-grid">
@@ -118,14 +171,42 @@ const BizFormDynamic: React.FC<BizFormProps> = ({ initialData = {}, onChange }) 
           onChange={(e) => handleChange("contract_start", e.target.value)}
         />
       </div>
+
+      {/* 계약 기간 버튼 그룹 */}
+      <div className="admin-modal-form-field">
+        <label>계약 기간</label>
+        <div style={{ display: "flex", gap: 8 }}>
+          {contractPeriods.map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              className={formData["contract_period"] === opt.value ? "selected" : ""}
+              style={{
+                padding: "6px 12px",
+                borderRadius: 4,
+                border: "1px solid #ccc",
+                background: formData["contract_period"] === opt.value ? "#1976d2" : "#fff",
+                color: formData["contract_period"] === opt.value ? "#fff" : "#222",
+                cursor: "pointer",
+              }}
+              onClick={() => handlePeriodClick(opt.value)}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* 계약 종료일 */}
       <div className="admin-modal-form-field">
-        <label>계약 종료일</label>
+        <label>
+          계약 종료일 <span style={{ color: "#888", fontSize: "0.95em" }}>(기간 선택시 자동 입력)</span>
+        </label>
         <input
           type="date"
           value={formData["contract_end"]}
-          onChange={(e) => handleChange("contract_end", e.target.value)}
-          min={formData["contract_start"] || undefined}
+          readOnly
+          placeholder="계약 기간을 선택하세요"
         />
       </div>
 
@@ -137,7 +218,7 @@ const BizFormDynamic: React.FC<BizFormProps> = ({ initialData = {}, onChange }) 
         onChange={(e) => handleChange("status", e.target.value)}
       >
         <option value="">선택</option>
-        {selectOptions["status"].map((opt) => (
+        {statusOptions.biz.map((opt) => (
           <option key={opt} value={opt}>{opt}</option>
         ))}
       </select>
@@ -148,8 +229,8 @@ const BizFormDynamic: React.FC<BizFormProps> = ({ initialData = {}, onChange }) 
       <label>담당자명</label>
       <input
         type="text"
-        value={formData["handler_name"]}
-        onChange={(e) => handleChange("handler_name", e.target.value)}
+        value={formData["manager_name"]}
+        onChange={(e) => handleChange("manager_name", e.target.value)}
         placeholder="담당자명 입력"
       />
     </div>
@@ -157,9 +238,12 @@ const BizFormDynamic: React.FC<BizFormProps> = ({ initialData = {}, onChange }) 
       <label>담당자 연락처</label>
       <input
         type="text"
-        value={formData["handler_contact"]}
-        onChange={(e) => handleChange("handler_contact", e.target.value)}
+        value={formData["manager_phone"]}
+        onChange={(e) =>
+          handleChange("manager_phone", formatPhoneNumber(e.target.value))
+        }
         placeholder="담당자 연락처 입력"
+        maxLength={13} // 000-0000-0000
       />
     </div>
   </div>
