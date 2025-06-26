@@ -194,6 +194,7 @@ const DashboardSummaryGraphs: React.FC = () => {
   };
   const options = {
     responsive: true,
+    maintainAspectRatio: false, // 그래프가 부모 높이에 맞게
     plugins: {
       legend: { position: "top" as const },
       title: { display: false }
@@ -240,15 +241,21 @@ const DashboardSummaryGraphs: React.FC = () => {
       <div className="dashboard-graph-container">
         <div className="dashboard-graph-card">
           <div style={{ fontWeight: 600, marginBottom: 8, color: planColors["베이직"] }}>사업팀 가입자 증감</div>
-          <Line data={bizChartData} options={options} />
+          <div style={{width: '100%', height: '300px'}}>
+            <Line data={bizChartData} options={options} />
+          </div>
         </div>
         <div className="dashboard-graph-card">
           <div style={{ fontWeight: 600, marginBottom: 8, color: osColors[5] }}>개발팀 프로젝트 증감</div>
-          <Line data={devChartData} options={options} />
+          <div style={{width: '100%', height: '300px'}}>
+            <Line data={devChartData} options={options} />
+          </div>
         </div>
         <div className="dashboard-graph-card">
           <div style={{ fontWeight: 600, marginBottom: 8, color: riskColors.HIGH }}>보안팀 사고 증감</div>
-          <Line data={securityChartData} options={options} />
+          <div style={{width: '100%', height: '300px'}}>
+            <Line data={securityChartData} options={options} />
+          </div>
         </div>
       </div>
     </div>
