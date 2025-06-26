@@ -20,9 +20,8 @@ export const API_URLS = {
     DEV: `${API_BASE}/dev`,
     DEV_COLUMNS: `${API_BASE}/dev/columns`,
     // 대시보드
-    GCI_RANKINGS: `${API_BASE}/gci_rankings`,
-    RISKY_COUNTRIES_MAP: `${API_BASE}/risky_countries/map_data`,
     DASHBOARD_SUMMARY: `${API_BASE}/dashboard/summary`,
+    DASHBOARD_SUMMARY_GRAPHS: `${API_BASE}/dashboard/summary-graphs`,
     // 그래프
     SECURITY_GRAPH: `${API_BASE}/security/graph`,
     BUSINESS_GRAPH: `${API_BASE}/business/graph`,

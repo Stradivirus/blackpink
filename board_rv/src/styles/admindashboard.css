@@ -259,7 +259,7 @@
   display: flex;
   justify-content: center;
   gap: 32px;
-  margin: 32px 0 0 0;
+  margin: 32px 0 32px 0; /* 마지막 0을 32px로 변경 */
 }
 
 .team-info-panel {
