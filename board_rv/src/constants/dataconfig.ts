@@ -146,7 +146,7 @@ export const osColors: Record<string, string> = {
   Windows: "#3498db",
   Linux: "#f1c40f",
   macOS: "#9b59b6",
-  iOS: "#e67e22",
+  Ios: "#e67e22",
   Android: "#16a085",
   미지정: "#888"
 };

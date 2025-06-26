@@ -76,7 +76,7 @@ def plot_error_by_os(df, font_prop):
     ax.set_title("OS별 에러 유형 분포", fontproperties=font_prop)
     ax.set_xlabel("OS", fontproperties=font_prop)
     ax.set_ylabel("에러 수", fontproperties=font_prop)
-    ax.legend(title='에러 유형', prop=font_prop)
+    ax.legend(title='에러 유형', prop=font_prop, title_fontproperties=font_prop)
     return save_fig_to_png(fig)
 
 def scatter_dev_days_by_handler_count(df, font_prop):

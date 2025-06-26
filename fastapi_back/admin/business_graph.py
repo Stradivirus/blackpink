@@ -46,9 +46,10 @@ def set_tick_font(ax, font_prop, size=16):
 def create_bar_plot(df):
     font_prop = set_plot_style()
     df['revenue'] = df.apply(calculate_revenue, axis=1)
-    group = df.groupby('plan')['revenue'].sum().reset_index()
+    plans = ['베이직', '프로', '엔터프라이즈']
+    group = df.groupby('plan')['revenue'].sum().reindex(plans).reset_index()
     fig, ax = plt.subplots(figsize=(10,8))
-    sns.barplot(x='plan', y='revenue', data=group, palette=['#66b3ff', '#99ff99', '#ff9999'], ax=ax)
+    sns.barplot(x='plan', y='revenue', data=group, order=plans, palette=['#66b3ff', '#99ff99', '#ff9999'], ax=ax)
     ax.set_title('계약종류별 수익', fontproperties=font_prop, fontsize=24)
     ax.set_xlabel("계약종류", fontproperties=font_prop, fontsize=20)
     ax.set_ylabel("수익 (단위:만원)", fontproperties=font_prop, fontsize=20)
@@ -58,7 +59,8 @@ def create_bar_plot(df):
 def create_heatmap(df):
     font_prop = set_plot_style()
     df['revenue'] = df.apply(calculate_revenue, axis=1)
-    pivot = df.groupby(['industry', 'plan'])['revenue'].sum().unstack().fillna(0)
+    plans = ['베이직', '프로', '엔터프라이즈']
+    pivot = df.groupby(['industry', 'plan'])['revenue'].sum().unstack().reindex(columns=plans).fillna(0)
     fig, ax = plt.subplots(figsize=(10,8))
     sns.heatmap(
         pivot, annot=True, fmt=".0f", cmap="YlGnBu", ax=ax,
@@ -92,9 +94,10 @@ def create_annual_sales_plot(df):
 def create_company_plan_heatmap(df):
     font_prop = set_plot_style()
     df['revenue'] = df.apply(calculate_revenue, axis=1)
+    plans = ['베이직', '프로', '엔터프라이즈']
     top_companies = df.groupby('company_name')['revenue'].sum().nlargest(7).index.tolist()
     df_top = df[df['company_name'].isin(top_companies)]
-    pivot = df_top.groupby(['company_name', 'plan'])['revenue'].sum().unstack().fillna(0)
+    pivot = df_top.groupby(['company_name', 'plan'])['revenue'].sum().unstack().reindex(columns=plans).fillna(0)
     fig, ax = plt.subplots(figsize=(12,10))
     sns.heatmap(pivot, annot=True, fmt=".0f", cmap="OrRd", ax=ax, annot_kws={"size": 20})
     ax.set_title('회사별 계약종류+수익 히트맵', fontproperties=font_prop, fontsize=24)
@@ -149,6 +152,7 @@ def create_nested_pie_chart(df):
 def create_terminated_contract_duration_plot(df):
     font_prop = set_plot_style()
     df_term = df[df['status'] == '만료'].copy()
+    plans = ['베이직', '프로', '엔터프라이즈']
     def safe_months(x):
         try:
             return x.n + 1
@@ -156,8 +160,8 @@ def create_terminated_contract_duration_plot(df):
             return np.nan
     df_term['duration_months'] = (df_term['contract_end'].dt.to_period('M') - df_term['contract_start'].dt.to_period('M')).apply(safe_months)
     fig, ax = plt.subplots(figsize=(10, 8))
-    sns.boxplot(x='plan', y='duration_months', data=df_term, palette=['#66b3ff', '#99ff99', '#ff9999'], ax=ax)
-    sns.stripplot(x='plan', y='duration_months', data=df_term, color='black', size=7, jitter=True, alpha=0.5, ax=ax)
+    sns.boxplot(x='plan', y='duration_months', data=df_term, order=plans, palette=['#66b3ff', '#99ff99', '#ff9999'], ax=ax)
+    sns.stripplot(x='plan', y='duration_months', data=df_term, order=plans, color='black', size=7, jitter=True, alpha=0.5, ax=ax)
     ax.set_title('계약 종료된 계약의 계약기간 분포', fontproperties=font_prop, fontsize=24)
     ax.set_xlabel("계약종류", fontproperties=font_prop, fontsize=20)
     ax.set_ylabel("계약기간 (개월)", fontproperties=font_prop, fontsize=20)
@@ -167,11 +171,11 @@ def create_terminated_contract_duration_plot(df):
 def create_suspended_contract_plan_plot(df):
     font_prop = set_plot_style()
     df_suspend = df[df['status'] == '해지'].copy()
-    plan_counts = df_suspend['plan'].value_counts().reset_index()
+    plans = ['베이직', '프로', '엔터프라이즈']
+    plan_counts = df_suspend['plan'].value_counts().reindex(plans).fillna(0).reset_index()
     plan_counts.columns = ['plan', 'count']
-    plan_counts = plan_counts.sort_values('plan')
     fig, axs = plt.subplots(1, 2, figsize=(14, 8))
-    sns.barplot(x='plan', y='count', data=plan_counts, palette=['#66b3ff', '#99ff99', '#ff9999'], ax=axs[0])
+    sns.barplot(x='plan', y='count', data=plan_counts, order=plans, palette=['#66b3ff', '#99ff99', '#ff9999'], ax=axs[0])
     axs[0].set_title('해지된 계약의 계약종류별 건수', fontproperties=font_prop, fontsize=24)
     axs[0].set_xlabel("계약종류", fontproperties=font_prop, fontsize=22)
     axs[0].set_ylabel("건수", fontproperties=font_prop, fontsize=22)
