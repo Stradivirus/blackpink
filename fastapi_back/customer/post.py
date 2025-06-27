@@ -60,18 +60,20 @@ def get_posts(
     size: int = Query(15, ge=1, le=100),
 ):
     skip = page * size
-    total_elements = board_collection.count_documents({})
+    # 🔽 조건 추가: deleted가 False이거나 없을 때만 조회
+    query = {"$or": [{"deleted": False}, {"deleted": {"$exists": False}}]}
+    total_elements = board_collection.count_documents(query)
     total_pages = (total_elements + size - 1) // size if total_elements > 0 else 1
-    cursor = board_collection.find().sort([
-        ("isNotice", -1),           # 공지 먼저
-        ("createdDate", -1),        # 최신글이 위로
-        ("createdTime", -1),        # 시간까지 내림차순
-        ("_id", -1)                 # 혹시 날짜가 같으면 id 기준
+    cursor = board_collection.find(query).sort([
+        ("isNotice", -1),
+        ("createdDate", -1),
+        ("createdTime", -1),
+        ("_id", -1)
     ]).skip(skip).limit(size)
     posts = []
     for doc in cursor:
         doc["isNotice"] = doc.get("isNotice", False)
-        doc["isAnswered"] = doc.get("isAnswered", False)  # 답변완료 여부 보정
+        doc["isAnswered"] = doc.get("isAnswered", False)
         doc["writerId"] = doc.get("writerId", "")
         doc["writerNickname"] = doc.get("writerNickname", "")
         doc["createdDate"] = doc.get("createdDate", "")
