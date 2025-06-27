@@ -70,7 +70,7 @@ const PostForm: React.FC<Props> = ({isEdit}) => {
         setError(null);
         try {
             const method = isEdit ? "PUT" : "POST";
-            const url = isEdit ? `${API_URLS.POST}/${id}` : API_URLS.POSTS;
+            const url = isEdit ? API_URLS.POST(id!) : API_URLS.POSTS;
             const body = {
                 ...form,
                 writerId: user?.userId, // userId로 변경

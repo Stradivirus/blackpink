@@ -127,7 +127,7 @@ const PostDetail: React.FC = () => {
         setError(null);
         try {
             console.log("삭제 요청:", API_URLS.POST(id));
-            const res = await fetch(API_URLS.POST(id), {method: "DELETE"});
+            const res = await fetch(API_URLS.POST(id), { method: "DELETE" });
             console.log("삭제 응답:", res.status);
             if (!res.ok) throw new Error("삭제에 실패했습니다.");
             navigate("/postpage");
