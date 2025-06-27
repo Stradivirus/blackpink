@@ -16,6 +16,8 @@ services:
     restart: unless-stopped
     networks:
       - app_net
+    environment:
+      TZ: Asia/Seoul
 
   nginx:
     image: board_rv:latest
