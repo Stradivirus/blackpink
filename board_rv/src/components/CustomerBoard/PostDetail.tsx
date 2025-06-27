@@ -126,11 +126,14 @@ const PostDetail: React.FC = () => {
         setIsDeleting(true);
         setError(null);
         try {
+            console.log("삭제 요청:", API_URLS.POST(id));
             const res = await fetch(API_URLS.POST(id), {method: "DELETE"});
+            console.log("삭제 응답:", res.status);
             if (!res.ok) throw new Error("삭제에 실패했습니다.");
             navigate("/postpage");
         } catch (err: any) {
             setError(err?.message || "삭제 중 오류가 발생했습니다.");
+            alert(err?.message || "삭제 중 오류가 발생했습니다.");
         } finally {
             setIsDeleting(false);
         }
