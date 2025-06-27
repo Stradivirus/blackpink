@@ -1,4 +1,4 @@
-const API_BASE = "http://34.64.160.67:8002/api";
+const API_BASE = "/api";
 // const API_BASE = "http://localhost:8000/api";
 export const API_URLS = {
     // 게시판
