@@ -34,7 +34,7 @@ def create_post(req: BoardCreateRequest):
 # - 수정 후 BoardResponse 형태로 반환
 @router.put("/api/posts/{id}", response_model=BoardResponse)
 def update_post(id: str, req: BoardCreateRequest = Body(...)):
-    prev = board_collection.find_one({"_id": id})
+    prev = board_collection.find_one({"_id": ObjectId(id)})  # ObjectId로 변환
     if not prev:
         raise HTTPException(404, "게시글을 찾을 수 없습니다.")
     update_doc = req.dict(exclude_unset=True)
@@ -43,9 +43,9 @@ def update_post(id: str, req: BoardCreateRequest = Body(...)):
     update_doc["createdDate"] = prev.get("createdDate", "")
     update_doc["createdTime"] = prev.get("createdTime", "")
     update_doc["isNotice"] = req.isNotice or False
-    update_doc["isAnswered"] = req.isAnswered if "isAnswered" in update_doc else prev.get("isAnswered", False)  # 답변완료 여부
-    board_collection.update_one({"_id": id}, {"$set": update_doc})
-    updated = board_collection.find_one({"_id": id})
+    update_doc["isAnswered"] = req.isAnswered if "isAnswered" in update_doc else prev.get("isAnswered", False)
+    board_collection.update_one({"_id": ObjectId(id)}, {"$set": update_doc})  # ObjectId로 변환
+    updated = board_collection.find_one({"_id": ObjectId(id)})
     updated["id"] = str(updated["_id"])
     return BoardResponse(**updated)
 
