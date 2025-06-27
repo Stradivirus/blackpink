@@ -38,7 +38,7 @@ def update_post(id: str, req: BoardCreateRequest = Body(...)):
     if not prev:
         raise HTTPException(404, "게시글을 찾을 수 없습니다.")
     update_doc = req.dict(exclude_unset=True)
-    update_doc["writerId"] = prev.get("writerId", req.userId)
+    update_doc["writerId"] = prev.get("writerId", req.writerId)
     update_doc["writerNickname"] = prev.get("writerNickname", getattr(req, "writerNickname", "알수없음"))
     update_doc["createdDate"] = prev.get("createdDate", "")
     update_doc["createdTime"] = prev.get("createdTime", "")
