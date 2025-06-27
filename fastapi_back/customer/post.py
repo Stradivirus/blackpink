@@ -46,6 +46,8 @@ def update_post(id: str, req: BoardCreateRequest = Body(...)):
     update_doc["isAnswered"] = req.isAnswered if "isAnswered" in update_doc else prev.get("isAnswered", False)
     board_collection.update_one({"_id": ObjectId(id)}, {"$set": update_doc})  # ObjectId로 변환
     updated = board_collection.find_one({"_id": ObjectId(id)})
+    if not updated:
+        raise HTTPException(404, "수정된 게시글을 찾을 수 없습니다.")
     updated["id"] = str(updated["_id"])
     return BoardResponse(**updated)
 
