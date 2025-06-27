@@ -1,0 +1,41 @@
+version: "3.8"
+
+services:
+  board_rv:
+    build:
+      context: ..
+      dockerfile: docker/board_rv.dockerfile
+    image: board_rv:latest
+    restart: unless-stopped
+    networks:
+      - app_net
+
+  fastapi_back:
+    build:
+      context: ..
+      dockerfile: docker/fastapi_back.dockerfile
+    image: fastapi_back:latest
+    restart: unless-stopped
+    networks:
+      - app_net
+
+  nginx:
+    image: board_rv:latest
+    depends_on:
+      - board_rv
+      - fastapi_back
+    ports:
+      - "8002:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    restart: unless-stopped
+    networks:
+      - app_net
+
+volumes:
+  board_rv_static:
+    external: false
+
+networks:
+  app_net:
+    driver: bridge
