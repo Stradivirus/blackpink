@@ -34,9 +34,9 @@ def create_post(req: BoardCreateRequest):
 # - 수정 후 BoardResponse 형태로 반환
 @router.put("/api/posts/{id}", response_model=BoardResponse)
 def update_post(id: str, req: BoardCreateRequest = Body(...)):
-    prev = board_collection.find_one({"_id": ObjectId(id)})  # ObjectId로 변환
+    prev = board_collection.find_one({"_id": ObjectId(id)})
     if not prev:
-        raise HTTPException(404, "게시글을 찾을 수 없습니다.")
+        raise HTTPException(status_code=404, detail="게시글을 찾을 수 없습니다.")
     update_doc = req.dict(exclude_unset=True)
     update_doc["writerId"] = prev.get("writerId", req.writerId)
     update_doc["writerNickname"] = prev.get("writerNickname", getattr(req, "writerNickname", "알수없음"))
@@ -44,10 +44,10 @@ def update_post(id: str, req: BoardCreateRequest = Body(...)):
     update_doc["createdTime"] = prev.get("createdTime", "")
     update_doc["isNotice"] = req.isNotice or False
     update_doc["isAnswered"] = req.isAnswered if "isAnswered" in update_doc else prev.get("isAnswered", False)
-    board_collection.update_one({"_id": ObjectId(id)}, {"$set": update_doc})  # ObjectId로 변환
+    board_collection.update_one({"_id": ObjectId(id)}, {"$set": update_doc})
     updated = board_collection.find_one({"_id": ObjectId(id)})
     if not updated:
-        raise HTTPException(404, "수정된 게시글을 찾을 수 없습니다.")
+        raise HTTPException(status_code=404, detail="수정 후 게시글을 찾을 수 없습니다.")
     updated["id"] = str(updated["_id"])
     return BoardResponse(**updated)
 
