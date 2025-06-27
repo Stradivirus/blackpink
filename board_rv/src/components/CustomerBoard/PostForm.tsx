@@ -33,7 +33,7 @@ const PostForm: React.FC<Props> = ({isEdit}) => {
     useEffect(() => {
         if (isEdit && id && user) {
             setError(null);
-            fetch(`${API_URLS.POST}/${id}`)
+            fetch(API_URLS.POST(id))
                 .then(res => res.json())
                 .then(data => {
                     setForm({
