@@ -6,9 +6,7 @@ services:
       context: ..
       dockerfile: docker/board_rv.dockerfile
     image: board_rv:latest
-    restart: unless-stopped
-    networks:
-      - app_net
+    # 이 컨테이너는 실제로 실행할 필요 없음 (빌드만 담당)
 
   fastapi_back:
     build:
@@ -22,12 +20,9 @@ services:
   nginx:
     image: board_rv:latest
     depends_on:
-      - board_rv
       - fastapi_back
     ports:
       - "8002:80"
-    volumes:
-      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
     restart: unless-stopped
     networks:
       - app_net
