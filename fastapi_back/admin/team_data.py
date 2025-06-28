@@ -42,20 +42,20 @@ async def get_biz():
 async def get_biz_columns():
     return fetch_columns(companies_collection)
 
-# 개발팀 전체 데이터 조회 (company_id → company_name 조인)
+# 개발팀 전체 데이터 조회 (company_id → company_name 조인) → 조인 함수 삭제, 단순 조회로 변경
 @router.get("/dev")
 async def get_dev_data():
-    return fetch_all_data_with_company_name(dev_collection, "dev")
+    return fetch_all_data(dev_collection, "dev")
 
 # 개발팀 컬럼 정보 조회
 @router.get("/dev/columns")
 async def get_dev_columns():
     return fetch_columns(dev_collection)
 
-# 보안 사고 전체 데이터 조회 (company_id → company_name 조인)
+# 보안 사고 전체 데이터 조회 (company_id → company_name 조인) → 조인 함수 삭제, 단순 조회로 변경
 @router.get("/security")
 async def get_security():
-    return fetch_all_data_with_company_name(incident_collection, "incidents")
+    return fetch_all_data(incident_collection, "incidents")
 
 # 보안 사고 컬럼 정보 조회
 @router.get("/security/columns")
@@ -128,26 +128,6 @@ def fetch_all_data(collection, key):
     try:
         for doc in collection.find():
             doc["_id"] = str(doc["_id"])
-            data.append(doc)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to fetch {key} data: {e}")
-    return {key: data}
-
-def fetch_all_data_with_company_name(collection, key):
-    """
-    company_id → company_name 조인하여 반환 (incident, dev 등에서 사용)
-    """
-    data = []
-    company_map = None
-    try:
-        for doc in collection.find():
-            doc["_id"] = str(doc["_id"])
-            company_id = doc.get("company_id")
-            if company_id:
-                if company_map is None:
-                    # company_map을 필요할 때 한 번만 생성
-                    company_map = {c["company_id"]: c.get("company_name", "") for c in companies_collection.find() if c.get("company_id")}
-                doc["company_name"] = company_map.get(company_id, "")
             data.append(doc)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to fetch {key} data: {e}")

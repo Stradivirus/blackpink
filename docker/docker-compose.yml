@@ -1,0 +1,38 @@
+version: "3.8"
+
+services:
+  board_rv:
+    build:
+      context: ..
+      dockerfile: docker/board_rv.dockerfile
+    image: board_rv:latest
+    # 이 컨테이너는 실제로 실행할 필요 없음 (빌드만 담당)
+
+  fastapi_back:
+    build:
+      context: ..
+      dockerfile: docker/fastapi_back.dockerfile
+    image: fastapi_back:latest
+    restart: unless-stopped
+    networks:
+      - app_net
+    environment:
+      TZ: Asia/Seoul
+
+  nginx:
+    image: board_rv:latest
+    depends_on:
+      - fastapi_back
+    ports:
+      - "8002:80"
+    restart: unless-stopped
+    networks:
+      - app_net
+
+volumes:
+  board_rv_static:
+    external: false
+
+networks:
+  app_net:
+    driver: bridge

@@ -243,7 +243,11 @@ const AdminDataTable: React.FC<AdminDataTableProps> = ({
             if (selectedTeam === "security") {
               if (col.key === "server_type") return <col key={col.key} style={{ width: "140px" }} />;
               if (col.key === "status") return <col key={col.key} style={{ width: "90px" }} />;
-              if (col.key === "handler_count") return <col key={col.key} style={{ width: "100px" }} />;
+              if (col.key === "handler_count") return <col key={col.key} style={{ width: "110px" }} />;
+              if (col.key === "risk_level") return <col key={col.key} style={{ width: "100px" }} />;
+              if (col.key === "company_id") return <col key={col.key} style={{ width: "100px" }} />;
+              if (col.key === "incident_date") return <col key={col.key} style={{ width: "110px" }} />;
+              if (col.key === "handled_date") return <col key={col.key} style={{ width: "110px" }} />;
             }
             if (selectedTeam === "dev") {
               if (col.key === "company_id") return <col key={col.key} style={{ width: "100px" }} />;

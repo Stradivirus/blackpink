@@ -34,18 +34,20 @@ def create_post(req: BoardCreateRequest):
 # - 수정 후 BoardResponse 형태로 반환
 @router.put("/api/posts/{id}", response_model=BoardResponse)
 def update_post(id: str, req: BoardCreateRequest = Body(...)):
-    prev = board_collection.find_one({"_id": id})
+    prev = board_collection.find_one({"_id": ObjectId(id)})
     if not prev:
-        raise HTTPException(404, "게시글을 찾을 수 없습니다.")
+        raise HTTPException(status_code=404, detail="게시글을 찾을 수 없습니다.")
     update_doc = req.dict(exclude_unset=True)
-    update_doc["writerId"] = prev.get("writerId", req.userId)
+    update_doc["writerId"] = prev.get("writerId", req.writerId)
     update_doc["writerNickname"] = prev.get("writerNickname", getattr(req, "writerNickname", "알수없음"))
     update_doc["createdDate"] = prev.get("createdDate", "")
     update_doc["createdTime"] = prev.get("createdTime", "")
     update_doc["isNotice"] = req.isNotice or False
-    update_doc["isAnswered"] = req.isAnswered if "isAnswered" in update_doc else prev.get("isAnswered", False)  # 답변완료 여부
-    board_collection.update_one({"_id": id}, {"$set": update_doc})
-    updated = board_collection.find_one({"_id": id})
+    update_doc["isAnswered"] = req.isAnswered if "isAnswered" in update_doc else prev.get("isAnswered", False)
+    board_collection.update_one({"_id": ObjectId(id)}, {"$set": update_doc})
+    updated = board_collection.find_one({"_id": ObjectId(id)})
+    if not updated:
+        raise HTTPException(status_code=404, detail="수정 후 게시글을 찾을 수 없습니다.")
     updated["id"] = str(updated["_id"])
     return BoardResponse(**updated)
 
@@ -60,18 +62,20 @@ def get_posts(
     size: int = Query(15, ge=1, le=100),
 ):
     skip = page * size
-    total_elements = board_collection.count_documents({})
+    # 🔽 조건 추가: deleted가 False이거나 없을 때만 조회
+    query = {"$or": [{"deleted": False}, {"deleted": {"$exists": False}}]}
+    total_elements = board_collection.count_documents(query)
     total_pages = (total_elements + size - 1) // size if total_elements > 0 else 1
-    cursor = board_collection.find().sort([
-        ("isNotice", -1),           # 공지 먼저
-        ("createdDate", -1),        # 최신글이 위로
-        ("createdTime", -1),        # 시간까지 내림차순
-        ("_id", -1)                 # 혹시 날짜가 같으면 id 기준
+    cursor = board_collection.find(query).sort([
+        ("isNotice", -1),
+        ("createdDate", -1),
+        ("createdTime", -1),
+        ("_id", -1)
     ]).skip(skip).limit(size)
     posts = []
     for doc in cursor:
         doc["isNotice"] = doc.get("isNotice", False)
-        doc["isAnswered"] = doc.get("isAnswered", False)  # 답변완료 여부 보정
+        doc["isAnswered"] = doc.get("isAnswered", False)
         doc["writerId"] = doc.get("writerId", "")
         doc["writerNickname"] = doc.get("writerNickname", "")
         doc["createdDate"] = doc.get("createdDate", "")

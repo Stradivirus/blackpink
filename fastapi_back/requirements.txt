@@ -7,3 +7,4 @@ pydantic[email]
 seaborn
 plotly
 networkx
+certifi

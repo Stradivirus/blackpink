@@ -39,7 +39,7 @@ export function useAdminDataTableFilters(data: any[], columns: any[], selectedTe
       (col) =>
         !excludedColumnsByTeam[selectedTeam]?.includes(col.key) &&
         !dateColumns.some((d) => d.key === col.key) &&
-        !((selectedTeam === "biz" || selectedTeam === "dev") && col.key === companyNameFilterKey)
+        !((selectedTeam === "biz" || selectedTeam === "dev" || selectedTeam === "security") && col.key === companyNameFilterKey)
     ) || [];
 
   // 연도/월 목록
@@ -128,9 +128,7 @@ export function useAdminDataTableFilters(data: any[], columns: any[], selectedTe
     if (monthFilter && String(d.getMonth() + 1).padStart(2, "0") !== monthFilter) return false;
 
     if (
-      (selectedTeam === "biz" || selectedTeam === "dev"
-//        || selectedTeam === "security" DB에서 보안팀에 회사명 추가 후 주석해제
-        ) &&
+      (selectedTeam === "biz" || selectedTeam === "dev" || selectedTeam === "security") &&
       companyNameQuery
     ) {
       const companyName = row["company_name"];

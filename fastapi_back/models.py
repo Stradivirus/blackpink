@@ -88,6 +88,7 @@ class AdminResponse(BaseModel):
 class Incident(BaseModel):
     incident_no: int
     company_id: str
+    company_name: str
     threat_type: str
     risk_level: str
     server_type: str

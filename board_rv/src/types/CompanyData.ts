@@ -30,6 +30,7 @@ export interface Dev {
 export interface Incident {
   incident_no: number;
   company_id: string;
+  company_name: string;
   threat_type: string;
   risk_level: string;
   server_type: string;
