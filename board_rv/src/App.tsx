@@ -26,7 +26,7 @@ import SysDevGraphs from "./components/Admin/AdminDashBoard/SysDevGraphs";
 // React에서는 React.lazy와 Suspense를 사용해 컴포넌트 단위로 지연로딩을 구현할 수 있습니다.
 const AdminDashboard = lazy(() => import("./pages/Admin/AdminDashboard"));
 
-const INACTIVITY_LIMIT = 5 * 60 * 1000;
+const INACTIVITY_LIMIT = 1 * 60 * 1000;
 
 const AppContent: React.FC = () => {
   const location = useLocation();
