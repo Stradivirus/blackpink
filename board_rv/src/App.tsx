@@ -1,5 +1,6 @@
-import React, { Suspense, lazy } from "react";
+import React, { Suspense, lazy, useEffect, useRef } from "react";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { useAuth } from "./context/AuthContext";
 import BoardHeader from "./components/CustomerBoard/BoardHeader";
 // 홈 페이지
 import Home from "./pages/Home";
@@ -25,10 +26,37 @@ import SysDevGraphs from "./components/Admin/AdminDashBoard/SysDevGraphs";
 // React에서는 React.lazy와 Suspense를 사용해 컴포넌트 단위로 지연로딩을 구현할 수 있습니다.
 const AdminDashboard = lazy(() => import("./pages/Admin/AdminDashboard"));
 
+const INACTIVITY_LIMIT = 5 * 60 * 1000;
+
 const AppContent: React.FC = () => {
   const location = useLocation();
   const isHome = location.pathname === "/";
   const isAdmin = location.pathname.startsWith("/admin");
+  const { isLoggedIn, logout } = useAuth();
+  const timerRef = useRef<number | null>(null);
+
+  // 사용자 활동 감지 및 타이머 리셋
+  useEffect(() => {
+    if (!isLoggedIn) return;
+
+    const resetTimer = () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+      timerRef.current = setTimeout(() => {
+        logout();
+        alert("5분 동안 활동이 없어 자동 로그아웃되었습니다.");
+      }, INACTIVITY_LIMIT);
+    };
+
+    // 활동 이벤트 종류
+    const events = ["mousemove", "mousedown", "keydown", "touchstart", "scroll"];
+    events.forEach(event => window.addEventListener(event, resetTimer));
+    resetTimer();
+
+    return () => {
+      events.forEach(event => window.removeEventListener(event, resetTimer));
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, [isLoggedIn, logout]);
 
   return (
     <>
