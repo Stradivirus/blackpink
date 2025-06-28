@@ -6,6 +6,15 @@ from models import CommentCreateRequest, CommentResponse
 
 router = APIRouter()
 
+def get_user_info(user_id: str):
+    member = member_collection.find_one({"userId": user_id})
+    if member:
+        return member["nickname"], None
+    admin = admin_collection.find_one({"userId": user_id})
+    if admin:
+        return admin["nickname"], admin.get("team")
+    return None, None
+
 # 댓글 생성 엔드포인트
 # - writerId로 회원/관리자 정보 조회(닉네임, 팀 등)
 # - 게시글 존재 및 삭제 여부 확인
@@ -13,20 +22,16 @@ router = APIRouter()
 # - 저장된 댓글 정보를 CommentResponse로 반환
 @router.post("/api/comments", response_model=CommentResponse)
 def create_comment(req: CommentCreateRequest):
-    member = member_collection.find_one({"userId": req.writerId})
-    admin = admin_collection.find_one({"userId": req.writerId})
-    team = None
-    if member:
-        nickname = member["nickname"]
-    elif admin:
-        nickname = admin["nickname"]
-        team = admin.get("team")
-    else:
+    nickname, team = get_user_info(req.writerId)
+    if not nickname:
         raise HTTPException(400, "존재하지 않는 사용자입니다.")
 
     post = board_collection.find_one({"_id": ObjectId(req.postId)})
     if not post or post.get("deleted"):
         raise HTTPException(404, "게시글을 찾을 수 없습니다.")
+
+    # Check if the writer is an admin
+    admin = admin_collection.find_one({"userId": req.writerId})
 
     now = datetime.now()
     comment = {
@@ -44,7 +49,7 @@ def create_comment(req: CommentCreateRequest):
         comment["team"] = team
 
     # 답변완료 체크: 관리자가 댓글 작성 + isAnswered true일 때 게시글에 반영
-    if hasattr(req, "isAnswered") and req.isAnswered and admin:
+    if getattr(req, "isAnswered", False) and admin:
         board_collection.update_one(
             {"_id": ObjectId(req.postId)},
             {"$set": {"isAnswered": True}}
@@ -61,9 +66,9 @@ def create_comment(req: CommentCreateRequest):
         createdDate=comment["createdDate"],
         createdTime=comment["createdTime"],
         deleted=comment["deleted"],
-        deletedDate=None,
-        deletedTime=None,
-        team=comment.get("team", "") 
+        deletedDate=comment["deletedDate"],
+        deletedTime=comment["deletedTime"],
+        team=comment.get("team", "")
     )
 
 # 게시글별 댓글 목록 조회 엔드포인트

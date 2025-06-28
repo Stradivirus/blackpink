@@ -4,9 +4,18 @@ from passlib.hash import bcrypt
 from models import MemberLoginRequest
 
 router = APIRouter()
-# 이 엔드포인트는 회원과 관리자가 동일한 비밀번호 변경 로직을 사용하도록 통합
 # 회원은 member_collection에서, 관리자는 admin_collection에서 사용자 정보를 조회
 
+def get_collection(account_type: str):
+    return admin_collection if account_type == "admin" else member_collection
+
+def is_duplicate(field: str, value: str):
+    return bool(
+        admin_collection.find_one({field: value}) or
+        member_collection.find_one({field: value})
+    )
+    
+    
 # 회원/관리자 통합 로그인 엔드포인트
 @router.post("/api/login")
 def universal_login(req: MemberLoginRequest):
@@ -38,10 +47,7 @@ def change_password(
     new_password: str = Body(...),
     accountType: str = Body("member")
 ):
-    if accountType == "admin":
-        collection = admin_collection
-    else:
-        collection = member_collection
+    collection = get_collection(accountType)
 
     user = collection.find_one({"userId": userId})
     if not user or not bcrypt.verify(old_password, user["password"]):
@@ -60,11 +66,9 @@ def change_nickname(
     new_nickname: str = Body(...),
     accountType: str = Body("member")
 ):
-    if accountType == "admin":
-        collection = admin_collection
-    else:
-        collection = member_collection
-
+    collection = get_collection(accountType)
+    if is_duplicate("nickname", new_nickname):
+        raise HTTPException(400, "이미 사용 중인 닉네임입니다.")
     user = collection.find_one({"userId": userId})
     if not user:
         raise HTTPException(400, "사용자를 찾을 수 없습니다.")

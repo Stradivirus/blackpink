@@ -64,6 +64,9 @@ class CommentResponse(BaseModel):
     createdDate: str
     createdTime: str
     team: str = ""
+    deleted: bool = False
+    deletedDate: Optional[str] = None
+    deletedTime: Optional[str] = None
 
 # 관리자 생성 요청 모델
 class AdminCreateRequest(BaseModel):
