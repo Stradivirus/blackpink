@@ -43,7 +43,7 @@ const AppContent: React.FC = () => {
       if (timerRef.current) clearTimeout(timerRef.current);
       timerRef.current = setTimeout(() => {
         logout();
-        alert("5분 동안 활동이 없어 자동 로그아웃되었습니다.");
+        alert("10초 동안 활동이 없어 자동 로그아웃되었습니다.");
       }, INACTIVITY_LIMIT);
     };
 
