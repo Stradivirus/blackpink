@@ -184,7 +184,7 @@ const DashboardSummaryGraphs: React.FC = () => {
               <span style={{ color: osColors["iOS"] }}>iOS: {summary.ios}</span><br/>
               <span style={{ color: osColors["Linux"] }}>Linux: {summary.linux}</span>&nbsp;
               <span style={{ color: osColors["Windows"] }}>Windows: {summary.windows}</span>&nbsp;
-              <span style={{ color: osColors["macOS"] }}>macOS: {summary.macos}</span>
+              <span style={{ color: osColors["macOS"] }}>macOS: {summary.macOS}</span>
             </div>
           </div>
           <div className="dashboard-summary-card">
