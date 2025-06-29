@@ -16,3 +16,4 @@ admin_collection = db["admins"]
 incident_collection = db["incident_logs"]
 companies_collection = db["companies"]
 dev_collection = db["sys_dev"]
+ncsi_collection = db["ncsi"]  # 새 컬렉션

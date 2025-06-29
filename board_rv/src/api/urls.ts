@@ -32,6 +32,8 @@ export const API_URLS = {
     CHANGE_NICKNAME: `${API_BASE}/change-nickname`,
     ADMIN_DELETE: `${API_BASE}/admin/delete`,
     MEMBER_DELETE: `${API_BASE}/member/delete`,
+    // NCSI TOP 20
+    NCSI_TOP20: `${API_BASE}/ncsi/top20`,
 };
 
 export const getCrudEndpoint = (selectedTeam: string): string => {

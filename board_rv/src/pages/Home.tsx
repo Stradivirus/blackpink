@@ -1,19 +1,11 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from "react";
 import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 import { API_URLS } from "../api/urls";
-import AuthForm from "../components/AuthForm";
+import NcsiDashboard from "../components/home/NcsiDashboard";
+import LoginPanel from "../components/home/LoginPanel";
 
 // 스타일 객체 정의
-const containerStyle: React.CSSProperties = {
-  minHeight: "100vh",
-  background: "linear-gradient(135deg,rgb(16, 32, 24) 60%, #2d3a4a 100%)",
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-  justifyContent: "center",
-};
-
 const titleStyle: React.CSSProperties = {
   color: "#00ffe7",
   fontSize: "3rem",
@@ -21,16 +13,6 @@ const titleStyle: React.CSSProperties = {
   letterSpacing: "2px",
   textShadow: "0 0 10px #00ffe7, 0 0 20px #0ff",
   marginBottom: "1.5rem",
-};
-
-const cardStyle: React.CSSProperties = {
-  background: "rgba(30, 40, 55, 0.95)",
-  borderRadius: "12px",
-  boxShadow: "0 4px 24px rgba(0, 0, 0, 0.7)",
-  padding: "2rem 3rem",
-  minWidth: "350px",
-  border: "1.5px solid #00ffe7",
-  marginBottom: "2rem",
 };
 
 const buttonStyle: React.CSSProperties = {
@@ -98,99 +80,55 @@ const Home: React.FC = () => {
   };
 
   return (
-    <div style={containerStyle}>
-      <h1 style={titleStyle}>SECURITY BOARD</h1>
-      <div style={cardStyle}>
-        <p style={{ color: "#fff", fontSize: "1.2rem", marginBottom: "1.5rem" }}>
-          신뢰와 안전을 최우선으로 하는{" "}
-          <span style={{ color: "#00ffe7", fontWeight: "bold", textShadow: "0 0 8px #00ffe7" }}>
-            BLACKPINK
-          </span>
-          에 오신 것을 환영합니다.
-        </p>
-        <button
-          style={{
-            ...buttonStyle,
-            ...(hoveredBtn === "login" ? buttonHoverStyle : {}),
-          }}
-          onMouseEnter={() => setHoveredBtn("login")}
-          onMouseLeave={() => setHoveredBtn(null)}
-          onClick={() => setAuthMode("login")}
-        >
-          로그인
-        </button>
-        <button
-          style={{
-            ...buttonStyle,
-            ...(hoveredBtn === "postpage" ? buttonHoverStyle : {}),
-          }}
-          onMouseEnter={() => setHoveredBtn("postpage")}
-          onMouseLeave={() => setHoveredBtn(null)}
-          onClick={() => navigate("/postpage")}
-        >
-          고객 게시판
-        </button>
-        {/* 아래에 관리자 자동 로그인 버튼 추가 */}
-        <button
-          style={{
-            ...buttonStyle,
-            background: "#222",
-            color: "#00ffe7",
-            border: "1.5px solid #00ffe7",
-            marginTop: "1.5rem",
-          }}
-          onClick={handleAdminAutoLogin}
-        >
-          관리자 자동 로그인
-        </button>
-        {/* 사용자 자동 로그인 버튼 추가 */}
-        <button
-          style={{
-            ...buttonStyle,
-            background: "#222",
-            color: "#00ffe7",
-            border: "1.5px solid #00ffe7",
-            marginTop: "0.7rem",
-          }}
-          onClick={async () => {
-            setLoginError("");
-            try {
-              const res = await fetch(API_URLS.LOGIN, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ userId: "test2", password: "12341234" }),
-              });
-              if (res.ok) {
-                const data = await res.json();
-                if (data.type !== "member") {
-                  setLoginError("회원 계정이 아닙니다.");
-                  return;
-                }
-                login(
-                  data.token || "dummy-token",
-                  { id: data.id, userId: data.userId, nickname: data.nickname, type: data.type }
-                );
-                navigate("/postpage");
-              } else {
-                setLoginError("사용자 로그인 실패");
-              }
-            } catch (err) {
-              setLoginError("로그인 오류가 발생했습니다.");
-            }
-          }}
-        >
-          사용자 자동 로그인
-        </button>
-        {authMode === "login" && (
-          <div style={{ margin: "2rem auto", maxWidth: 400 }}>
-            <AuthForm onSuccess={handleAuthSuccess} />
-          </div>
-        )}
-        {loginError && (
-          <div style={{ color: "red", marginTop: 12, textAlign: "center" }}>
-            {loginError}
-          </div>
-        )}
+    <div
+      style={{
+        minHeight: "100vh",
+        width: "100vw",
+        display: "flex",
+        flexDirection: "row",
+        background: "linear-gradient(135deg,rgb(16, 32, 24) 60%, #2d3a4a 100%)",
+        boxSizing: "border-box",
+        paddingLeft: "8vw",
+        paddingRight: "8vw",
+      }}
+    >
+      {/* 왼쪽: NCSI 대시보드 */}
+      <div
+        style={{
+          flex: 2,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <NcsiDashboard />
+      </div>
+      {/* 오른쪽: 로그인/게시판 등 */}
+      <div
+        style={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <LoginPanel
+          titleStyle={titleStyle}
+          buttonStyle={buttonStyle}
+          buttonHoverStyle={buttonHoverStyle}
+          hoveredBtn={hoveredBtn}
+          setHoveredBtn={setHoveredBtn}
+          setAuthMode={setAuthMode}
+          setLoginError={setLoginError}
+          authMode={authMode}
+          loginError={loginError}
+          handleAdminAutoLogin={handleAdminAutoLogin}
+          handleAuthSuccess={handleAuthSuccess}
+          navigate={navigate}
+          login={login}
+        />
       </div>
     </div>
   );

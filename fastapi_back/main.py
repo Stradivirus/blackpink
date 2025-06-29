@@ -9,6 +9,7 @@ from admin.dev_graph import router as dev_graph_router
 from admin.team_data import router as team_data_router
 from admin.dashboard_graphs import router as dashboard_graphs_router
 from auth import router as auth_router
+from api_ncsi import router as ncsi_router
 
 app = FastAPI()
 
@@ -33,6 +34,7 @@ app.include_router(business_graph_router)
 app.include_router(dev_graph_router)
 app.include_router(team_data_router)
 app.include_router(dashboard_graphs_router)
+app.include_router(ncsi_router, prefix="/api")
 
 
 if __name__ == "__main__":
