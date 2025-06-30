@@ -94,31 +94,54 @@ const SecurityFormDynamic: React.FC<SecurityFormProps> = ({ initialData = {}, on
           placeholder="회사명 검색"
           value={companySearch}
           onChange={(e) => setCompanySearch(e.target.value)}
+          disabled={!!initialData && Object.keys(initialData).length > 0}
         />
       </div>
       {/* 회사명 선택 */}
       <div className="admin-modal-form-field">
-        <label>회사명 선택</label>
-        <select
-          value={formData["company_id"]}
-          onChange={(e) => {
-            const selected = companyOptions.find((opt) => opt.value === e.target.value);
-            setFormData((prev) => ({
-              ...prev,
-              company_id: selected ? selected.value : "",
-              company_name: selected ? selected.label : "",
-            }));
-          }}
-        >
-          <option value="">선택</option>
-          {companyOptions
-            .filter((opt) => typeof opt.label === "string" && opt.label.includes(companySearch))
-            .map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
+        <label>회사 선택</label>
+        {initialData && Object.keys(initialData).length > 0 ? (
+          // 수정 모드: 회사명만 읽기전용, 값이 없으면 initialData에서 보여줌
+          <input
+            type="text"
+            value={
+              formData["company_name"] !== undefined && formData["company_name"] !== ""
+                ? formData["company_name"]
+                : initialData.company_name || ""
+            }
+            readOnly
+          />
+        ) : (
+          // 등록 모드: 드롭다운
+            <select
+              value={formData["company_id"]}
+              onChange={(e) => {
+                const selected = companyOptions.find(opt => opt.value === e.target.value);
+                if (selected) {
+                  setFormData(prev => ({
+                    ...prev,
+                    company_id: selected.value,
+                    company_name: selected.label,  // ✅ 정확히 일치하는 값만
+                  }));
+                  setCompanySearch(selected.label); // UI상 입력된 값도 세팅
+                } else {
+                  // 선택 안된 경우 초기화
+                  setFormData(prev => ({
+                    ...prev,
+                    company_id: "",
+                    company_name: "",
+                  }));
+                }
+              }}
+            >
+            <option value="">선택</option>
+            {companyOptions
+              .filter(opt => typeof opt.label === "string" && opt.label.includes(companySearch))
+              .map((opt) => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
             ))}
-        </select>
+          </select>
+        )}
       </div>
 
       {/* 위협유형 */}

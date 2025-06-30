@@ -58,7 +58,7 @@ const AdminDataTable: React.FC<AdminDataTableProps> = ({
     setSelectedIds,
   } = useAdminDataCrud(selectedTeam, fetchData);
 
-  // 전체 선택 체크박스
+  // 전체 선택 체크박스 
   const isAllSelected =
     filteredData.length > 0 &&
     filteredData.every((row, idx) =>
@@ -390,11 +390,24 @@ function getRowId(row: any, idx: number) {
 function getDisplayValue(row: any, key: string) {
   if (key === "company_id" && row.company_id) return row.company_id;
   if (key === "company_name" && row.company_name) return row.company_name;
+
   if (key.toLowerCase().includes("date") && row[key]) {
-    const d = new Date(row[key]);
-    if (!isNaN(d.getTime())) return d.toLocaleDateString();
+    let d = new Date(row[key]);
+
+    // 유효한 날짜인 경우: yyyy-mm-dd 포맷으로 출력
+    if (!isNaN(d.getTime())) {
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+
+    // 날짜 변환 실패 시 원본 문자열 그대로 출력
+    return row[key];
   }
+
   return row[key] ?? "";
 }
+
 
 export default AdminDataTable;
