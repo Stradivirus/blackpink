@@ -117,6 +117,39 @@ const BizFormDynamic: React.FC<BizFormProps> = ({ initialData = {}, onChange }) 
     return onlyNums.replace(/(\d{2,3})(\d{3,4})(\d{4})/, "$1-$2-$3");
   }
 
+  // 사업팀 어드민 목록 상태
+  const [bizAdmins, setBizAdmins] = useState<{ nickname: string; phone: string }[]>([]);
+
+  // 사업팀 어드민 목록 불러오기
+  useEffect(() => {
+    axios.get(API_URLS.ADMIN_LIST)
+      .then(res => {
+        // 팀이 "사업팀"인 관리자만 추출
+        const admins = (res.data || []).filter((a: any) => a.team === "사업팀");
+        setBizAdmins(admins);
+      })
+      .catch(() => setBizAdmins([]));
+  }, []);
+
+  // 담당자 선택 시 이름/전화번호 자동 입력
+  const handleManagerSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedName = e.target.value;
+    const selected = bizAdmins.find(a => a.nickname === selectedName);
+    if (selected) {
+      setFormData(prev => ({
+        ...prev,
+        manager_name: selected.nickname,
+        manager_phone: selected.phone,
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        manager_name: "",
+        manager_phone: "",
+      }));
+    }
+  };
+
   return (
     <div className="admin-modal-form-grid">
       {/* 회사코드 */}
@@ -233,23 +266,25 @@ const BizFormDynamic: React.FC<BizFormProps> = ({ initialData = {}, onChange }) 
     {/* 담당자명과 연락처: 2칸 합쳐서 한 줄 */}
     <div className="admin-modal-form-field" style={{ gridColumn: "1 / span 1" }}>
       <label>담당자명</label>
-      <input
-        type="text"
+      <select
         value={formData["manager_name"]}
-        onChange={(e) => handleChange("manager_name", e.target.value)}
-        placeholder="담당자명 입력"
-      />
+        onChange={handleManagerSelect}
+      >
+        <option value="">선택</option>
+        {bizAdmins.map((admin) => (
+          <option key={admin.nickname} value={admin.nickname}>
+            {admin.nickname}
+          </option>
+        ))}
+      </select>
     </div>
     <div className="admin-modal-form-field" style={{ gridColumn: "2 / span 1" }}>
       <label>담당자 연락처</label>
       <input
         type="text"
         value={formData["manager_phone"]}
-        onChange={(e) =>
-          handleChange("manager_phone", formatPhoneNumber(e.target.value))
-        }
-        placeholder="담당자 연락처 입력"
-        maxLength={13} // 000-0000-0000
+        readOnly
+        placeholder="담당자 선택시 자동 입력"
       />
     </div>
   </div>

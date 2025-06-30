@@ -25,6 +25,7 @@ export interface Dev {
     maintenance?: string | null;
     error?: string | null;
     handler_count: number;
+    manager_name?: string;      // 담당자명 추가
 };
 
 export interface Incident {
@@ -38,6 +39,7 @@ export interface Incident {
   handled_date?: string | null;
   status: string;
   action: string;
+  manager_name?: string;
   handler_count: number;
 }
 

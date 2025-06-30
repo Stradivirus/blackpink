@@ -8,8 +8,9 @@ const teamLabels = ["관리팀", "보안팀", "사업팀", "개발팀"];
 const columns = [
   { label: "ID", render: (m: Admin) => m.id, hidden: true },
   { label: "관리자 ID", render: (m: Admin) => m.userId },
-  { label: "닉네임", render: (m: Admin) => m.nickname },
+  { label: "이름", render: (m: Admin) => m.nickname },
   { label: "팀", render: (m: Admin) => m.team },
+  { label: "전화번호", render: (m: Admin) => m.phone || "-" }, // 전화번호 컬럼 추가
 ];
 
 const AdminsList: React.FC = () => {
