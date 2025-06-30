@@ -1,7 +1,17 @@
 import requests
 from bs4 import BeautifulSoup
 import os
-from db import ncsi_collection  # MongoDB 컬렉션 import
+from pymongo import MongoClient
+import certifi
+
+# 환경 변수에서 MongoDB 정보 읽기 (없으면 기본값 사용)
+MONGO_URI = os.getenv("MONGO_URI", "mongodb+srv://stradivirus:1q2w3e4r@cluster0.e7rvfpz.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+MONGO_DB = os.getenv("MONGO_DB", "blackpink")
+MONGO_COLLECTION = os.getenv("MONGO_COLLECTION", "ncsi")
+
+client = MongoClient(MONGO_URI, tlsCAFile=certifi.where())
+db = client[MONGO_DB]
+ncsi_collection = db[MONGO_COLLECTION]
 
 NCSI_URL = "https://ncsi.ega.ee/ncsi-index/?order=rank"
 TOP_N = 20
@@ -67,7 +77,6 @@ COUNTRY_COORDINATES = {
     "Nigeria": (9.0820, 8.6753),
     "Kenya": (-1.286389, 36.817223),
 }
-
 
 def crawl_ncsi():
     print(f"[Crawler] Starting crawl from URL: {NCSI_URL}")
@@ -143,8 +152,8 @@ def crawl_ncsi():
             print("[Crawler WARNING] No valid country data was collected. Check selectors and COUNTRY_COORDINATES.")
             return []
 
-        # MongoDB 저장
-        ncsi_collection.delete_many({})  # 기존 데이터 삭제
+        # MongoDB 저장 (기존 데이터 모두 삭제 후 삽입)
+        ncsi_collection.delete_many({})
         ncsi_collection.insert_many(countries_data)
         print(f"[Crawler] MongoDB에 {len(countries_data)}개국 정보 저장 완료.")
 
