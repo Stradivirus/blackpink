@@ -2,99 +2,9 @@ import { useState } from "react";
 import axios from "axios";
 import { API_URLS } from "../../api/urls";
 import type { Admin } from "../../types/users";
+import styles from "./MemberInviteForm.styles";
 
 const ADMIN_TEAMS: Admin["team"][] = ["관리팀", "보안팀", "사업팀", "개발팀"];
-
-// 스타일 객체 추가
-const styles = {
-  card: {
-    maxWidth: 360,
-    margin: "3rem auto",
-    padding: 36,
-    borderRadius: 16,
-    background: "#fff",
-    boxShadow: "0 4px 24px 0 rgba(0,0,0,0.08)",
-    display: "flex",
-    flexDirection: "column" as const,
-    alignItems: "center",
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 700,
-    marginBottom: 24,
-    letterSpacing: -1,
-    color: "#222",
-  },
-  radioGroup: {
-    display: "flex",
-    justifyContent: "center",
-    gap: 24,
-    marginBottom: 20,
-  },
-  radioLabel: {
-    fontSize: 16,
-    fontWeight: 500,
-    color: "#444",
-    display: "flex",
-    alignItems: "center",
-    gap: 6,
-    cursor: "pointer",
-  },
-  select: {
-    width: "100%",
-    padding: "10px 12px",
-    borderRadius: 8,
-    border: "1px solid #d0d7de",
-    fontSize: 15,
-    marginBottom: 12,
-    background: "#f8fafc",
-    outline: "none",
-  },
-  input: {
-    width: "100%",
-    padding: "10px 12px",
-    borderRadius: 8,
-    border: "1px solid #d0d7de",
-    fontSize: 15,
-    marginBottom: 12,
-    background: "#f8fafc",
-    outline: "none",
-    transition: "border 0.2s",
-  },
-  inputError: {
-    border: "1.5px solid #e74c3c",
-    background: "#fff6f6",
-  },
-  error: {
-    color: "#e74c3c",
-    fontSize: 13,
-    margin: "-8px 0 8px 2px",
-    minHeight: 18,
-  },
-  button: {
-    width: "100%",
-    padding: "12px 0",
-    borderRadius: 8,
-    border: "none",
-    background: "#3b82f6",
-    color: "#fff",
-    fontWeight: 700,
-    fontSize: 16,
-    cursor: "pointer",
-    marginTop: 8,
-    transition: "background 0.2s",
-  },
-  buttonDisabled: {
-    background: "#b6c3d1",
-    cursor: "not-allowed",
-  },
-  message: {
-    marginTop: 18,
-    fontSize: 15,
-    fontWeight: 500,
-    textAlign: "center" as const,
-  },
-};
 
 const MemberInviteForm: React.FC = () => {
   const [userId, setUserId] = useState("");
@@ -106,6 +16,11 @@ const MemberInviteForm: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [userIdError, setUserIdError] = useState<string | null>(null);
   const [nicknameError, setNicknameError] = useState<string | null>(null);
+  const [companyName, setCompanyName] = useState("");
+  const [companyId, setCompanyId] = useState("");
+  const [companyInput, setCompanyInput] = useState(""); // 검색창 입력값
+  const [companyResults, setCompanyResults] = useState<any[]>([]);
+  const [companySearchLoading, setCompanySearchLoading] = useState(false);
 
   const checkDuplicate = async (field: "userId" | "nickname", value: string) => {
     if (!value) return;
@@ -122,6 +37,32 @@ const MemberInviteForm: React.FC = () => {
       }
     } catch {
     }
+  };
+
+  // 회사명/코드로 검색
+  const handleCompanySearch = async () => {
+    if (!companyInput) {
+      setCompanyResults([]);
+      return;
+    }
+    setCompanySearchLoading(true);
+    try {
+      // name 또는 id로 검색 (백엔드에서 둘 다 지원해야 함)
+      const res = await axios.get("/api/company/search", { params: { keyword: companyInput } });
+      setCompanyResults(res.data || []);
+    } catch {
+      setCompanyResults([]);
+    } finally {
+      setCompanySearchLoading(false);
+    }
+  };
+
+  // 검색 결과 선택 시
+  const handleCompanySelect = (company: any) => {
+    setCompanyName(company.company_name);
+    setCompanyId(company.company_id);
+    setCompanyInput(""); // 검색창 초기화
+    setCompanyResults([]);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -156,6 +97,8 @@ const MemberInviteForm: React.FC = () => {
         nickname,
         email,
         accountType,
+        company_id: companyId,
+        company_name: companyName,
       };
       if (accountType === "admin") {
         payload.team = team;
@@ -166,6 +109,10 @@ const MemberInviteForm: React.FC = () => {
       setNickname("");
       setEmail("");
       setTeam("관리팀");
+      setCompanyName("");
+      setCompanyId("");
+      setCompanyInput("");
+      setCompanyResults([]);
     } catch (err: any) {
       setMessage(
         err.response?.data?.detail || "회원 초대에 실패했습니다."
@@ -242,6 +189,102 @@ const MemberInviteForm: React.FC = () => {
         required
         style={styles.input}
       />
+      {accountType === "member" && (
+        <>
+          {/* 회사명/코드 검색창 + 버튼 */}
+          <div style={styles.companySearchWrap}>
+            <input
+              type="text"
+              placeholder="회사명 또는 회사코드 입력"
+              value={companyInput}
+              onChange={e => setCompanyInput(e.target.value)}
+              style={{ ...styles.input, marginBottom: 0, flex: 1 }}
+              autoComplete="off"
+            />
+            <button
+              type="button"
+              onClick={handleCompanySearch}
+              style={{
+                ...styles.companySearchBtn,
+                height: "48px",
+                fontSize: "16px",
+                borderRadius: "9px",
+                marginBottom: 0,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                whiteSpace: "nowrap",
+              }}
+            >
+              검색
+            </button>
+            {companySearchLoading && (
+              <div style={styles.searchLoading}>
+                검색 중...
+              </div>
+            )}
+          </div>
+          {/* 검색 결과 드롭다운 */}
+          {companyResults.length > 0 && (
+            <div
+              style={{
+                position: "relative",
+                width: "100%",
+                zIndex: 10,
+                marginBottom: 12,
+              }}
+            >
+              <div
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  background: "#fff",
+                  border: "1.5px solid #d0d7de",
+                  borderRadius: 9,
+                  maxHeight: 200,
+                  overflowY: "auto" as const,
+                  boxShadow: "0 2px 12px 0 rgba(0,0,0,0.10)",
+                  zIndex: 20,
+                }}
+              >
+                {companyResults.map((c) => (
+                  <div
+                    key={c.company_id}
+                    style={{
+                      padding: "12px 18px",
+                      cursor: "pointer",
+                      borderBottom: "1px solid #f1f1f1",
+                      background: "#fff",
+                      transition: "background 0.15s",
+                    }}
+                    onClick={() => handleCompanySelect(c)}
+                  >
+                    <div style={{ fontWeight: 600, fontSize: 15 }}>{c.company_name}</div>
+                    <div style={{ fontSize: 13, color: "#888", marginTop: 2 }}>코드: {c.company_id}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          {/* 회사명/회사코드 자동 입력 */}
+          <input
+            type="text"
+            placeholder="회사명"
+            value={companyName}
+            readOnly
+            style={styles.input}
+          />
+          <input
+            type="text"
+            placeholder="회사코드"
+            value={companyId}
+            readOnly
+            style={styles.input}
+          />
+        </>
+      )}
       <button
         type="submit"
         disabled={loading || !!userIdError || !!nicknameError}

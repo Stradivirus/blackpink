@@ -1,8 +1,8 @@
 import random
 import string
 from datetime import datetime
-from fastapi import APIRouter, HTTPException, Body
-from db import member_collection, admin_collection
+from fastapi import APIRouter, HTTPException, Body, Query
+from db import member_collection, admin_collection, companies_collection
 from passlib.hash import bcrypt
 from models import AdminCreateRequest, AdminResponse, MemberResponse
 from pydantic import BaseModel
@@ -41,10 +41,16 @@ def send_email(to_email: str, user_id: str, temp_password: str):
         server.sendmail(smtp_user, to_email, msg.as_string())
 
 # 회원/관리자 계정 생성 및 초대 메일 발송 함수
-# - 임시 비밀번호 생성 및 해시 저장
-# - 관리자와 회원 컬렉션 모두에서 중복 아이디 체크, DB 저장, 이메일 발송
-# - accountType: "member" 또는 "admin"
-def create_member(userId: str, nickname: str, email: str, accountType: str = "member", team: str = None):
+# - company_id, company_name 추가
+def create_member(
+    userId: str,
+    nickname: str,
+    email: str,
+    accountType: str = "member",
+    team: str = None,
+    company_id: str = None,
+    company_name: str = None
+):
     # 관리자와 회원 컬렉션 모두에서 아이디 중복 체크
     if admin_collection.find_one({"userId": userId}) or member_collection.find_one({"userId": userId}):
         raise ValueError("이미 존재하는 아이디입니다.")
@@ -56,7 +62,9 @@ def create_member(userId: str, nickname: str, email: str, accountType: str = "me
         "nickname": nickname,
         "password": hashed_password,
         "email": email,
-        "joinedAt": datetime.now()
+        "joinedAt": datetime.now(),
+        "company_id": company_id,
+        "company_name": company_name,
     }
     if accountType == "admin":
         collection = admin_collection
@@ -110,18 +118,18 @@ def admin_list():
     ]
 
 # 회원/관리자 초대(임시 비밀번호 발송) 엔드포인트
-# - userId, nickname, email, accountType, team 정보로 계정 생성 및 메일 발송
-# - 중복 아이디/이메일 체크 및 예외 처리
 @router.post("/api/admin/member-invite")
 def admin_member_invite(
     userId: str = Body(...),
     nickname: str = Body(...),
     email: str = Body(...),
     accountType: str = Body("member"),
-    team: str = Body(None)
+    team: str = Body(None),
+    company_id: str = Body(None),
+    company_name: str = Body(None)
 ):
     try:
-        member = create_member(userId, nickname, email, accountType, team)
+        member = create_member(userId, nickname, email, accountType, team, company_id, company_name)
         return {"message": "임시 비밀번호가 이메일로 발송되었습니다.", "userId": userId}
     except ValueError as e:
         raise HTTPException(400, str(e))
@@ -157,6 +165,8 @@ def member_list():
             nickname=m["nickname"],
             email=m["email"],
             joinedAt=m["joinedAt"].date() if hasattr(m["joinedAt"], "date") else m["joinedAt"],
+            company_id=m.get("company_id", ""),
+            company_name=m.get("company_name", ""),
         )
         for m in members
     ]
@@ -183,4 +193,18 @@ def member_delete(req: UserIdRequest):
     if result.deleted_count == 0:
         raise HTTPException(404, "회원을 찾을 수 없습니다.")
     return {"message": "삭제 완료"}
+
+@router.get("/api/company/search")
+async def search_company(keyword: str = Query(...)):
+    """
+    회사명 또는 회사코드로 부분 검색 (프론트 검색창 대응)
+    """
+    query = {
+        "$or": [
+            {"company_name": {"$regex": keyword, "$options": "i"}},
+            {"company_id": {"$regex": keyword, "$options": "i"}},
+        ]
+    }
+    results = list(companies_collection.find(query, {"_id": 0}))
+    return results
 

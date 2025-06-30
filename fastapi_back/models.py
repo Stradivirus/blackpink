@@ -21,6 +21,8 @@ class MemberResponse(BaseModel):
     nickname: str
     email: EmailStr
     joinedAt: date
+    company_id: str                # 회사코드 추가
+    company_name: str              # 회사명 추가
 
 # 게시글 생성 요청 모델
 class BoardCreateRequest(BaseModel):

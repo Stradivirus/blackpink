@@ -7,6 +7,7 @@ const columns = [
   { label: "ID", render: (m: Member) => m.id, hidden: true },
   { label: "고객 ID", render: (m: Member) => m.userId },
   { label: "닉네임", render: (m: Member) => m.nickname },
+  { label: "회사명", render: (m: Member) => m.company_name }, // 회사명 컬럼 추가
   { label: "이메일", render: (m: Member) => m.email },
   { label: "가입일", render: (m: Member) => m.joinedAt },
 ];

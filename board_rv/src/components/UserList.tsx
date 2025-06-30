@@ -105,12 +105,12 @@ const styles = {
   },
 };
 
-function UserList<T extends { id: string; nickname: string; userId?: string }>(
+function UserList<T extends { id: string; nickname: string; userId?: string; company_name?: string }>(
   {
     title,
     columns,
     data,
-    setData, // 추가
+    setData,
     loading,
     accountType,
     onAfterNicknameUpdate,
@@ -118,6 +118,23 @@ function UserList<T extends { id: string; nickname: string; userId?: string }>(
 ) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [nicknameValue, setNicknameValue] = useState<string>("");
+  // 회사명 검색 상태 추가
+  const [companySearch, setCompanySearch] = useState("");
+  const [filteredData, setFilteredData] = useState<T[] | null>(null);
+
+  // 회사명 검색 핸들러
+  const handleCompanySearch = () => {
+    if (!companySearch.trim()) {
+      setFilteredData(null);
+      return;
+    }
+    setFilteredData(
+      data.filter(row =>
+        row.company_name &&
+        row.company_name.toLowerCase().includes(companySearch.trim().toLowerCase())
+      )
+    );
+  };
 
   const handleNicknameClick = (row: T) => {
     setEditingId(row.id);
@@ -237,10 +254,47 @@ function UserList<T extends { id: string; nickname: string; userId?: string }>(
 
   return (
     <div style={styles.card}>
-      <div style={styles.title}>{title}</div>
+      {/* 타이틀 + 검색창 */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 28 }}>
+        <div style={styles.title}>{title}</div>
+        <div style={{ display: "flex", gap: 6 }}>
+          <input
+            type="text"
+            placeholder="회사명 검색"
+            value={companySearch}
+            onChange={e => setCompanySearch(e.target.value)}
+            style={{
+              border: "1.5px solid #d0d7de",
+              borderRadius: 8,
+              padding: "7px 12px",
+              fontSize: 15,
+              background: "#f8fafc",
+              outline: "none",
+            }}
+            onKeyDown={e => { if (e.key === "Enter") handleCompanySearch(); }}
+          />
+          <button
+            type="button"
+            onClick={handleCompanySearch}
+            style={{
+              background: "#2563eb",
+              color: "#fff",
+              border: "none",
+              borderRadius: 8,
+              padding: "7px 16px",
+              fontWeight: 600,
+              fontSize: 15,
+              cursor: "pointer",
+            }}
+          >
+            검색
+          </button>
+        </div>
+      </div>
+      {/* 이하 기존 테이블 렌더링 */}
       {loading ? (
         <div style={styles.loading}>로딩 중...</div>
-      ) : data.length === 0 ? (
+      ) : (filteredData ?? data).length === 0 ? (
         <div style={{ textAlign: "center", color: "#888", padding: 40 }}>
           데이터가 없습니다.
         </div>
@@ -255,7 +309,7 @@ function UserList<T extends { id: string; nickname: string; userId?: string }>(
               </tr>
             </thead>
             <tbody>
-              {data.map((row, idx) => (
+              {(filteredData ?? data).map((row, idx) => (
                 <tr key={row.id ?? idx} style={idx % 2 === 1 ? styles.trHover : undefined}>
                   {visibleColumns.map((col, i) => (
                     <td key={i} style={styles.td}>{renderCell(col, row)}</td>
