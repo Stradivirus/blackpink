@@ -7,12 +7,9 @@ COPY ../board_rv ./
 RUN npm run build
 
 # 2단계: Nginx로 정적 파일 서빙
-FROM nginx:1.25.4-alpine3.19
+FROM nginx:1.25-alpine
 COPY --from=build /app/dist /usr/share/nginx/html
 COPY docker/nginx/default.conf /etc/nginx/conf.d/default.conf
-
-# Upgrade all packages to reduce vulnerabilities
-RUN apk update && apk upgrade --no-cache
 
 # 한국 시간대 설정
 RUN apk add --no-cache tzdata \
