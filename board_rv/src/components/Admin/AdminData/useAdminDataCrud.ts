@@ -74,7 +74,6 @@ export function useAdminDataCrud(selectedTeam: string, fetchData?: () => void) {
             : String(modalInitialData._id);
         if (!itemId) throw new Error("수정할 데이터 ID가 없습니다.");
 
-        // console.log("수정 요청, ID:", itemId); // 디버깅 출력 제거
 
         const response = await fetch(`${endpoint}/${itemId}`, {
           method: "PUT",
