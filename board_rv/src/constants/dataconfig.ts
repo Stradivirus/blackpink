@@ -41,6 +41,7 @@ export const columnsByTeam: Record<string, { key: string; label: string }[]> = {
     { key: "dev_status", label: "상태" },
     { key: "maintenance", label: "유지보수" },
     { key: "error", label: "에러" },
+    { key: "manager_name", label: "담당자명" },
     { key: "handler_count", label: "담당자 수" },
   ],
   security: [
@@ -53,6 +54,7 @@ export const columnsByTeam: Record<string, { key: string; label: string }[]> = {
     { key: "handled_date", label: "처리 일자" },
     { key: "status", label: "상태" },
     { key: "action", label: "조치" },
+    { key: "manager_name", label: "담당자명" },
     { key: "handler_count", label: "처리 인원 수" },
   ],
 };

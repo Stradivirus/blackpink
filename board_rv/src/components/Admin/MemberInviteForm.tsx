@@ -21,6 +21,8 @@ const MemberInviteForm: React.FC = () => {
   const [companyInput, setCompanyInput] = useState(""); // 검색창 입력값
   const [companyResults, setCompanyResults] = useState<any[]>([]);
   const [companySearchLoading, setCompanySearchLoading] = useState(false);
+  const [phone, setPhone] = useState(""); // 전화번호 상태 추가
+  const [phoneError, setPhoneError] = useState<string | null>(null); // 전화번호 에러 상태 추가
 
   const checkDuplicate = async (field: "userId" | "nickname", value: string) => {
     if (!value) return;
@@ -65,6 +67,17 @@ const MemberInviteForm: React.FC = () => {
     setCompanyResults([]);
   };
 
+  // 전화번호 입력 핸들러
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/\D/g, ""); // 숫자만 허용
+    setPhone(value);
+    if (value.length !== 10 && value.length !== 11) {
+      setPhoneError("전화번호는 10자리 또는 11자리여야 합니다.");
+    } else {
+      setPhoneError(null);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -102,6 +115,7 @@ const MemberInviteForm: React.FC = () => {
       };
       if (accountType === "admin") {
         payload.team = team;
+        payload.phone = phone; // 관리자일 때만 전화번호 포함
       }
       await axios.post(API_URLS.MEMBER_INVITE, payload);
       setMessage("임시 비밀번호가 이메일로 발송되었습니다.");
@@ -109,6 +123,7 @@ const MemberInviteForm: React.FC = () => {
       setNickname("");
       setEmail("");
       setTeam("관리팀");
+      setPhone(""); // 입력값 초기화
       setCompanyName("");
       setCompanyId("");
       setCompanyInput("");
@@ -150,16 +165,30 @@ const MemberInviteForm: React.FC = () => {
         </label>
       </div>
       {accountType === "admin" && (
-        <select
-          value={team}
-          onChange={e => setTeam(e.target.value as Admin["team"])}
-          style={styles.select}
-          required
-        >
-          {ADMIN_TEAMS.map(t => (
-            <option key={t} value={t}>{t}</option>
-          ))}
-        </select>
+        <>
+          <select
+            value={team}
+            onChange={e => setTeam(e.target.value as Admin["team"])}
+            style={styles.select}
+            required
+          >
+            {ADMIN_TEAMS.map(t => (
+              <option key={t} value={t}>{t}</option>
+            ))}
+          </select>
+          <input
+            type="text"
+            placeholder="전화번호"
+            value={phone}
+            onChange={handlePhoneChange}
+            required
+            style={phoneError ? { ...styles.input, ...styles.inputError } : styles.input}
+            maxLength={11}
+            inputMode="numeric"
+            pattern="\d*"
+          />
+          <div style={styles.error}>{phoneError || ""}</div>
+        </>
       )}
       <input
         type="text"
@@ -287,8 +316,8 @@ const MemberInviteForm: React.FC = () => {
       )}
       <button
         type="submit"
-        disabled={loading || !!userIdError || !!nicknameError}
-        style={loading || !!userIdError || !!nicknameError ? { ...styles.button, ...styles.buttonDisabled } : styles.button}
+        disabled={loading || !!userIdError || !!nicknameError || !!phoneError}
+        style={loading || !!userIdError || !!nicknameError || !!phoneError ? { ...styles.button, ...styles.buttonDisabled } : styles.button}
       >
         {loading ? "발송 중..." : "초대 메일 발송"}
       </button>

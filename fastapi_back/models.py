@@ -88,6 +88,7 @@ class AdminResponse(BaseModel):
     userId: str
     nickname: str
     team: Literal["관리팀", "보안팀", "사업팀", "개발팀"]
+    phone: str  # 추가
 
 # 보안 사고 정보 모델
 class Incident(BaseModel):
@@ -101,6 +102,7 @@ class Incident(BaseModel):
     handled_date: Optional[date] = None
     status: str
     action: str
+    manager_name: Optional[str] = None
     handler_count: int
 
 # 보안 사고 목록 응답 모델
@@ -129,4 +131,4 @@ class Project(BaseModel):
     maintenance: Optional[str] = None
     error: Optional[str] = None
     handler_count: int
-    # 필요에 따라 필드 추가
+    manager_name: Optional[str] = None  # 담당자명 추가

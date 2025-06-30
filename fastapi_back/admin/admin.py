@@ -92,6 +92,7 @@ def admin_join(req: AdminCreateRequest):
         "password": hashed_pw,
         "nickname": req.nickname,
         "team": req.team,
+        "phone": req.phone,  # 추가
     }
     result = admin_collection.insert_one(admin)
     admin["id"] = str(result.inserted_id)
@@ -100,6 +101,7 @@ def admin_join(req: AdminCreateRequest):
         userId=admin["userId"],
         nickname=admin["nickname"],
         team=admin["team"],
+        phone=admin["phone"],  # 추가
     )
 
 # 관리자 목록 조회 엔드포인트
@@ -113,6 +115,7 @@ def admin_list():
             userId=a["userId"],
             nickname=a["nickname"],
             team=a.get("team", "관리팀"),
+            phone=a.get("phone", ""),  # 추가
         )
         for a in admins
     ]

@@ -152,6 +152,39 @@ const DevFormDynamic: React.FC<DevFormProps> = ({ initialData = {}, onChange }) 
     // eslint-disable-next-line
   }, [initialData, formData.error]);
 
+  // 개발팀 어드민 목록 상태
+  const [devAdmins, setDevAdmins] = useState<{ nickname: string; phone: string }[]>([]);
+
+  // 개발팀 어드민 목록 불러오기
+  useEffect(() => {
+    fetch("/api/admin/list")
+      .then(res => res.json())
+      .then((data) => {
+        const admins = (data || []).filter((a: any) => a.team === "개발팀");
+        setDevAdmins(admins);
+      })
+      .catch(() => setDevAdmins([]));
+  }, []);
+
+  // 담당자 선택 시 이름/전화번호 자동 입력
+  const handleManagerSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedName = e.target.value;
+    const selected = devAdmins.find(a => a.nickname === selectedName);
+    if (selected) {
+      setFormData(prev => ({
+        ...prev,
+        manager_name: selected.nickname,
+        manager_phone: selected.phone,
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        manager_name: "",
+        manager_phone: "",
+      }));
+    }
+  };
+
   return (
     <div className="admin-modal-form-grid">
       <div className="admin-modal-form-field">
@@ -306,6 +339,32 @@ const DevFormDynamic: React.FC<DevFormProps> = ({ initialData = {}, onChange }) 
             <option key={num} value={num}>{num}</option>
           ))}
         </select>
+      </div>
+
+      {/* 담당자명 드롭다운 */}
+      <div className="admin-modal-form-field">
+        <label>담당자명</label>
+        <select
+          value={formData["manager_name"]}
+          onChange={handleManagerSelect}
+        >
+          <option value="">선택</option>
+          {devAdmins.map((admin) => (
+            <option key={admin.nickname} value={admin.nickname}>
+              {admin.nickname}
+            </option>
+          ))}
+        </select>
+      </div>
+      {/* 담당자 연락처: 읽기 전용 */}
+      <div className="admin-modal-form-field">
+        <label>담당자 연락처</label>
+        <input
+          type="text"
+          value={formData["manager_phone"] || ""}
+          readOnly
+          placeholder="담당자 선택시 자동 입력"
+        />
       </div>
     </div>
   );
