@@ -9,8 +9,9 @@ import matplotlib.pyplot as plt
 from db import companies_collection
 from .graph_utils import set_plot_style, image_response, save_fig_to_png
 
-router = APIRouter()
+router = APIRouter(prefix="/api")
 
+# MongoDB에서 회사 데이터프레임 생성
 def load_data():
     data = list(companies_collection.find())
     if not data:
@@ -27,6 +28,7 @@ def load_data():
     df['months'] = (df['contract_end'].dt.to_period('M') - df['contract_start'].dt.to_period('M')).apply(safe_months)
     return df
 
+# 계약 기간에 따라 예상 수익 계산
 def calculate_revenue(row):
     if row['months'] <= 3:
         return {'베이직': 30, '프로': 50, '엔터프라이즈': 80}.get(row['plan'], np.nan)
@@ -43,6 +45,7 @@ def set_tick_font(ax, font_prop, size=16):
         label.set_fontproperties(font_prop)
         label.set_fontsize(size)
 
+# 계약종류별 수익 바차트
 def create_bar_plot(df):
     font_prop = set_plot_style()
     df['revenue'] = df.apply(calculate_revenue, axis=1)
@@ -56,6 +59,7 @@ def create_bar_plot(df):
     set_tick_font(ax, font_prop)
     return save_fig_to_png(fig, backend="matplotlib")
 
+# 업종-계약종류별 수익 히트맵
 def create_heatmap(df):
     font_prop = set_plot_style()
     df['revenue'] = df.apply(calculate_revenue, axis=1)
@@ -72,6 +76,7 @@ def create_heatmap(df):
     set_tick_font(ax, font_prop)
     return save_fig_to_png(fig, backend="matplotlib")
 
+# 회사별 연매출 비교 바차트
 def create_annual_sales_plot(df):
     font_prop = set_plot_style()
     df['revenue'] = df.apply(calculate_revenue, axis=1)
@@ -91,6 +96,7 @@ def create_annual_sales_plot(df):
         text.set_fontsize(14)
     return save_fig_to_png(fig, backend="matplotlib")
 
+# 회사별 계약종류+수익 히트맵
 def create_company_plan_heatmap(df):
     font_prop = set_plot_style()
     df['revenue'] = df.apply(calculate_revenue, axis=1)
@@ -106,6 +112,7 @@ def create_company_plan_heatmap(df):
     set_tick_font(ax, font_prop, size=20)
     return save_fig_to_png(fig, backend="matplotlib")
 
+# 2025 vs 2023+2024 계약종류별 비교 도넛형 파이차트
 def create_nested_pie_chart(df):
     font_prop = set_plot_style()
     df['revenue'] = df.apply(calculate_revenue, axis=1)
@@ -149,6 +156,7 @@ def create_nested_pie_chart(df):
     ax.set_title("2025 vs 2023+2024 계약종류별 비교", fontproperties=font_prop, fontsize=20)
     return save_fig_to_png(fig, backend="matplotlib")
 
+# 만료된 계약의 계약기간 분포(박스+스트립플롯)
 def create_terminated_contract_duration_plot(df):
     font_prop = set_plot_style()
     df_term = df[df['status'] == '만료'].copy()
@@ -168,6 +176,7 @@ def create_terminated_contract_duration_plot(df):
     set_tick_font(ax, font_prop)
     return save_fig_to_png(fig, backend="matplotlib")
 
+# 해지된 계약의 계약종류별 건수/비율(바+파이)
 def create_suspended_contract_plan_plot(df):
     font_prop = set_plot_style()
     df_suspend = df[df['status'] == '해지'].copy()
@@ -204,6 +213,7 @@ business_graph_func_map = {
     'suspended_plan': create_suspended_contract_plan_plot,
 }
 
+# 그래프 생성 및 반환
 def create_business_plot(graph_type):
     df = load_data()
     if df.empty:
@@ -213,7 +223,8 @@ def create_business_plot(graph_type):
         return func(df)
     return None
 
-@router.get("/api/business/graph/{graph_type}")
+# 그래프 이미지 반환 엔드포인트
+@router.get("/business/graph/{graph_type}")
 def plot_business_graph(graph_type: str):
     img_data = create_business_plot(graph_type)
     return image_response(img_data)

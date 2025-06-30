@@ -34,7 +34,7 @@ app.include_router(business_graph_router)
 app.include_router(dev_graph_router)
 app.include_router(team_data_router)
 app.include_router(dashboard_graphs_router)
-app.include_router(ncsi_router, prefix="/api")
+app.include_router(ncsi_router)  
 
 
 if __name__ == "__main__":

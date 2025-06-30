@@ -3,14 +3,13 @@ from models import Project
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
-from matplotlib import font_manager as fm
-import io
 from db import dev_collection
 from .graph_utils import set_plot_style, save_fig_to_png, image_response
 
-router = APIRouter()
+router = APIRouter(prefix="/api")
 collection = dev_collection
 
+# MongoDB에서 프로젝트 데이터프레임 생성
 def get_dataframe():
     data = list(collection.find())
     if not data:
@@ -19,7 +18,7 @@ def get_dataframe():
     for d in data:
         try:
             d.pop('_id', None)
-            project = Project(**d)
+            project = Project(**d)  # Pydantic 모델로 검증
             projects.append(project.dict())
         except Exception:
             continue
@@ -29,6 +28,8 @@ def get_dataframe():
     return df
 
 # --- 그래프별 함수 분리 ---
+
+# OS별 버전 분포(스택 바차트)
 def plot_os_version_by_os(df, font_prop):
     fig, ax = plt.subplots(figsize=(10, 6))
     version_counts = df.groupby(['os', 'os_versions']).size().unstack(fill_value=0)
@@ -41,6 +42,7 @@ def plot_os_version_by_os(df, font_prop):
     plt.xticks(rotation=45)
     return save_fig_to_png(fig)
 
+# OS별 관리 현황(스택 바차트)
 def plot_maintenance_by_os(df, font_prop):
     fig, ax = plt.subplots(figsize=(10, 6))
     version_counts = df.groupby(['os', 'maintenance']).size().unstack(fill_value=0)
@@ -53,11 +55,11 @@ def plot_maintenance_by_os(df, font_prop):
     plt.xticks(rotation=45)
     return save_fig_to_png(fig)
 
+# OS별 개발기간(박스플롯)
 def plot_dev_duration_by_os(df, font_prop):
     fig, ax = plt.subplots(figsize=(10, 6))
     df['dev_days'] = pd.to_numeric(df['dev_days'], errors='coerce')
-
-        # Sort OS names alphabetically
+    # OS 이름 알파벳순 정렬
     os_order = sorted(df['os'].dropna().unique())
     sns.boxplot(data=df, x='os', y='dev_days', ax=ax, palette="Set1", order=os_order)
     ax.set_title("OS별 개발기간", fontproperties=font_prop, fontsize=16)
@@ -68,6 +70,7 @@ def plot_dev_duration_by_os(df, font_prop):
     plt.tight_layout()
     return save_fig_to_png(fig)
 
+# OS별 에러 유형 분포(카운트플롯)
 def plot_error_by_os(df, font_prop):
     df_valid = df[(df['error'].notnull()) & (df['error'] != "에러 없음")]
     fig, ax = plt.subplots(figsize=(12, 6))
@@ -79,6 +82,7 @@ def plot_error_by_os(df, font_prop):
     ax.legend(title='에러 유형', prop=font_prop, title_fontproperties=font_prop)
     return save_fig_to_png(fig)
 
+# 담당 인원 수와 개발기간 관계(산점도+회귀선)
 def scatter_dev_days_by_handler_count(df, font_prop):
     df_valid = df[df['dev_days'].notnull() & df['handler_count'].notnull()]
     fig, ax = plt.subplots(figsize=(10, 6))
@@ -117,6 +121,7 @@ dev_graph_func_map = {
     'dev_by_handler': scatter_dev_days_by_handler_count,
 }
 
+# 그래프 생성 및 반환
 def create_plot(graph_type):
     df = get_dataframe()
     if df.empty:
@@ -127,7 +132,8 @@ def create_plot(graph_type):
         return None
     return func(df, font_prop)
 
-@router.get("/api/dev/graph/{graph_type}")
+# 그래프 이미지 반환 엔드포인트
+@router.get("/dev/graph/{graph_type}")
 async def plot(graph_type: str):
     img_data = create_plot(graph_type)
     return image_response(img_data)

@@ -9,39 +9,32 @@ from pydantic import BaseModel
 import smtplib
 from email.mime.text import MIMEText
 
-router = APIRouter()
+router = APIRouter(prefix="/api")
 
-# 임시 비밀번호 생성 함수
-# - 영문 대소문자+숫자 조합의 임시 비밀번호를 랜덤 생성
-# - 회원/관리자 초대 시 사용
+# 임시 비밀번호 생성 함수 (영문+숫자 랜덤)
 def generate_temp_password(length=10):
     chars = string.ascii_letters + string.digits
     return ''.join(random.choice(chars) for _ in range(length))
 
-# 이메일 발송 함수
-# - SMTP를 이용해 임시 비밀번호 안내 메일 발송
-# - 개발 종료 후 보안상 앱 비밀번호 등 환경변수로 관리 필요
-# - 네이버 SMTP 예시
+# 이메일 발송 함수 (임시 비밀번호 안내)
 def send_email(to_email: str, user_id: str, temp_password: str):
     smtp_server = "smtp.naver.com"
     smtp_port = 587
     smtp_user = "stradivirus@naver.com"
     smtp_password = "R6LZJP61QE4R"
-
     subject = "임시 비밀번호 안내"
     body = f"안녕하세요.\n\n아이디: {user_id}\n임시 비밀번호: {temp_password}\n로그인 후 비밀번호를 꼭 변경해주세요."
     msg = MIMEText(body)
     msg["Subject"] = subject
     msg["From"] = smtp_user
     msg["To"] = to_email
-
+    # SMTP 서버로 메일 전송
     with smtplib.SMTP(smtp_server, smtp_port) as server:
         server.starttls()
         server.login(smtp_user, smtp_password)
         server.sendmail(smtp_user, to_email, msg.as_string())
 
-# 회원/관리자 계정 생성 및 초대 메일 발송 함수
-# - company_id, company_name 추가
+# 회원/관리자 계정 생성 및 초대 메일 발송 (중복 체크 포함)
 def create_member(
     userId: str,
     nickname: str,
@@ -51,10 +44,9 @@ def create_member(
     company_id: str = None,
     company_name: str = None
 ):
-    # 관리자와 회원 컬렉션 모두에서 아이디 중복 체크
+    # 아이디 중복 체크
     if admin_collection.find_one({"userId": userId}) or member_collection.find_one({"userId": userId}):
         raise ValueError("이미 존재하는 아이디입니다.")
-    
     temp_password = generate_temp_password()
     hashed_password = bcrypt.hash(temp_password)
     member = {
@@ -72,18 +64,13 @@ def create_member(
             member["team"] = team
     else:
         collection = member_collection
-    
     collection.insert_one(member)
     send_email(email, userId, temp_password)
     return member
 
-# 관리자 회원가입 엔드포인트
-# - 관리자 계정 신규 생성 (userId, password, nickname, team)
-# - 관리자와 회원 컬렉션 모두에서 중복 체크 및 비밀번호 해시 저장
-# - 생성된 관리자 정보를 AdminResponse로 반환
-@router.post("/api/admin/join", response_model=AdminResponse)
+# 관리자 회원가입 엔드포인트 (중복 체크 및 해시 저장)
+@router.post("/admin/join", response_model=AdminResponse)
 def admin_join(req: AdminCreateRequest):
-    # 관리자와 회원 컬렉션 모두에서 아이디 중복 체크
     if admin_collection.find_one({"userId": req.userId}) or member_collection.find_one({"userId": req.userId}):
         raise HTTPException(400, "이미 존재하는 관리자입니다.")
     hashed_pw = bcrypt.hash(req.password)
@@ -96,6 +83,7 @@ def admin_join(req: AdminCreateRequest):
     }
     result = admin_collection.insert_one(admin)
     admin["id"] = str(result.inserted_id)
+    # 생성된 관리자 정보 반환
     return AdminResponse(
         id=admin["id"],
         userId=admin["userId"],
@@ -104,9 +92,8 @@ def admin_join(req: AdminCreateRequest):
         phone=admin["phone"],  # 추가
     )
 
-# 관리자 목록 조회 엔드포인트
-# - 모든 관리자 계정 정보를 AdminResponse 리스트로 반환
-@router.get("/api/admin/list", response_model=list[AdminResponse])
+# 관리자 목록 조회 엔드포인트 (전체 관리자 반환)
+@router.get("/admin/list", response_model=list[AdminResponse])
 def admin_list():
     admins = admin_collection.find()
     return [
@@ -120,8 +107,8 @@ def admin_list():
         for a in admins
     ]
 
-# 회원/관리자 초대(임시 비밀번호 발송) 엔드포인트
-@router.post("/api/admin/member-invite")
+# 회원/관리자 초대(임시 비밀번호 발송, 중복 예외 처리)
+@router.post("/admin/member-invite")
 def admin_member_invite(
     userId: str = Body(...),
     nickname: str = Body(...),
@@ -139,26 +126,18 @@ def admin_member_invite(
     except Exception as e:
         raise HTTPException(500, f"오류 발생: {e}")
 
-# 아이디/닉네임 중복 체크 엔드포인트
-# - field: userId 또는 nickname
-# - 관리자와 회원 컬렉션 모두에서 중복 체크
-# - 어느 쪽에라도 존재하면 exists: true 반환
-@router.get("/api/admin/check-duplicate")
+# 아이디/닉네임 중복 체크 엔드포인트 (관리자/회원 모두)
+@router.get("/admin/check-duplicate")
 def check_duplicate(field: str, value: str, accountType: str = "member"):
     if field not in ["userId", "nickname"]:
         raise HTTPException(400, "허용되지 않는 필드입니다.")
-    
-    # 관리자와 회원 컬렉션 모두에서 중복 체크
     admin_exists = admin_collection.find_one({field: value})
     member_exists = member_collection.find_one({field: value})
-    
-    # 어느 쪽에라도 존재하면 중복으로 처리
     exists = bool(admin_exists or member_exists)
     return {"exists": exists}
 
-# 회원 목록 조회 엔드포인트
-# - 모든 회원 계정 정보를 MemberResponse 리스트로 반환
-@router.get("/api/member/list", response_model=list[MemberResponse])
+# 회원 목록 조회 엔드포인트 (전체 회원 반환)
+@router.get("/member/list", response_model=list[MemberResponse])
 def member_list():
     members = member_collection.find()
     return [
@@ -177,29 +156,25 @@ def member_list():
 class UserIdRequest(BaseModel):
     userId: str
 
-# 관리자 삭제 엔드포인트
-# - userId에 해당하는 관리자 계정 삭제
-# - 삭제된 문서 수에 따라 성공/실패 응답
-@router.post("/api/admin/delete")
+# 관리자 삭제 엔드포인트 (userId로 삭제)
+@router.post("/admin/delete")
 def admin_delete(req: UserIdRequest):
     result = admin_collection.delete_one({"userId": req.userId})
     if result.deleted_count == 0:
         raise HTTPException(404, "관리자를 찾을 수 없습니다.")
     return {"message": "삭제 완료"}
 
-# 멤버 삭제 엔드포인트
-# - userId에 해당하는 멤버 계정 삭제
-# - 삭제된 문서 수에 따라 성공/실패 응답
-@router.post("/api/member/delete")
+# 멤버 삭제 엔드포인트 (userId로 삭제)
+@router.post("/member/delete")
 def member_delete(req: UserIdRequest):
     result = member_collection.delete_one({"userId": req.userId})
     if result.deleted_count == 0:
         raise HTTPException(404, "회원을 찾을 수 없습니다.")
     return {"message": "삭제 완료"}
 
-@router.get("/api/company/search")
+# 회사명/코드로 부분 검색 (검색창 대응)
+@router.get("/company/search")
 async def search_company(keyword: str = Query(...)):
-    # 회사명 또는 회사코드로 부분 검색 (프론트 검색창 대응)
     query = {
         "$or": [
             {"company_name": {"$regex": keyword, "$options": "i"}},

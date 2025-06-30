@@ -48,7 +48,6 @@ export function useAdminDataCrud(selectedTeam: string, fetchData?: () => void) {
   // 등록/수정 제출
   const handleSubmit = async (formData: any) => {
     try {
-      // console.log("formData:", formData); // 디버깅 출력 제거
       // 빈 문자열을 null로 변환, 날짜 필드는 빈 값이면 아예 삭제
       const processedData: any = {};
       Object.entries(formData).forEach(([k, v]) => {

@@ -4,9 +4,10 @@ from bson.objectid import ObjectId
 from db import comment_collection, member_collection, board_collection, admin_collection
 from models import CommentCreateRequest, CommentResponse
 
-router = APIRouter()
+router = APIRouter(prefix="/api")
 
 def get_user_info(user_id: str):
+    # user_id로 회원/관리자 닉네임과 팀 정보 조회
     member = member_collection.find_one({"userId": user_id})
     if member:
         return member["nickname"], None
@@ -16,11 +17,8 @@ def get_user_info(user_id: str):
     return None, None
 
 # 댓글 생성 엔드포인트
-# - writerId로 회원/관리자 정보 조회(닉네임, 팀 등)
-# - 게시글 존재 및 삭제 여부 확인
-# - 댓글 정보(작성자, 내용, 작성일시 등) DB에 저장
-# - 저장된 댓글 정보를 CommentResponse로 반환
-@router.post("/api/comments", response_model=CommentResponse)
+# 댓글 저장 후 CommentResponse 반환
+@router.post("/comments", response_model=CommentResponse)
 def create_comment(req: CommentCreateRequest):
     nickname, team = get_user_info(req.writerId)
     if not nickname:
@@ -30,7 +28,7 @@ def create_comment(req: CommentCreateRequest):
     if not post or post.get("deleted"):
         raise HTTPException(404, "게시글을 찾을 수 없습니다.")
 
-    # Check if the writer is an admin
+    # 관리자인지 확인
     admin = admin_collection.find_one({"userId": req.writerId})
 
     now = datetime.now()
@@ -48,7 +46,7 @@ def create_comment(req: CommentCreateRequest):
     if team:
         comment["team"] = team
 
-    # 답변완료 체크: 관리자가 댓글 작성 + isAnswered true일 때 게시글에 반영
+    # 관리자가 isAnswered로 댓글 작성 시 게시글에 반영
     if getattr(req, "isAnswered", False) and admin:
         board_collection.update_one(
             {"_id": ObjectId(req.postId)},
@@ -72,11 +70,10 @@ def create_comment(req: CommentCreateRequest):
     )
 
 # 게시글별 댓글 목록 조회 엔드포인트
-# - post_id로 해당 게시글의 삭제되지 않은 댓글만 조회
-# - 작성일/시간 기준 오름차순 정렬
-# - 각 댓글을 CommentResponse로 변환하여 리스트 반환
-@router.get("/api/comments/{post_id}")
+# post_id로 삭제되지 않은 댓글만 조회
+@router.get("/comments/{post_id}")
 def get_comments(post_id: str):
+    # 해당 게시글의 삭제되지 않은 댓글만 조회
     comments = comment_collection.find({"postId": post_id, "deleted": False}).sort([("createdDate", 1), ("createdTime", 1)])
     result = []
     for comment in comments:
@@ -96,11 +93,10 @@ def get_comments(post_id: str):
     return result
 
 # 댓글 삭제(soft delete) 엔드포인트
-# - id로 댓글을 조회, 이미 삭제된 경우 404 반환
-# - 댓글의 deleted, deletedDate, deletedTime 필드 갱신 (soft delete)
-# - 삭제 성공 시 메시지 반환
-@router.delete("/api/comments/{id}")
+# 댓글 soft delete, 성공 시 메시지 반환
+@router.delete("/comments/{id}")
 def delete_comment(id: str):
+    # id로 댓글 조회 및 soft delete 처리
     c = comment_collection.find_one({"_id": ObjectId(id)})
     if not c or c.get("deleted"):
         raise HTTPException(404, "댓글을 찾을 수 없습니다.")

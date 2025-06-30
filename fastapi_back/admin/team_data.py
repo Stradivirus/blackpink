@@ -2,12 +2,10 @@
 from fastapi import APIRouter, HTTPException, Request, Body, Query
 from db import companies_collection, dev_collection, incident_collection
 from bson import ObjectId
-from datetime import datetime, date, time
-from models import Project, Incident
 
 router = APIRouter(prefix="/api")
 
-# 컬렉션 맵핑 상단에 선언
+# 컬렉션 맵핑
 collection_map = {
     "dev": dev_collection,
     "biz": companies_collection,
@@ -32,7 +30,7 @@ def update_item_by_id(collection, item_id: str, item: dict):
         raise HTTPException(status_code=404, detail="Item not found")
     return {"status": "success"}
 
-# 사업팀 전체 데이터 조회 (회사명 조인 없음)
+# 사업팀 전체 데이터 조회
 @router.get("/biz")
 async def get_biz():
     return fetch_all_data(companies_collection, "biz")
@@ -42,7 +40,7 @@ async def get_biz():
 async def get_biz_columns():
     return fetch_columns(companies_collection)
 
-# 개발팀 전체 데이터 조회 (company_id → company_name 조인) → 조인 함수 삭제, 단순 조회로 변경
+# 개발팀 전체 데이터 조회
 @router.get("/dev")
 async def get_dev_data():
     return fetch_all_data(dev_collection, "dev")
@@ -52,7 +50,7 @@ async def get_dev_data():
 async def get_dev_columns():
     return fetch_columns(dev_collection)
 
-# 보안 사고 전체 데이터 조회 (company_id → company_name 조인) → 조인 함수 삭제, 단순 조회로 변경
+# 보안 사고 전체 데이터 조회
 @router.get("/security")
 async def get_security():
     return fetch_all_data(incident_collection, "incidents")
@@ -62,41 +60,44 @@ async def get_security():
 async def get_security_columns():
     return fetch_columns(incident_collection)
 
-# 사업팀 등록
+# 사업팀 데이터 등록
 @router.post("/biz")
 async def create_company(item: dict):
     return insert_item(companies_collection, item)
 
+# 사업팀 데이터 수정
 @router.put("/biz/{item_id}")
 async def update_company(item_id: str, item: dict = Body(...)):
     return update_item_by_id(companies_collection, item_id, item)
 
-# 개발팀 등록
+# 개발팀 데이터 등록
 @router.post("/dev")
 async def create_dev(item: dict):
-    # 최소 한 개 이상의 필수값이 있는지 체크 (예: company_id, start_date 등)
+    # 필수값 체크
     required_keys = ["company_id", "company_name", "start_date", "dev_status"]
     if not any(item.get(k) for k in required_keys):
         raise HTTPException(status_code=400, detail="필수값이 없습니다.")
-    # end_date_fin이 빈 문자열/None이면 아예 필드에서 제거 (MongoDB에 null로 저장 방지)
+    # end_date_fin이 없으면 필드 제거
     if not item.get("end_date_fin"):
         item.pop("end_date_fin", None)
     return insert_item(dev_collection, item)
 
+# 개발팀 데이터 수정
 @router.put("/dev/{item_id}")
 async def update_dev(item_id: str, item: dict):
     return update_item_by_id(dev_collection, item_id, item)
 
-# 보안팀 등록
+# 보안팀 데이터 등록
 @router.post("/security")
 async def create_security(item: dict):
     return insert_item(incident_collection, item)
 
+# 보안팀 데이터 수정
 @router.put("/security/{item_id}")
 async def update_security(item_id: str, item: dict):
     return update_item_by_id(incident_collection, item_id, item)
 
-# 삭제 함수 collection_map 사용
+# 데이터 삭제 (팀별)
 @router.delete("/{team}")
 async def delete_items(team: str, request: Request):
     try:
@@ -122,7 +123,7 @@ async def delete_items(team: str, request: Request):
     result = collection.delete_many({"_id": {"$in": object_ids}})
     return {"deleted_count": result.deleted_count}
 
-# 컬렉션의 모든 데이터를 반환 (단순 조회, 회사명 조인 없음)
+# 컬렉션의 모든 데이터 반환
 def fetch_all_data(collection, key):
     data = []
     try:
@@ -133,7 +134,7 @@ def fetch_all_data(collection, key):
         raise HTTPException(status_code=500, detail=f"Failed to fetch {key} data: {e}")
     return {key: data}
 
-# 컬렉션의 컬럼 정보 반환 (샘플 문서 기준, _id 제외)
+# 컬렉션의 컬럼 정보 반환
 def fetch_columns(collection):
     sample = collection.find_one()
     if not sample:
@@ -143,18 +144,15 @@ def fetch_columns(collection):
         columns.remove("_id")
     return {"columns": columns}
 
+# 업종별 다음 company_id 반환
 @router.get("/biz/next-company-id")
 async def get_next_company_id(industry: str):
-    """
-    업종(industry)별 다음 company_id 반환 (예: IT → I00012)
-    """
     import re
     prefix_map = {"IT": "I", "제조": "M", "금융": "F", "유통": "D"}
     prefix = prefix_map.get(industry)
     if not prefix:
         raise HTTPException(status_code=400, detail="유효하지 않은 업종입니다.")
 
-    # find_one으로 가장 큰 company_id 찾기
     doc = companies_collection.find_one(
         {"company_id": {"$regex": f"^{prefix}"}},
         sort=[("company_id", -1)]

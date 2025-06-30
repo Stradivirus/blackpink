@@ -1,12 +1,12 @@
 from fastapi import APIRouter
 from db import dev_collection, incident_collection, companies_collection
-from datetime import datetime, timedelta
-from collections import defaultdict, Counter
+from datetime import datetime
 import pandas as pd
 import math
 
-router = APIRouter()
+router = APIRouter(prefix="/api")
 
+# 최근 n개월(기본 3개월) 리스트 반환
 def get_recent_months(n=3):
     now = datetime.now()
     months = []
@@ -16,15 +16,18 @@ def get_recent_months(n=3):
         months.append(f"{year}-{month:02d}")
     return months
 
+# DataFrame의 컬럼을 datetime으로 변환
 def ensure_datetime(df, col):
     if col not in df.columns:
         df[col] = pd.NaT
     df[col] = pd.to_datetime(df[col], errors='coerce')
 
+# DataFrame에 컬럼이 없으면 기본값으로 추가
 def ensure_column(df, col, default=None):
     if col not in df.columns:
         df[col] = default
 
+# 사업팀(플랜별) 월별 계약 건수 데이터 생성
 def get_biz_data(df_comp, recent_months):
     biz_data = {"labels": recent_months}
     plans = ["베이직", "프로", "엔터프라이즈", "미지정"]
@@ -46,6 +49,7 @@ def get_biz_data(df_comp, recent_months):
             biz_data[plan].append(int(cnt))
     return biz_data
 
+# 개발팀(OS별) 월별 진행중 프로젝트 수 데이터 생성
 def get_dev_data(df_dev, recent_months):
     dev_data = {"labels": recent_months}
     all_os_types = set()
@@ -83,6 +87,7 @@ def get_dev_data(df_dev, recent_months):
         dev_data[os_name] = arr
     return dev_data
 
+# 보안팀(위험도별) 월별 진행중 사고 건수 데이터 생성
 def get_security_data(df_incident, recent_months):
     security_data = {"labels": recent_months}
     levels = ["LOW", "MEDIUM", "HIGH", "미지정"]
@@ -99,7 +104,8 @@ def get_security_data(df_incident, recent_months):
             security_data[level].append(int(cnt))
     return security_data
 
-@router.get("/api/dashboard/summary-graphs")
+# 대시보드 요약 그래프 데이터 반환
+@router.get("/dashboard/summary-graphs")
 def dashboard_summary_graphs():
     companies_data = list(companies_collection.find())
     df_comp = pd.DataFrame(companies_data)
@@ -134,7 +140,8 @@ def dashboard_summary_graphs():
         "security": security_data
     }
 
-@router.get("/api/dashboard/summary")
+# 대시보드 요약(현재 상태) 데이터 반환
+@router.get("/dashboard/summary")
 def dashboard_summary():
     # 1. 사업팀: 플랜별 계약 건수 (companies) - 오늘 기준 유효한 계약만 카운트
     today = pd.Timestamp(datetime.now().date())

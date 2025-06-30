@@ -8,9 +8,10 @@ import networkx as nx
 from db import incident_collection
 from .graph_utils import set_plot_style, image_response, save_fig_to_png
 
-router = APIRouter()
+router = APIRouter(prefix="/api")
 collection = incident_collection
 
+# MongoDB에서 데이터프레임 생성
 def get_dataframe():
     data = list(collection.find())
     if not data:
@@ -21,6 +22,7 @@ def get_dataframe():
     df['month'] = df['incident_date'].dt.month
     return df
 
+# 한글 폰트 일괄 적용
 def set_font_all(ax, font_prop):
     ax.set_title(ax.get_title(), fontproperties=font_prop)
     ax.set_xlabel(ax.get_xlabel(), fontproperties=font_prop)
@@ -32,6 +34,7 @@ def set_font_all(ax, font_prop):
 
 # --- 그래프별 함수 분리 ---
 
+# 위험 등급 비율 파이차트
 def plot_risk(df, font_prop):
     risk_counts = df['risk_level'].value_counts().reset_index()
     risk_counts.columns = ['risk_level', 'count']
@@ -51,8 +54,8 @@ def plot_risk(df, font_prop):
     ax.set_title("위험 등급 비율", fontproperties=font_prop, fontsize=22)
     return save_fig_to_png(fig, backend="matplotlib")
 
+# 연도별 침해 현황 바차트
 def plot_threat_y(df, font_prop):
-    # 연도별 침해 현황 (matplotlib/seaborn)
     yearly_counts = df.groupby(['year', 'threat_type']).size().reset_index(name='count')
     fig, ax = plt.subplots(figsize=(10, 6))
     sns.barplot(
@@ -73,7 +76,7 @@ def plot_threat_y(df, font_prop):
             text.set_fontproperties(font_prop)
     return save_fig_to_png(fig, backend="matplotlib")
 
-
+# 처리된 위협종류 분포 바차트
 def plot_processed_threats(df, font_prop):
     fig, ax = plt.subplots(figsize=(10, 6))
     processed_df = df[df['status'].isin(['처리중', '처리완료'])]
@@ -88,6 +91,7 @@ def plot_processed_threats(df, font_prop):
     set_font_all(ax, font_prop)
     return save_fig_to_png(fig, backend="matplotlib")
 
+# 서버별 발생 위협 히트맵
 def plot_correl_threats_server(df, font_prop):
     fig, ax = plt.subplots(figsize=(10,6))
     pivot_table = df.pivot_table(index='threat_type', columns='server_type', aggfunc='size', fill_value=0)
@@ -99,12 +103,14 @@ def plot_correl_threats_server(df, font_prop):
     set_font_all(ax, font_prop)
     return save_fig_to_png(fig, backend="matplotlib")
 
+# 범례 폰트 적용
 def set_legend_font(ax, font_prop):
     legend = ax.legend()
     if legend:
         for text in legend.get_texts():
             text.set_fontproperties(font_prop)
 
+# 위험 등급별 처리 현황 스택 바차트
 def plot_correl_risk_status(df, font_prop):
     fig, ax = plt.subplots(figsize=(10, 6))
     crosstab = pd.crosstab(df['risk_level'], df['status'])
@@ -117,6 +123,7 @@ def plot_correl_risk_status(df, font_prop):
     set_legend_font(ax, font_prop)
     return save_fig_to_png(fig, backend="matplotlib")
 
+# 위협 유형과 조치 방법 산점도
 def plot_correl_threat_action(df, font_prop):
     fig, ax = plt.subplots(figsize=(10, 6))
     cross = df.groupby(['threat_type', 'action']).size().reset_index(name='count')
@@ -126,6 +133,7 @@ def plot_correl_threat_action(df, font_prop):
     set_font_all(ax, font_prop)
     return save_fig_to_png(fig, backend="matplotlib")
 
+# 위협 유형별 투입 인원 네트워크 그래프
 def plot_correl_threat_handler(df, font_prop):
     fig, ax = plt.subplots(figsize=(10, 6))
     G = nx.Graph()
@@ -148,6 +156,7 @@ def plot_correl_threat_handler(df, font_prop):
     ax.set_title('위협 유형별 투입 인원', fontproperties=font_prop)
     return save_fig_to_png(fig, backend="matplotlib")
 
+# 월별 위협유형 발생 추이 라인차트
 def plot_threat_m(df, font_prop, threat_type):
     if threat_type is None:
         return None
@@ -177,6 +186,7 @@ def plot_threat_m(df, font_prop, threat_type):
         ax.set_xticks(sorted(monthly_counts['month'].unique()))
     return save_fig_to_png(fig, backend="matplotlib")
 
+# 위협유형별 처리기간 vs 투입인원 jointplot
 def plot_manpower(df, font_prop, threat_type=None):
     if threat_type is None:
         return None
@@ -239,6 +249,7 @@ graph_func_map = {
     'manpower': plot_manpower,
 }
 
+# 그래프 생성 및 반환
 def create_plot(graph_type, threat_type=None):
     df = get_dataframe()
     if df.empty:
@@ -252,14 +263,16 @@ def create_plot(graph_type, threat_type=None):
             return func(df, font_prop)
     return None
 
-@router.get("/api/security/graph/{graph_type}")
+# 그래프 이미지 반환 엔드포인트
+@router.get("/security/graph/{graph_type}")
 async def plot(graph_type: str, threat_type: str = None):
     img_data = create_plot(graph_type, threat_type)
     if img_data is None:
         return JSONResponse(content={"error": "데이터가 없습니다."}, status_code=404)
     return image_response(img_data)
 
-@router.get("/api/security/graph/threat_types")
+# 위협유형 목록 반환 엔드포인트
+@router.get("/security/graph/threat_types")
 async def get_threat_types():
     df = get_dataframe()
     if df.empty or 'threat_type' not in df.columns:

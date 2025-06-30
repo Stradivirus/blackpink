@@ -4,13 +4,11 @@ from bson.objectid import ObjectId
 from db import board_collection
 from models import BoardCreateRequest, BoardResponse
 
-router = APIRouter()
+router = APIRouter(prefix="/api")
 
 # 게시글 생성 엔드포인트
-# - 클라이언트에서 전달받은 게시글 정보를 DB에 저장
-# - 작성자 정보, 작성일시, 조회수, 공지여부, 삭제여부 등 필드 자동 세팅
-# - 저장 후 BoardResponse 형태로 반환
-@router.post("/api/posts", response_model=BoardResponse)
+# 게시글 저장 후 BoardResponse 반환
+@router.post("/posts", response_model=BoardResponse)
 def create_post(req: BoardCreateRequest):
     now = datetime.now()
     doc = req.dict()
@@ -20,7 +18,7 @@ def create_post(req: BoardCreateRequest):
     doc["createdTime"] = now.strftime("%H:%M:%S")
     doc["viewCount"] = 0
     doc["isNotice"] = req.isNotice or False
-    doc["isAnswered"] = req.isAnswered or False  # 답변완료 여부 저장
+    doc["isAnswered"] = req.isAnswered or False
     doc["deletedDate"] = None
     doc["deletedTime"] = None
 
@@ -29,10 +27,8 @@ def create_post(req: BoardCreateRequest):
     return BoardResponse(**doc)
 
 # 게시글 수정 엔드포인트
-# - id로 기존 게시글을 조회 후, 전달받은 값으로 일부 필드만 갱신
-# - 작성자/작성일 등 주요 정보는 기존 값 유지
-# - 수정 후 BoardResponse 형태로 반환
-@router.put("/api/posts/{id}", response_model=BoardResponse)
+# 일부 필드만 갱신, BoardResponse 반환
+@router.put("/posts/{id}", response_model=BoardResponse)
 def update_post(id: str, req: BoardCreateRequest = Body(...)):
     prev = board_collection.find_one({"_id": ObjectId(id)})
     if not prev:
@@ -52,11 +48,8 @@ def update_post(id: str, req: BoardCreateRequest = Body(...)):
     return BoardResponse(**updated)
 
 # 게시글 목록 조회 엔드포인트 (페이징, 정렬)
-# - page, size 파라미터로 페이징 처리
-# - 공지글 우선, 최신순 정렬
-# - 누락 필드 보정 및 BoardResponse 리스트 반환
-# - totalElements: 전체 게시글 수, totalPages: (임시 1)
-@router.get("/api/posts")
+# 공지 우선, 최신순, BoardResponse 리스트 반환
+@router.get("/posts")
 def get_posts(
     page: int = Query(0, ge=0),
     size: int = Query(15, ge=1, le=100),
@@ -90,10 +83,8 @@ def get_posts(
     }
 
 # 게시글 단건 조회 및 조회수 증가 엔드포인트
-# - id로 게시글을 조회, 없으면 404 반환
-# - 조회 시 viewCount 1 증가 및 DB 반영
-# - 누락 필드 보정 후 BoardResponse 반환
-@router.get("/api/posts/{id}", response_model=BoardResponse)
+# id로 조회, viewCount 증가, BoardResponse 반환
+@router.get("/posts/{id}", response_model=BoardResponse)
 def get_post(id: str):
     b = board_collection.find_one({"_id": ObjectId(id)})
     if not b:
@@ -112,11 +103,8 @@ def get_post(id: str):
     return BoardResponse(**b)
 
 # 게시글 삭제(soft delete) 및 관련 댓글 soft delete 엔드포인트
-# - id로 게시글을 조회, 이미 삭제된 경우 404 반환
-# - 게시글의 deleted, deletedDate, deletedTime 필드 갱신 (soft delete)
-# - 해당 게시글의 댓글도 soft delete 처리
-# - 삭제 성공 시 메시지 반환
-@router.delete("/api/posts/{id}")
+# 게시글/댓글 soft delete, 성공 시 메시지 반환
+@router.delete("/posts/{id}")
 def delete_post(id: str):
     b = board_collection.find_one({"_id": ObjectId(id)})
     if not b or b.get("deleted"):
