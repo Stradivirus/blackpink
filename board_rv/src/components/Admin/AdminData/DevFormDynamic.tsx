@@ -104,30 +104,6 @@ const DevFormDynamic: React.FC<DevFormProps> = ({ initialData = {}, onChange }) 
     });
   };
 
-  // 회사명 검색 자동 선택 로직
-  useEffect(() => {
-    if (companySearch) {
-      const filtered = companyOptions.filter(
-        opt => typeof opt.label === "string" && opt.label.includes(companySearch)
-      );
-      if (filtered.length > 0 && formData["company_id"] !== filtered[0].value) {
-        setFormData(prev => ({
-          ...prev,
-          company_id: filtered[0].value,
-          company_name: filtered[0].label,
-        }));
-      }
-    }
-    if (!companySearch && formData["company_id"]) {
-      setFormData(prev => ({
-        ...prev,
-        company_id: "",
-        company_name: "",
-      }));
-    }
-    // eslint-disable-next-line
-  }, [companySearch, companyOptions]);
-
   const processedData: any = {};
   Object.entries(formData).forEach(([k, v]) => {
     if (["maintenance", "error", "end_date_fin"].includes(k) && v === "") {
@@ -179,18 +155,27 @@ const DevFormDynamic: React.FC<DevFormProps> = ({ initialData = {}, onChange }) 
           />
         ) : (
           // 등록 모드: 드롭다운
-          <select
-            value={formData["company_id"]}
-            onChange={(e) => {
-              const selected = companyOptions.find(opt => opt.value === e.target.value);
-              setFormData(prev => ({
-                ...prev,
-                company_id: selected ? selected.value : "",
-                company_name: selected ? selected.label : "",
-              }));
-              if (selected) setCompanySearch(selected.label);
-            }}
-          >
+            <select
+              value={formData["company_id"]}
+              onChange={(e) => {
+                const selected = companyOptions.find(opt => opt.value === e.target.value);
+                if (selected) {
+                  setFormData(prev => ({
+                    ...prev,
+                    company_id: selected.value,
+                    company_name: selected.label,  // ✅ 정확히 일치하는 값만
+                  }));
+                  setCompanySearch(selected.label); // UI상 입력된 값도 세팅
+                } else {
+                  // 선택 안된 경우 초기화
+                  setFormData(prev => ({
+                    ...prev,
+                    company_id: "",
+                    company_name: "",
+                  }));
+                }
+              }}
+            >
             <option value="">선택</option>
             {companyOptions
               .filter(opt => typeof opt.label === "string" && opt.label.includes(companySearch))

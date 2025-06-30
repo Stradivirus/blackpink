@@ -58,7 +58,7 @@ const AdminDataTable: React.FC<AdminDataTableProps> = ({
     setSelectedIds,
   } = useAdminDataCrud(selectedTeam, fetchData);
 
-  // 전체 선택 체크박스
+  // 전체 선택 체크박스 
   const isAllSelected =
     filteredData.length > 0 &&
     filteredData.every((row, idx) =>

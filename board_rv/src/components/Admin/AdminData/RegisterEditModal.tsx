@@ -32,15 +32,39 @@ const RegisterEditModal: React.FC<RegisterEditModalProps> = ({
 
   if (!visible) return null;
 
-  const handleSubmit = () => {
-    onSubmit(formData);
-  };
+  const handleSubmit = async () => {
+  // dev나 security 팀일 때만 회사 유효성 체크
+  if (team === "dev" || team === "security") {
+    try {
+      const res = await fetch("/api/biz");
+      const data = await res.json();
+      const bizCompanies = data.biz || [];
+
+      const isValid = bizCompanies.some(
+        (c: any) =>
+          c.company_name === formData.company_name
+      );
+
+      if (!isValid) {
+        alert("사업팀에 등록된 회사명만 선택할 수 있습니다.");
+        return;
+      }
+    } catch (err) {
+      alert("회사 목록을 확인할 수 없습니다.");
+      return;
+    }
+  }
+
+  onSubmit(formData);
+};
 
   const teamLabelMap: Record<string, string> = {
     dev: "개발",
     biz: "사업",
     security: "보안",
   };
+
+  
 
   return (
     <div className="admin-modal-overlay">
