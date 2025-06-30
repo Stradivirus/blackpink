@@ -14,7 +14,7 @@ const getToday = () => {
 
 const SecurityFormDynamic: React.FC<SecurityFormProps> = ({ initialData = {}, onChange }) => {
   const columns = columnsByTeam["security"] || [];
-  const [companyOptions, setCompanyOptions] = useState<{ label: string; value: string }[]>([]);
+  const [companyOptions] = useState<{ label: string; value: string }[]>([]);
   const [companySearch, setCompanySearch] = useState("");
 
   const [formData, setFormData] = useState<Record<string, any>>(() => {
