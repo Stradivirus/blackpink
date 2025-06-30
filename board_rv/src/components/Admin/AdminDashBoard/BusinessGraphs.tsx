@@ -12,16 +12,10 @@ const BusinessGraphs: React.FC = () => {
   const [imgSrcs, setImgSrcs] = React.useState<(string | null)[]>(Array(BUSINESS_GRAPH_TYPES.length).fill(null));
 
   React.useEffect(() => {
-    // 1초 간격으로 각 이미지 src를 할당
-    BUSINESS_GRAPH_TYPES.forEach((g, idx) => {
-      setTimeout(() => {
-        setImgSrcs((prev) => {
-          const arr = [...prev];
-          arr[idx] = `${API_URLS.BUSINESS_GRAPH}/${g.type}?t=${imgKeys[idx]}`;
-          return arr;
-        });
-      }, idx * 1000);
-    });
+    // 모든 이미지 src를 한 번에 할당
+    setImgSrcs(
+      BUSINESS_GRAPH_TYPES.map((g, idx) => `${API_URLS.BUSINESS_GRAPH}/${g.type}?t=${imgKeys[idx]}`)
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [imgKeys]);
 

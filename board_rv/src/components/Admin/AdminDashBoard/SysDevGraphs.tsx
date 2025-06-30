@@ -12,15 +12,11 @@ const SysDevGraphs: React.FC = () => {
   const [imgSrcs, setImgSrcs] = React.useState<(string | null)[]>(Array(SYS_DEV_GRAPH_TYPES.length).fill(null));
 
   React.useEffect(() => {
-    SYS_DEV_GRAPH_TYPES.forEach((g, idx) => {
-      setTimeout(() => {
-        setImgSrcs((prev) => {
-          const arr = [...prev];
-          arr[idx] = `${API_URLS.DEV_GRAPH}/${g.type}?t=${imgKeys[idx]}`;
-          return arr;
-        });
-      }, idx * 1000);
-    });
+    setImgSrcs(
+      SYS_DEV_GRAPH_TYPES.map(
+        (g, idx) => `${API_URLS.DEV_GRAPH}/${g.type}?t=${imgKeys[idx]}`
+      )
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [imgKeys]);
 
