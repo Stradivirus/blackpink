@@ -106,17 +106,6 @@ const BizFormDynamic: React.FC<BizFormProps> = ({ initialData = {}, onChange }) 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formData["contract_start"]]);
 
-  // 전화번호 자동 하이픈 함수
-  function formatPhoneNumber(value: string) {
-    // 숫자만 남기기
-    const onlyNums = value.replace(/[^0-9]/g, "");
-    if (onlyNums.length < 4) return onlyNums;
-    if (onlyNums.length < 8) {
-      return onlyNums.replace(/(\d{2,3})(\d{3,4})/, "$1-$2");
-    }
-    return onlyNums.replace(/(\d{2,3})(\d{3,4})(\d{4})/, "$1-$2-$3");
-  }
-
   // 사업팀 어드민 목록 상태
   const [bizAdmins, setBizAdmins] = useState<{ nickname: string; phone: string }[]>([]);
 
