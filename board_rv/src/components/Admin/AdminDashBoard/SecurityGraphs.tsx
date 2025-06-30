@@ -1,3 +1,6 @@
+// 보안팀 대시보드 그래프 이미지 뷰어 컴포넌트
+// 위협유형별/투입인원 등 그래프 이미지 로딩, 에러처리, 확대 모달 지원
+
 import * as React from "react";
 import { API_URLS } from "../../../api/urls";
 import { threatTypes } from "../../../constants/dataconfig";
@@ -11,6 +14,7 @@ type SecurityGraphsProps = {
   graphTypes: GraphType[];
 };
 
+// 월별 위협유형 그래프(자동 슬라이드)
 const ThreatMGraph: React.FC<{ onImgClick?: (src: string, alt: string) => void }> = ({ onImgClick }) => {
   const [idx, setIdx] = React.useState(0);
   const [imgLoaded, setImgLoaded] = React.useState(false);
@@ -55,6 +59,7 @@ const ThreatMGraph: React.FC<{ onImgClick?: (src: string, alt: string) => void }
 
 const threatTypeList = ["전체보기", ...threatTypes];
 
+// 위협유형별 처리기간/투입인원 그래프
 const ManpowerGraph: React.FC<{ onImgClick?: (src: string, alt: string) => void }> = ({ onImgClick }) => {
   const [selectedType, setSelectedType] = React.useState("전체보기");
   const [imgLoaded, setImgLoaded] = React.useState(false);
@@ -96,6 +101,7 @@ const ManpowerGraph: React.FC<{ onImgClick?: (src: string, alt: string) => void 
   );
 };
 
+// 보안팀 대시보드 그래프 전체 뷰어
 const SecurityGraphs: React.FC<SecurityGraphsProps> = ({ graphTypes }) => {
   const [modalImg, setModalImg] = React.useState<string | null>(null);
   const [modalAlt, setModalAlt] = React.useState<string>("");

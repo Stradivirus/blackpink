@@ -7,11 +7,13 @@ import CommentList from "./CommentList";
 import "../../styles/Board.css";
 import "../../styles/modal.css";
 
+// 최근 게시글 5개를 보여주는 컴포넌트
 const RecentPostList: React.FC<{ excludeId?: string }> = ({excludeId}) => {
     const [posts, setPosts] = useState<Post[]>([]);
     const [totalElements, setTotalElements] = useState(0);
     const [error, setError] = useState<string | null>(null);
 
+    // 최근 게시글 fetch
     useEffect(() => {
         setError(null);
         fetch(`${API_URLS.POSTS}?page=0&size=6&sort=createdDate,desc`)
@@ -71,6 +73,7 @@ const RecentPostList: React.FC<{ excludeId?: string }> = ({excludeId}) => {
     );
 };
 
+// 삭제 확인 모달 컴포넌트
 const ConfirmModal: React.FC<{
     open: boolean;
     x: number;
@@ -95,6 +98,7 @@ const ConfirmModal: React.FC<{
     );
 };
 
+// 게시글 상세 페이지 컴포넌트
 const PostDetail: React.FC = () => {
     const {id} = useParams<{ id: string }>();
     const location = useLocation();
@@ -108,6 +112,7 @@ const PostDetail: React.FC = () => {
     const navigate = useNavigate();
     const {user} = useAuth();
 
+    // 게시글 정보 fetch
     useEffect(() => {
         if (id) {
             setError(null);
@@ -121,14 +126,13 @@ const PostDetail: React.FC = () => {
         }
     }, [id]);
 
+    // 삭제 처리 함수
     const handleDelete = async () => {
         if (!id) return;
         setIsDeleting(true);
         setError(null);
         try {
-            console.log("삭제 요청:", API_URLS.POST(id));
             const res = await fetch(API_URLS.POST(id), { method: "DELETE" });
-            console.log("삭제 응답:", res.status);
             if (!res.ok) throw new Error("삭제에 실패했습니다.");
             navigate("/postpage");
         } catch (err: any) {
@@ -139,6 +143,7 @@ const PostDetail: React.FC = () => {
         }
     };
 
+    // 삭제 버튼 클릭 시 모달 위치 지정
     const handleDeleteClick = (e: React.MouseEvent) => {
         setModalPos({
             x: e.clientX + window.scrollX,
@@ -181,6 +186,7 @@ const PostDetail: React.FC = () => {
                 <div className="board-detail-content board-detail-content-bg">
                     {post.content}
                 </div>
+                {/* 본인만 수정/삭제 가능 */}
                 {user && String(user.userId) === post.writerId ? (
                     <div className="board-detail-btn-group board-detail-btn-group-right">
                         <Link to={`/posts/${post.id}/edit`}>
@@ -211,7 +217,9 @@ const PostDetail: React.FC = () => {
                     onCancel={() => setShowConfirm(false)}
                 />
             </main>
+            {/* 댓글 목록 */}
             <CommentList postId={post.id} />
+            {/* 최근 게시글 5개 */}
             <RecentPostList excludeId={String(post.id)}/>
         </>
     );

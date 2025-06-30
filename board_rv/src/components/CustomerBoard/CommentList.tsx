@@ -4,13 +4,15 @@ import type { Comment } from "../../types/Board";
 import { useAuth } from "../../context/AuthContext";
 import "../../styles/comment.css";
 
+// 게시글 댓글 목록 및 작성 컴포넌트
 const CommentList: React.FC<{ postId: string }> = ({ postId }) => {
-    const [comments, setComments] = useState<Comment[]>([]);
-    const [content, setContent] = useState("");
+    const [comments, setComments] = useState<Comment[]>([]); // 댓글 목록
+    const [content, setContent] = useState(""); // 입력 중인 댓글 내용
     const [isAnswered, setIsAnswered] = useState(false); // 답변완료 체크박스 상태
-    const [error, setError] = useState<string | null>(null);
-    const { user } = useAuth();
+    const [error, setError] = useState<string | null>(null); // 에러 메시지
+    const { user } = useAuth(); // 로그인 사용자 정보
 
+    // 댓글 목록 fetch 함수
     const fetchComments = () => {
         fetch(API_URLS.COMMENTS(postId))
             .then(res => res.json())
@@ -18,11 +20,13 @@ const CommentList: React.FC<{ postId: string }> = ({ postId }) => {
             .catch(() => setError("댓글을 불러오지 못했습니다."));
     };
 
+    // postId 변경 시 댓글 목록 새로고침
     useEffect(() => {
         fetchComments();
         // eslint-disable-next-line
     }, [postId]);
 
+    // 댓글 작성 핸들러
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
@@ -56,6 +60,7 @@ const CommentList: React.FC<{ postId: string }> = ({ postId }) => {
         fetchComments();
     };
 
+    // 댓글 삭제 핸들러
     const handleDelete = async (id: string) => {
         if (!window.confirm("댓글을 삭제하시겠습니까?")) return;
         const res = await fetch(API_URLS.COMMENT_DELETE(id), { method: "DELETE" });
@@ -82,7 +87,7 @@ const CommentList: React.FC<{ postId: string }> = ({ postId }) => {
                                     {c.isAnswered && <span style={{color:'#1976d2', marginLeft:4}}>[답변완료]</span>}
                                 </b>
                                 <span style={{ color: "#888", marginLeft: 8 }}>{c.createdDate} {c.createdTime}</span>
-                                {user && String(user.userId) === String(c.writerId) && ( // userId로 비교
+                                {user && String(user.userId) === String(c.writerId) && ( // 본인 댓글만 삭제 가능
                                     <button
                                         className="comment-delete-btn"
                                         onClick={() => handleDelete(c.id)}

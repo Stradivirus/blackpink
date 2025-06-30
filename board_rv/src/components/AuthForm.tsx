@@ -3,6 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import { API_URLS } from "../api/urls";
 import "../styles/modal.css";
 
+// 로그인 폼 props 타입 정의
 interface AuthFormProps {
     onSuccess?: (data: {
         token: string;
@@ -14,14 +15,15 @@ interface AuthFormProps {
     }) => void;
 }
 
+// 로그인 폼 컴포넌트
 const AuthForm: React.FC<AuthFormProps> = ({ onSuccess }) => {
-    const { login } = useAuth();
+    const { login } = useAuth(); // 인증 컨텍스트의 로그인 함수 사용
     const [form, setForm] = useState({
         userId: "",
         password: "",
     });
-    const [loginError, setLoginError] = useState<string>("");
-    const [loading, setLoading] = useState(false);
+    const [loginError, setLoginError] = useState<string>(""); // 에러 메시지 상태
+    const [loading, setLoading] = useState(false); // 로딩 상태
 
     // 입력값 변경 핸들러
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -43,7 +45,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ onSuccess }) => {
             });
             if (res.ok) {
                 const data = await res.json();
-                // postpage에서만 member 로그인 허용
+                // postpage에서는 member만 로그인 허용
                 if (
                     window.location.pathname === "/postpage" &&
                     data.type !== "member" &&
@@ -79,6 +81,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ onSuccess }) => {
         }
     };
 
+    // 로그인 폼 렌더링
     return (
         <form className="modal-form" onSubmit={handleSubmit}>
             <h3 className="modal-message" style={{ marginBottom: 12 }}>

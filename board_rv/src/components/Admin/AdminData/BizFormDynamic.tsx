@@ -1,3 +1,6 @@
+// 사업팀 동적 폼 컴포넌트 (등록/수정 모달용)
+// 업종 선택 시 회사코드 자동, 계약기간 자동계산, 담당자 자동입력 등 지원
+
 import React, { useEffect, useState } from "react";
 import { columnsByTeam, selectOptions, statusOptions } from "../../../constants/dataconfig";
 import { handleChangeFactory } from "./TeamFormDynamic";
@@ -17,13 +20,16 @@ const contractPeriods = [
   { value: 1095, label: "3년" },
 ];
 
+// 오늘 날짜 반환 함수
 const getToday = () => {
   const d = new Date();
   return d.toISOString().slice(0, 10);
 };
 
 const BizFormDynamic: React.FC<BizFormProps> = ({ initialData = {}, onChange }) => {
+  // 사업팀 컬럼 정보
   const columns = columnsByTeam["biz"] || [];
+  // 폼 데이터 상태 (초기값: initialData 또는 기본값)
   const [formData, setFormData] = useState<Record<string, any>>(() => {
     const init: Record<string, any> = {};
     columns.forEach(({ key }) => {
@@ -58,9 +64,9 @@ const BizFormDynamic: React.FC<BizFormProps> = ({ initialData = {}, onChange }) 
       }
     };
     fetchCompanyId();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formData["industry"]]);
 
+  // 초기 데이터 변경 시 폼 데이터 동기화
   useEffect(() => {
     if (initialData && Object.keys(initialData).length > 0) {
       const init: Record<string, any> = {};
@@ -71,13 +77,15 @@ const BizFormDynamic: React.FC<BizFormProps> = ({ initialData = {}, onChange }) 
     }
   }, [initialData]);
 
+  // formData 변경 시 상위로 전달
   useEffect(() => {
     onChange(formData);
   }, [formData, onChange]);
 
+  // 폼 필드 값 변경 핸들러
   const handleChange = handleChangeFactory(setFormData);
 
-  // 계약 기간 버튼 클릭 시
+  // 계약 기간 버튼 클릭 시 종료일 자동 계산
   const handlePeriodClick = (days: number) => {
     const start = formData["contract_start"];
     if (start) {

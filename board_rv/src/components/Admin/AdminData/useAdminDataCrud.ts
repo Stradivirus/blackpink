@@ -1,24 +1,31 @@
+// 관리자 데이터 CRUD 및 선택/모달 상태 관리 커스텀 훅
+// 등록, 수정, 삭제, 선택 등 테이블 행의 상태와 동작을 통합 관리
+
 import { useState, useEffect } from "react";
 import { getCrudEndpoint } from "../../../api/urls";
 
+// CRUD 및 선택/모달 상태를 관리하는 커스텀 훅
 export function useAdminDataCrud(selectedTeam: string, fetchData?: () => void) {
-  // 선택된 행(checkbox) 관리 상태도 여기서!
+  // 선택된 행(checkbox) 상태
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  // 등록/수정 모달 표시 여부
   const [modalVisible, setModalVisible] = useState(false);
+  // 모달에 전달할 초기 데이터(수정 시 사용)
   const [modalInitialData, setModalInitialData] = useState<Record<string, any> | null | undefined>(undefined);
 
+  // 팀별 CRUD API 엔드포인트
   const endpoint = getCrudEndpoint(selectedTeam);
 
-  // 팀 이동 시 체크박스 해제
+  // 팀 변경 시 선택된 행 초기화
   useEffect(() => { setSelectedIds(new Set()); }, [selectedTeam]);
 
-  // 등록 버튼 클릭
+  // 등록 버튼 클릭 시 모달 오픈(초기값 없음)
   const handleRegisterClick = () => {
     setModalInitialData(null);
     setModalVisible(true);
   };
 
-  // 수정 버튼 클릭
+  // 수정 버튼 클릭 시 선택된 행이 1개일 때만 모달 오픈
   const handleEditClick = (selectedIds: Set<string>, filteredData: any[]) => {
     if (selectedIds.size > 1) {
       alert("하나의 행만 선택해주세요.");
@@ -27,6 +34,7 @@ export function useAdminDataCrud(selectedTeam: string, fetchData?: () => void) {
       alert("행을 선택해주세요.");
       return;
     }
+    // 선택된 행의 데이터 찾기
     const selectedId = Array.from(selectedIds)[0];
     const selectedRow = filteredData.find((row) => {
       const rowId =
@@ -45,14 +53,14 @@ export function useAdminDataCrud(selectedTeam: string, fetchData?: () => void) {
     setModalVisible(true);
   };
 
-  // 등록/수정 제출
+  // 등록/수정 제출 처리
   const handleSubmit = async (formData: any) => {
     try {
-      // 빈 문자열을 null로 변환, 날짜 필드는 빈 값이면 아예 삭제
+      // 빈 문자열을 null로 변환, 날짜 필드는 빈 값이면 undefined
       const processedData: any = {};
       Object.entries(formData).forEach(([k, v]) => {
         if (v === "") {
-          // end_date_fin 등 날짜 필드는 undefined로
+          // 날짜 필드는 undefined로 처리
           if (k.includes("date")) {
             // undefined로 보내면 FastAPI에서 필드 자체가 누락됨
           } else {
@@ -64,7 +72,7 @@ export function useAdminDataCrud(selectedTeam: string, fetchData?: () => void) {
       });
 
       if (modalInitialData) {
-        // 수정
+        // 수정 요청
         const itemId =
           typeof modalInitialData._id === "object" && "$oid" in modalInitialData._id
             ? modalInitialData._id.$oid
@@ -72,7 +80,6 @@ export function useAdminDataCrud(selectedTeam: string, fetchData?: () => void) {
             ? modalInitialData._id
             : String(modalInitialData._id);
         if (!itemId) throw new Error("수정할 데이터 ID가 없습니다.");
-
 
         const response = await fetch(`${endpoint}/${itemId}`, {
           method: "PUT",
@@ -84,7 +91,7 @@ export function useAdminDataCrud(selectedTeam: string, fetchData?: () => void) {
 
         if (!response.ok) throw new Error("수정 실패");
       } else {
-
+        // 등록 요청
         const response = await fetch(endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -105,7 +112,7 @@ export function useAdminDataCrud(selectedTeam: string, fetchData?: () => void) {
     }
   };
 
-  // 삭제
+  // 삭제 처리
   const handleDeleteClick = async (selectedIds: Set<string>) => {
     if (selectedIds.size === 0) {
       alert("삭제할 항목을 선택해주세요.");
@@ -131,6 +138,7 @@ export function useAdminDataCrud(selectedTeam: string, fetchData?: () => void) {
     }
   };
 
+  // 훅에서 제공하는 상태와 함수 반환
   return {
     selectedIds,
     setSelectedIds,

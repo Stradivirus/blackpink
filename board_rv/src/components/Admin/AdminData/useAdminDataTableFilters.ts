@@ -1,7 +1,11 @@
+// 테이블 필터, 검색, 페이지네이션 등 데이터 가공 커스텀 훅
+// 팀/컬럼별 동적 필터, 연도/월, 회사명 검색 등 다양한 필터링 지원
+
 import { useState, useMemo, useEffect, useRef } from "react";
 import { dateColumnsByTeam, osVersionMap } from "../../../constants/dataconfig";
 
 export function useAdminDataTableFilters(data: any[], columns: any[], selectedTeam: string) {
+  // 날짜 컬럼, 필터 상태, 검색어 등 다양한 상태 관리
   const dateColumns = dateColumnsByTeam[selectedTeam] || [];
   const [dateFilterColumn, setDateFilterColumn] = useState<string>(dateColumns.length > 0 ? dateColumns[0].key : "");
   const [yearFilter, setYearFilter] = useState<string | null>(null);
@@ -13,10 +17,10 @@ export function useAdminDataTableFilters(data: any[], columns: any[], selectedTe
   const [currentPage, setCurrentPage] = useState(1);
   const companyNameFilterKey = "company_name";
 
-  // companyIdLabelToIdsMap을 useRef로 관리
+  // 회사명-회사ID 매핑을 위한 ref
   const companyIdLabelToIdsMapRef = useRef<Record<string, string[]>>({});
 
-  // 팀이 바뀌면 필터 상태 초기화
+  // 팀 변경 시 필터 상태 초기화
   useEffect(() => {
     setDateFilterColumn(dateColumns.length > 0 ? dateColumns[0].key : "");
     setYearFilter(null);
@@ -26,14 +30,14 @@ export function useAdminDataTableFilters(data: any[], columns: any[], selectedTe
     setActiveDropdown(null);
   }, [selectedTeam]);
 
-  // 제외 컬럼
+  // 팀별로 제외할 컬럼 정의
   const excludedColumnsByTeam: { [key: string]: string[] } = {
     security: ["incident_no"],
     biz: ["manager_phone", "industry"],
     dev: ["dev_days"],
   };
 
-  // 필터 가능한 컬럼
+  // 실제 필터 가능한 컬럼만 추출
   const filterableColumns =
     columns?.filter(
       (col) =>
@@ -42,7 +46,7 @@ export function useAdminDataTableFilters(data: any[], columns: any[], selectedTe
         !((selectedTeam === "biz" || selectedTeam === "dev" || selectedTeam === "security") && col.key === companyNameFilterKey)
     ) || [];
 
-  // 연도/월 목록
+  // 연도 목록 추출
   const uniqueYears = useMemo(() => {
     const yearsSet = new Set<string>();
     data.forEach((row) => {
@@ -54,6 +58,7 @@ export function useAdminDataTableFilters(data: any[], columns: any[], selectedTe
     return Array.from(yearsSet).sort((a, b) => Number(b) - Number(a));
   }, [data, dateFilterColumn]);
 
+  // 월 목록 추출
   const uniqueMonths = useMemo(() => {
     const monthsSet = new Set<string>();
     data.forEach((row) => {
@@ -66,13 +71,14 @@ export function useAdminDataTableFilters(data: any[], columns: any[], selectedTe
     return Array.from(monthsSet).sort();
   }, [data, dateFilterColumn]);
 
+  // 각 컬럼별 필터 값 목록 반환
   const getFilterValues = (colKey: string) => {
     if (selectedTeam === "dev" && colKey === "os_versions") {
       const selectedOS = filters.os?.[0];
       return selectedOS ? osVersionMap[selectedOS] || [] : [];
     }
 
-    if (colKey === "company_id") { // 회사명으로 변경예정
+    if (colKey === "company_id") {
       const letterToLabelMap: Record<string, string> = {
         F: "금융",
         M: "제조",
@@ -95,11 +101,12 @@ export function useAdminDataTableFilters(data: any[], columns: any[], selectedTe
       return Object.keys(labelToCompanyIds).sort();
     }
 
+    // 일반 컬럼의 고유 값 목록 반환
     const valuesSet = new Set<number | string>();
     data.forEach((row) => {
       let val = row[colKey];
       if (val !== undefined && val !== null) {
-        // 숫자 형태일 경우 숫자로 저장 (중복 방지 목적)
+        // 숫자면 숫자로, 아니면 문자열로 저장
         const num = Number(val);
         if (!isNaN(num)) {
           valuesSet.add(num);
@@ -117,8 +124,7 @@ export function useAdminDataTableFilters(data: any[], columns: any[], selectedTe
       : valuesArray.map(String).sort();
   };
 
-
-  // 필터링된 데이터
+  // 모든 필터 조건을 반영한 데이터 반환
   const filteredData = data.filter((row) => {
     const rawDate = row[dateFilterColumn];
     if (!rawDate) return false;
@@ -127,6 +133,7 @@ export function useAdminDataTableFilters(data: any[], columns: any[], selectedTe
     if (yearFilter && String(d.getFullYear()) !== yearFilter) return false;
     if (monthFilter && String(d.getMonth() + 1).padStart(2, "0") !== monthFilter) return false;
 
+    // 회사명 검색어 필터
     if (
       (selectedTeam === "biz" || selectedTeam === "dev" || selectedTeam === "security") &&
       companyNameQuery
@@ -140,6 +147,7 @@ export function useAdminDataTableFilters(data: any[], columns: any[], selectedTe
       }
     }
 
+    // 각 컬럼별 필터 적용
     return Object.entries(filters).every(([colKey, values]) => {
       if (values.length === 0) return true;
       const val = row[colKey];
@@ -154,7 +162,7 @@ export function useAdminDataTableFilters(data: any[], columns: any[], selectedTe
     });
   });
 
-  // 필터 초기화
+  // 모든 필터 상태 초기화
   const handleResetFilters = () => {
     setFilters({});
     setYearFilter(null);
@@ -163,7 +171,7 @@ export function useAdminDataTableFilters(data: any[], columns: any[], selectedTe
     setActiveDropdown(null);
   };
 
-  // 날짜 컬럼 순환
+  // 날짜 컬럼 순환(다음 컬럼으로 변경)
   const handleDateColumnToggle = () => {
     if (dateColumns.length < 2) return;
     const currentIndex = dateColumns.findIndex((col) => col.key === dateFilterColumn);
@@ -173,16 +181,18 @@ export function useAdminDataTableFilters(data: any[], columns: any[], selectedTe
     setMonthFilter(null);
   };
 
-  // 페이지네이션
+  // 페이지네이션: 현재 페이지 데이터만 반환
   const paginatedData = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
     return filteredData.slice(startIndex, startIndex + itemsPerPage);
   }, [filteredData, currentPage]);
 
+  // 필터/검색/날짜컬럼 변경 시 1페이지로 이동
   useEffect(() => {
     setCurrentPage(1);
   }, [filters, yearFilter, monthFilter, companyNameQuery, dateFilterColumn]);
 
+  // 페이지네이션 버튼 계산
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   const maxPageButtons = 10;
   const currentGroup = Math.floor((currentPage - 1) / maxPageButtons);
@@ -194,6 +204,7 @@ export function useAdminDataTableFilters(data: any[], columns: any[], selectedTe
     paginationPages.push(i);
   }
 
+  // 훅에서 제공하는 값 및 함수들 반환
   return {
     dateColumns,
     dateFilterColumn,

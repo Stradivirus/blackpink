@@ -1,3 +1,6 @@
+// 보안팀 동적 폼 컴포넌트 (등록/수정 모달용)
+// 회사/위협유형/위험등급 등 입력 및 담당자 자동입력 지원
+
 import React, { useEffect, useState } from "react";
 import { columnsByTeam, selectOptions, statusOptions } from "../../../constants/dataconfig";
 import { handleChangeFactory } from "./TeamFormDynamic";
@@ -7,16 +10,21 @@ interface SecurityFormProps {
   onChange: (data: Record<string, any>) => void;
 }
 
+// 오늘 날짜 반환 함수
 const getToday = () => {
   const d = new Date();
   return d.toISOString().slice(0, 10);
 };
 
 const SecurityFormDynamic: React.FC<SecurityFormProps> = ({ initialData = {}, onChange }) => {
+  // 보안팀 컬럼 정보
   const columns = columnsByTeam["security"] || [];
+  // 회사 옵션(현재 미사용)
   const [companyOptions] = useState<{ label: string; value: string }[]>([]);
+  // 회사명 검색어 상태
   const [companySearch, setCompanySearch] = useState("");
 
+  // 폼 데이터 상태 (초기값: initialData 또는 기본값)
   const [formData, setFormData] = useState<Record<string, any>>(() => {
     const init: Record<string, any> = {};
     columns.forEach(({ key }) => {
@@ -49,6 +57,7 @@ const SecurityFormDynamic: React.FC<SecurityFormProps> = ({ initialData = {}, on
       .catch(() => setSecurityAdmins([]));
   }, []);
 
+  // initialData 변경 시 폼 데이터 동기화
   useEffect(() => {
     if (initialData && Object.keys(initialData).length > 0) {
       const init: Record<string, any> = {};
@@ -59,10 +68,12 @@ const SecurityFormDynamic: React.FC<SecurityFormProps> = ({ initialData = {}, on
     }
   }, [initialData]);
 
+  // formData 변경 시 상위로 전달
   useEffect(() => {
     onChange(formData);
   }, [formData, onChange]);
 
+  // 폼 필드 값 변경 핸들러
   const handleChange = handleChangeFactory(setFormData);
 
   // 담당자 선택 시 이름/전화번호 자동 입력
@@ -86,7 +97,7 @@ const SecurityFormDynamic: React.FC<SecurityFormProps> = ({ initialData = {}, on
 
   return (
     <div className="admin-modal-form-grid">
-      {/* 회사명 검색 */}
+      {/* 회사명 검색 입력 */}
       <div className="admin-modal-form-field">
         <label>회사명 검색</label>
         <input
@@ -97,11 +108,11 @@ const SecurityFormDynamic: React.FC<SecurityFormProps> = ({ initialData = {}, on
           disabled={!!initialData && Object.keys(initialData).length > 0}
         />
       </div>
-      {/* 회사명 선택 */}
+      {/* 회사명/ID 선택 */}
       <div className="admin-modal-form-field">
         <label>회사 선택</label>
         {initialData && Object.keys(initialData).length > 0 ? (
-          // 수정 모드: 회사명만 읽기전용, 값이 없으면 initialData에서 보여줌
+          // 수정 모드: 회사명만 읽기전용
           <input
             type="text"
             value={
@@ -121,11 +132,10 @@ const SecurityFormDynamic: React.FC<SecurityFormProps> = ({ initialData = {}, on
                   setFormData(prev => ({
                     ...prev,
                     company_id: selected.value,
-                    company_name: selected.label,  // ✅ 정확히 일치하는 값만
+                    company_name: selected.label,
                   }));
-                  setCompanySearch(selected.label); // UI상 입력된 값도 세팅
+                  setCompanySearch(selected.label);
                 } else {
-                  // 선택 안된 경우 초기화
                   setFormData(prev => ({
                     ...prev,
                     company_id: "",

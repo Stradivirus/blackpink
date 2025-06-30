@@ -4,20 +4,21 @@ import { useNavigate } from "react-router-dom";
 import "../../styles/Board.css";
 import Modal from "../Modal";
 import AuthForm from "../AuthForm";
-import ChangePasswordForm from "../ChangePasswordForm"; // 추가
+import ChangePasswordForm from "../ChangePasswordForm";
 
+// 게시판 상단 헤더 컴포넌트
 const BoardHeader = () => {
-    const { isLoggedIn, user, logout } = useAuth();
-    const [modalOpen, setModalOpen] = useState(false);
-    const [pwModalOpen, setPwModalOpen] = useState(false);
-    const navigate = useNavigate();
+    const { isLoggedIn, user, logout } = useAuth(); // 인증 상태 및 사용자 정보
+    const [modalOpen, setModalOpen] = useState(false); // 로그인 모달 상태
+    const [pwModalOpen, setPwModalOpen] = useState(false); // 비밀번호 변경 모달 상태
+    const navigate = useNavigate(); // 페이지 이동 함수
 
     const openModal = () => {
-        setModalOpen(true);
+        setModalOpen(true); // 로그인 모달 열기
     };
 
     const handleProfileClick = () => {
-        alert("프로필 기능은 추후 추가됩니다.");
+        alert("프로필 기능은 추후 추가됩니다."); // 프로필 클릭 시 안내
     };
 
     // 로그아웃 시 홈으로 이동
@@ -86,9 +87,11 @@ const BoardHeader = () => {
                     </>
                 )}
             </div>
+            {/* 로그인 모달 */}
             <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
                 <AuthForm onSuccess={() => setModalOpen(false)} />
             </Modal>
+            {/* 비밀번호 변경 모달 */}
             <Modal open={pwModalOpen} onClose={() => setPwModalOpen(false)}>
                 <ChangePasswordForm onSuccess={() => setPwModalOpen(false)} />
             </Modal>

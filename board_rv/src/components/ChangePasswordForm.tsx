@@ -3,17 +3,18 @@ import { API_URLS } from "../api/urls";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom"; 
 
+// 비밀번호 변경 폼 컴포넌트
 const ChangePasswordForm: React.FC<{ onSuccess?: () => void }> = ({ onSuccess }) => {
-    const { user, logout } = useAuth();
-    const [oldPassword, setOldPassword] = useState("");
-    const [newPassword, setNewPassword] = useState("");
-    const [confirmPassword, setConfirmPassword] = useState("");
-    const [message, setMessage] = useState<string | null>(null);
-    const [loading, setLoading] = useState(false);
-    const [showMatch, setShowMatch] = useState(false);
-    const navigate = useNavigate();
+    const { user, logout } = useAuth(); // 인증 정보와 로그아웃 함수 사용
+    const [oldPassword, setOldPassword] = useState(""); // 기존 비밀번호
+    const [newPassword, setNewPassword] = useState(""); // 새 비밀번호
+    const [confirmPassword, setConfirmPassword] = useState(""); // 새 비밀번호 확인
+    const [message, setMessage] = useState<string | null>(null); // 안내 메시지
+    const [loading, setLoading] = useState(false); // 로딩 상태
+    const [showMatch, setShowMatch] = useState(false); // 비밀번호 일치 여부
+    const navigate = useNavigate(); // 페이지 이동 훅
 
-    // 새 비밀번호, 확인 비밀번호 입력 시 일치 여부 체크
+    // 새 비밀번호와 확인값이 일치하는지 체크
     useEffect(() => {
         if (newPassword && confirmPassword && newPassword === confirmPassword) {
             setShowMatch(true);
@@ -22,6 +23,7 @@ const ChangePasswordForm: React.FC<{ onSuccess?: () => void }> = ({ onSuccess })
         }
     }, [newPassword, confirmPassword]);
 
+    // 폼 제출 시 비밀번호 변경 요청
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setMessage(null);
@@ -40,14 +42,14 @@ const ChangePasswordForm: React.FC<{ onSuccess?: () => void }> = ({ onSuccess })
                     userId: user?.userId,
                     old_password: oldPassword,
                     new_password: newPassword,
-                    accountType: user?.type || "member", // user.type 사용!
+                    accountType: user?.type || "member",
                 }),
             });
             if (res.ok) {
                 setMessage("비밀번호가 성공적으로 변경되었습니다. 다시 로그인 해주세요.");
                 setTimeout(() => {
-                    logout();
-                    navigate("/"); // 여기로 이동
+                    logout(); // 로그아웃 처리
+                    navigate("/"); // 메인으로 이동
                     if (onSuccess) onSuccess();
                 }, 1000);
             } else {
@@ -61,6 +63,7 @@ const ChangePasswordForm: React.FC<{ onSuccess?: () => void }> = ({ onSuccess })
         }
     };
 
+    // 비밀번호 변경 폼 렌더링
     return (
         <form onSubmit={handleSubmit} style={{ minWidth: 280 }}>
             <h3 style={{ marginBottom: 12 }}>비밀번호 변경</h3>

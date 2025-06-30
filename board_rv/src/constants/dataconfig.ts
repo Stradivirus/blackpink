@@ -1,12 +1,18 @@
 // src/constants/dataConfig.ts
 
 // 팀 정의
+// 사용처:
+//   pages/Admin/AdminLayout.tsx,
+//   pages/Admin/AdminDashboard.tsx,
+//   pages/Admin/AdminDataPage.tsx
 export const teamList = [
   { key: "biz", label: "사업팀" },
   { key: "dev", label: "개발팀" },
   { key: "security", label: "보안팀" },
 ];
 
+// 사용처:
+//   components/Admin/AdminDashBoard/SecurityGraphs.tsx
 export const threatTypes = [
   "악성코드",
   "해킹공격",
@@ -19,6 +25,11 @@ export const threatTypes = [
 ];
 
 // 각 팀별 컬럼 정의
+// 사용처:
+//   components/Admin/AdminData/DevFormDynamic.tsx,
+//   components/Admin/AdminData/SecurityFormDynamic.tsx,
+//   components/Admin/AdminData/BizFormDynamic.tsx,
+//   pages/Admin/AdminDataPage.tsx
 export const columnsByTeam: Record<string, { key: string; label: string }[]> = {
   biz: [
     { key: "company_id", label: "회사코드" },
@@ -46,7 +57,7 @@ export const columnsByTeam: Record<string, { key: string; label: string }[]> = {
   ],
   security: [
     { key: "company_id", label: "회사코드" },
-    { key: "company_name", label: "회사명" }, // ← 이 줄 추가!
+    { key: "company_name", label: "회사명" },
     { key: "threat_type", label: "위협 유형" },
     { key: "risk_level", label: "위험 등급" },
     { key: "server_type", label: "서버 종류" },
@@ -60,6 +71,8 @@ export const columnsByTeam: Record<string, { key: string; label: string }[]> = {
 };
 
 // 팀별 날짜 필터용 컬럼 정보 정의
+// 사용처:
+//   components/Admin/AdminData/useAdminDataTableFilters.ts
 export const dateColumnsByTeam: {
   [team: string]: { key: string; label: string }[];
 } = {
@@ -78,6 +91,9 @@ export const dateColumnsByTeam: {
 };
 
 // OS에 따른 버전 맵
+// 사용처:
+//   components/Admin/AdminData/DevFormDynamic.tsx,
+//   components/Admin/AdminData/useAdminDataTableFilters.ts
 export const osVersionMap: Record<string, string[]> = {
   Windows: ["7", "8", "10", "11"],
   Linux: ["Rocky 8", "Rocky 9", "Ubuntu 18.04", "Ubuntu 20.04", "Ubuntu 22.04"],
@@ -87,6 +103,11 @@ export const osVersionMap: Record<string, string[]> = {
 };
 
 // 팀명 매핑 객체 추가 (dataconfig에 없으므로 직접 추가)
+// 사용처:
+//   components/Admin/AdminData/RegisterEditModal.tsx,
+//   pages/Admin/AdminLayout.tsx,
+//   pages/Admin/AdminsList.tsx
+//   components/Admin/MemberInviteForm.tsx
 export const teamLabelMap: Record<string, string> = {
   "보안팀": "보안팀",
   "개발팀": "개발팀",
@@ -103,12 +124,14 @@ export const actions = [
   "모니터링 강화", "보안 교육 실시", "방화벽 설정"
 ];
 
+// 사용처: components/Admin/AdminData/DevFormDynamic.tsx, components/Admin/AdminData/SecurityFormDynamic.tsx, components/Admin/AdminData/BizFormDynamic.tsx
 export const statusOptions = {
   biz: ["진행중", "만료", "해지"],
   dev: ["개발 예정", "개발 진행중", "개발 중지", "개발 완료"],
   security: ["진행중", "처리완료"],
 };
 
+// 사용처: components/Admin/AdminData/DevFormDynamic.tsx, components/Admin/AdminData/SecurityFormDynamic.tsx, components/Admin/AdminData/BizFormDynamic.tsx
 export const selectOptions: Record<string, string[]> = {
   plan: ["베이직", "프로", "엔터프라이즈"],
   status: [], // 기본값은 빈 배열, 실제 렌더링 시 team에 따라 동적으로 할당
@@ -132,17 +155,20 @@ export const industryPrefixMap: Record<string, string> = {
 
 // 대시보드 데이터 타입 정의
 // 컬러맵 및 데이터 키 상수 추가 (DashboardSummaryGraphs.tsx에서 이동)
+// 사용처: components/Admin/AdminDashBoard/DashboardSummaryGraphs.tsx
 export const planColors: Record<string, string> = {
   베이직: "#764ba2",
   프로: "#e67e22",
   엔터프라이즈: "#3498db",
   미지정: "#888"
 };
+// 사용처: components/Admin/AdminDashBoard/DashboardSummaryGraphs.tsx
 export const riskColors: Record<string, string> = {
   LOW: "#3498db",
   MEDIUM: "#f1c40f",
   HIGH: "#e74c3c"
 };
+// 사용처: components/Admin/AdminDashBoard/DashboardSummaryGraphs.tsx
 export const osColors: Record<string, string> = {
   Windows: "#3498db",
   Linux: "#f1c40f",
@@ -152,11 +178,15 @@ export const osColors: Record<string, string> = {
   Android: "#16a085",
   미지정: "#888"
 };
+// 사용처: components/Admin/AdminDashBoard/DashboardSummaryGraphs.tsx
 export const securityOrder = ["LOW", "MEDIUM", "HIGH", "미지정"];
+// 사용처: components/Admin/AdminDashBoard/DashboardSummaryGraphs.tsx
 export const bizPlanKeys = ["베이직", "프로", "엔터프라이즈"] as const;
+// 사용처: components/Admin/AdminDashBoard/DashboardSummaryGraphs.tsx
 export const secLevelKeys = ["LOW", "MEDIUM", "HIGH"] as const;
 
 // 사업팀 그래프 타입 정의 추가
+// 사용처: components/Admin/AdminDashBoard/BusinessGraphs.tsx
 export const businessGraphTypes = [
   { type: "bar", label: "수익 바 차트" },
   { type: "heatmap", label: "수익 히트맵" },
@@ -168,6 +198,7 @@ export const businessGraphTypes = [
 ];
 
 // 시스템 개발 그래프 타입 정의 추가
+// 사용처: components/Admin/AdminDashBoard/SysDevGraphs.tsx
 export const sysDevGraphTypes = [
   { type: "os_version_by_os", label: "OS별 버전 분포" },
   { type: "maintenance_by_os", label: "OS별 관리 현황" },
@@ -177,6 +208,7 @@ export const sysDevGraphTypes = [
 ];
 
 // 보안팀 그래프 타입 정의
+// 사용처: pages/Admin/AdminDashboard.tsx
 export const securityGraphTypes = [
   { type: "threat_m", label: "월별 침해 현황" },
   { type: "manpower", label: "처리기간 vs 투입인원" },

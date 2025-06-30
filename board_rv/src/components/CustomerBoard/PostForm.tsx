@@ -4,32 +4,35 @@ import {API_URLS} from "../../api/urls";
 import {useAuth} from "../../context/AuthContext";
 import "../../styles/Board.css";
 
+// 게시글 작성/수정 폼 컴포넌트
 interface Props {
-    isEdit?: boolean;
+    isEdit?: boolean; // 수정 모드 여부
 }
 
 const PostForm: React.FC<Props> = ({isEdit}) => {
-    const {id} = useParams<{ id: string }>();
-    const navigate = useNavigate();
-    const { user } = useAuth();
+    const {id} = useParams<{ id: string }>(); // 게시글 id 파라미터
+    const navigate = useNavigate(); // 페이지 이동 함수
+    const { user } = useAuth(); // 로그인 사용자 정보
 
+    // 폼 상태
     const [form, setForm] = useState({
         title: "",
         content: "",
-        writerId: user?.userId ?? "", // userId로 변경
+        writerId: user?.userId ?? "", // 작성자 id
         writerNickname: user?.nickname ?? "",
         isNotice: false,
     });
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false); // 제출 중 여부
+    const [error, setError] = useState<string | null>(null); // 에러 메시지
 
+    // 로그인 정보 변경 시 작성자 id 갱신
     useEffect(() => {
         if (user) {
-            setForm(f => ({...f, writerId: user.userId})); // userId로 변경
+            setForm(f => ({...f, writerId: user.userId}));
         }
     }, [user]);
 
-    // 수정 모드일 때 기존 데이터 불러오기 (isNotice 포함)
+    // 수정 모드일 때 기존 데이터 불러오기
     useEffect(() => {
         if (isEdit && id && user) {
             setError(null);
@@ -39,7 +42,7 @@ const PostForm: React.FC<Props> = ({isEdit}) => {
                     setForm({
                         title: data.title,
                         content: data.content,
-                        writerId: data.writerId, // 이미 userId 문자열
+                        writerId: data.writerId,
                         writerNickname: data.writerNickname,
                         isNotice: !!data.isNotice,
                     });
@@ -48,21 +51,24 @@ const PostForm: React.FC<Props> = ({isEdit}) => {
         }
     }, [isEdit, id, user]);
 
+    // 에러 발생 시 alert
     useEffect(() => {
         if (error) {
             alert(error);
         }
     }, [error]);
 
+    // 입력값 변경 핸들러
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setForm({...form, [e.target.name]: e.target.value});
     };
 
-    // 2. 체크박스 핸들러 추가
+    // 공지 체크박스 변경 핸들러
     const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setForm({...form, isNotice: e.target.checked});
     };
 
+    // 폼 제출 핸들러
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (isSubmitting) return;
@@ -73,7 +79,7 @@ const PostForm: React.FC<Props> = ({isEdit}) => {
             const url = isEdit ? API_URLS.POST(id!) : API_URLS.POSTS;
             const body = {
                 ...form,
-                writerId: user?.userId, // userId로 변경
+                writerId: user?.userId,
                 writerNickname: user?.nickname,
             };
             const res = await fetch(url, {
@@ -90,6 +96,7 @@ const PostForm: React.FC<Props> = ({isEdit}) => {
         }
     };
 
+    // 로그인하지 않은 경우 안내
     if (!user) {
         return (
             <main className="board-form-container board-form-container--detail">
@@ -99,6 +106,7 @@ const PostForm: React.FC<Props> = ({isEdit}) => {
         );
     }
 
+    // 폼 렌더링
     return (
         <>
             <main className="board-form-container board-form-container--detail">
@@ -133,7 +141,7 @@ const PostForm: React.FC<Props> = ({isEdit}) => {
                             maxLength={2000}
                         />
                     </label>
-                    {/* 2. 관리자만 공지 체크박스 노출 */}
+                    {/* 관리자만 공지 체크박스 노출 */}
                     {user.type === "admin" && (
                         <label>
                             <input

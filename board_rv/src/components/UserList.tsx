@@ -2,12 +2,14 @@ import React, { useState } from "react";
 import { API_URLS } from "../api/urls";
 import styles from "./UserList.styles";
 
+// 테이블 컬럼 타입 정의
 type Column<T> = {
   label: string;
   render: (row: T) => React.ReactNode;
   hidden?: boolean;
 };
 
+// UserList 컴포넌트 props 타입
 interface UserListProps<T> {
   title: string;
   columns: Column<T>[];
@@ -16,9 +18,10 @@ interface UserListProps<T> {
   loading: boolean;
   accountType: "member" | "admin";
   onAfterNicknameUpdate?: (id: string, nickname: string) => void;
-  showCompanySearch?: boolean; // 회사명 검색창 표시 여부 (기본 true)
+  showCompanySearch?: boolean;
 }
 
+// 사용자 목록 테이블 컴포넌트
 function UserList<T extends { id: string; nickname: string; userId?: string; company_name?: string }>(
   {
     title,
@@ -31,10 +34,10 @@ function UserList<T extends { id: string; nickname: string; userId?: string; com
     showCompanySearch = true,
   }: UserListProps<T>
 ) {
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [nicknameValue, setNicknameValue] = useState<string>("");
-  const [companySearch, setCompanySearch] = useState("");
-  const [filteredData, setFilteredData] = useState<T[] | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null); // 닉네임 수정 중인 id
+  const [nicknameValue, setNicknameValue] = useState<string>(""); // 닉네임 입력값
+  const [companySearch, setCompanySearch] = useState(""); // 회사명 검색어
+  const [filteredData, setFilteredData] = useState<T[] | null>(null); // 검색 결과 데이터
 
   // 회사명 검색 핸들러
   const handleCompanySearch = () => {
@@ -50,15 +53,18 @@ function UserList<T extends { id: string; nickname: string; userId?: string; com
     );
   };
 
+  // 닉네임 클릭 시 수정모드 진입
   const handleNicknameClick = (row: T) => {
     setEditingId(row.id);
     setNicknameValue(row.nickname);
   };
 
+  // 닉네임 입력값 변경 핸들러
   const handleNicknameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNicknameValue(e.target.value);
   };
 
+  // 닉네임 입력창 포커스 아웃 시 저장
   const handleNicknameBlur = (row: T) => {
     if (nicknameValue !== row.nickname) {
       handleNicknameUpdate(row.id, nicknameValue);
@@ -66,6 +72,7 @@ function UserList<T extends { id: string; nickname: string; userId?: string; com
     setEditingId(null);
   };
 
+  // 닉네임 업데이트 API 호출
   const handleNicknameUpdate = async (id: string, nickname: string) => {
     const user = data.find(u => u.id === id);
     try {
@@ -117,7 +124,7 @@ function UserList<T extends { id: string; nickname: string; userId?: string; com
     }
   };
 
-  // 닉네임 컬럼만 특별 처리
+  // 닉네임 컬럼만 인라인 수정 지원
   const renderCell = (col: Column<T>, row: T) => {
     if (col.label === "닉네임") {
       if (editingId === row.id) {
@@ -240,4 +247,5 @@ function UserList<T extends { id: string; nickname: string; userId?: string; com
   );
 }
 
+// UserList 컴포넌트 export
 export default UserList;

@@ -1,4 +1,7 @@
 // src/components/Admin/AdminDataTable.tsx
+// 관리자 데이터 테이블 컴포넌트 (필터, CRUD, 페이지네이션 등 지원)
+// 팀별 데이터 관리 및 UI 제공
+
 import React, { useMemo } from "react";
 import type { AdminDataTableProps } from "../../types/users";
 import RegisterEditModal from "./AdminData/RegisterEditModal";
@@ -14,7 +17,7 @@ const AdminDataTable: React.FC<AdminDataTableProps> = ({
   selectedTeamLabel,
   fetchData,
 }) => {
-  // 필터 관련 훅
+  // 필터 관련 상태 및 함수 관리
   const {
     dateColumns,
     dateFilterColumn,
@@ -44,7 +47,7 @@ const AdminDataTable: React.FC<AdminDataTableProps> = ({
     endPage,
   } = useAdminDataTableFilters(data, columns, selectedTeam);
 
-  // CRUD 및 선택 관련 훅
+  // CRUD 및 선택 관련 상태/함수 관리
   const {
     modalVisible,
     setModalVisible,
@@ -58,13 +61,14 @@ const AdminDataTable: React.FC<AdminDataTableProps> = ({
     setSelectedIds,
   } = useAdminDataCrud(selectedTeam, fetchData);
 
-  // 전체 선택 체크박스 
+  // 전체 선택 체크박스 상태 계산
   const isAllSelected =
     filteredData.length > 0 &&
     filteredData.every((row, idx) =>
       selectedIds.has(getRowId(row, idx))
     );
 
+  // 전체 선택/해제 핸들러
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
       const allIds = filteredData.map((row, idx) => getRowId(row, idx));
@@ -74,7 +78,7 @@ const AdminDataTable: React.FC<AdminDataTableProps> = ({
     }
   };
 
-  // 실제 테이블에 보여줄 컬럼
+  // 숨김 컬럼 제외 실제 표시 컬럼 계산
   const getVisibleColumns = useMemo(() => columns.filter((col) => col.key !== "hidden_column"), [columns]);
 
   if (loading) return <div>로딩 중...</div>;
@@ -85,6 +89,7 @@ const AdminDataTable: React.FC<AdminDataTableProps> = ({
 
       {/* 날짜 필터 그룹 */}
       <div className="admin-data-table-date-filter-group">
+        {/* 날짜 컬럼 선택 드롭다운 */}
         {dateColumns.length > 0 && (
           <DropdownButton
             label={dateColumns.find((col) => col.key === dateFilterColumn)?.label ?? "날짜 컬럼 선택"}
@@ -92,6 +97,7 @@ const AdminDataTable: React.FC<AdminDataTableProps> = ({
             onClick={handleDateColumnToggle}
           />
         )}
+        {/* 연도/월 필터 드롭다운 */}
         <DropdownButton
           label={`${yearFilter ?? "연도 선택"} ▼`}
           selected={!!yearFilter}
@@ -169,7 +175,7 @@ const AdminDataTable: React.FC<AdminDataTableProps> = ({
       {/* 다중 필터 영역 */}
       <div className="admin-data-table-multi-filter-row">
         <div className="admin-data-table-multi-filter-group">
-          {/* 왼쪽: 필터 버튼들 */}
+          {/* 컬럼별 필터 드롭다운 */}
           {filterableColumns.map((col) => {
             const selected = filters[col.key] || [];
             return (
@@ -202,7 +208,7 @@ const AdminDataTable: React.FC<AdminDataTableProps> = ({
             );
           })}
 
-          {/* 초기화 버튼 */}
+          {/* 필터 초기화 버튼 */}
           {(Object.values(filters).some((vals) => vals.length > 0) ||
             yearFilter !== null ||
             monthFilter !== null) && (
@@ -216,6 +222,7 @@ const AdminDataTable: React.FC<AdminDataTableProps> = ({
           )}
         </div>
 
+        {/* 회사명 검색 및 총 개수 표시 */}
         {["biz", "dev", "security"].includes(selectedTeam) && ( 
           <div className="admin-data-table-search-area-relative">
             <div className="total-count-independent">
@@ -233,13 +240,12 @@ const AdminDataTable: React.FC<AdminDataTableProps> = ({
         )}
       </div>
 
-
-
-      {/* 테이블 렌더링 */}
+      {/* 데이터 테이블 렌더링 */}
       <table className="admin-data-table-table">
         <colgroup>
           <col style={{ width: "36px" }} />
           {getVisibleColumns.map((col) => {
+            // 팀별 컬럼별 너비 지정
             if (selectedTeam === "security") {
               if (col.key === "server_type") return <col key={col.key} style={{ width: "140px" }} />;
               if (col.key === "status") return <col key={col.key} style={{ width: "90px" }} />;
@@ -307,6 +313,7 @@ const AdminDataTable: React.FC<AdminDataTableProps> = ({
         </tbody>
       </table>
 
+      {/* 페이지네이션 */}
       <div className="admin-data-table-pagination">
         {startPage > 1 && (
           <button
@@ -339,7 +346,7 @@ const AdminDataTable: React.FC<AdminDataTableProps> = ({
         )}
       </div>
 
-      {/* 우측 하단 고정 버튼 */}
+      {/* 우측 하단 고정 버튼 (등록/수정/삭제) */}
       <div className="admin-data-table-fixed-buttons">
         <button
           className="admin-data-table-fixed-btn"
@@ -362,6 +369,7 @@ const AdminDataTable: React.FC<AdminDataTableProps> = ({
         </button>
       </div>
 
+      {/* 등록/수정 모달 */}
       {modalVisible && (
         <RegisterEditModal
           visible={modalVisible}
@@ -377,6 +385,7 @@ const AdminDataTable: React.FC<AdminDataTableProps> = ({
 
 // row의 고유 식별자 생성 함수 (중복 방지)
 function getRowId(row: any, idx: number) {
+  // row에서 고유 id 추출, 없으면 인덱스 사용
   if (row._id) {
     if (typeof row._id === "object" && "$oid" in row._id) return row._id.$oid;
     if (typeof row._id === "string") return row._id;
@@ -386,7 +395,7 @@ function getRowId(row: any, idx: number) {
   return idx.toString();
 }
 
-// 셀 값 가공 함수
+// 셀 값 가공 함수 (날짜/회사명 등 포맷팅)
 function getDisplayValue(row: any, key: string) {
   if (key === "company_id" && row.company_id) return row.company_id;
   if (key === "company_name" && row.company_name) return row.company_name;
@@ -408,6 +417,5 @@ function getDisplayValue(row: any, key: string) {
 
   return row[key] ?? "";
 }
-
 
 export default AdminDataTable;

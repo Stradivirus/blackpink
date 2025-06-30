@@ -3,27 +3,31 @@ import axios from "axios";
 import { API_URLS } from "../../api/urls";
 import type { Admin } from "../../types/users";
 import styles from "./MemberInviteForm.styles";
+import { teamLabelMap } from "../../constants/dataconfig"; // 팀 라벨 맵 import
 
-const ADMIN_TEAMS: Admin["team"][] = ["관리팀", "보안팀", "사업팀", "개발팀"];
+// 관리자 팀 목록 상수 (teamLabelMap의 key를 사용)
+const ADMIN_TEAMS: Admin["team"][] = Object.keys(teamLabelMap) as Admin["team"][];
 
+// 회원 초대(계정 발급) 폼 컴포넌트
 const MemberInviteForm: React.FC = () => {
-  const [userId, setUserId] = useState("");
-  const [nickname, setNickname] = useState("");
-  const [email, setEmail] = useState("");
-  const [accountType, setAccountType] = useState<"member" | "admin">("member");
-  const [team, setTeam] = useState<Admin["team"]>("관리팀");
-  const [message, setMessage] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [userIdError, setUserIdError] = useState<string | null>(null);
-  const [nicknameError, setNicknameError] = useState<string | null>(null);
-  const [companyName, setCompanyName] = useState("");
-  const [companyId, setCompanyId] = useState("");
-  const [companyInput, setCompanyInput] = useState(""); // 검색창 입력값
-  const [companyResults, setCompanyResults] = useState<any[]>([]);
-  const [companySearchLoading, setCompanySearchLoading] = useState(false);
-  const [phone, setPhone] = useState(""); // 전화번호 상태 추가
-  const [phoneError, setPhoneError] = useState<string | null>(null); // 전화번호 에러 상태 추가
+  const [userId, setUserId] = useState(""); // 아이디 입력값
+  const [nickname, setNickname] = useState(""); // 닉네임 입력값
+  const [email, setEmail] = useState(""); // 이메일 입력값
+  const [accountType, setAccountType] = useState<"member" | "admin">("member"); // 계정 유형
+  const [team, setTeam] = useState<Admin["team"]>("관리팀"); // 관리자 팀 선택값
+  const [message, setMessage] = useState<string | null>(null); // 안내 메시지
+  const [loading, setLoading] = useState(false); // 로딩 상태
+  const [userIdError, setUserIdError] = useState<string | null>(null); // 아이디 중복 에러
+  const [nicknameError, setNicknameError] = useState<string | null>(null); // 닉네임 중복 에러
+  const [companyName, setCompanyName] = useState(""); // 회사명
+  const [companyId, setCompanyId] = useState(""); // 회사코드
+  const [companyInput, setCompanyInput] = useState(""); // 회사 검색 입력값
+  const [companyResults, setCompanyResults] = useState<any[]>([]); // 회사 검색 결과
+  const [companySearchLoading, setCompanySearchLoading] = useState(false); // 회사 검색 로딩
+  const [phone, setPhone] = useState(""); // 전화번호 입력값
+  const [phoneError, setPhoneError] = useState<string | null>(null); // 전화번호 에러
 
+  // 아이디/닉네임 중복 체크
   const checkDuplicate = async (field: "userId" | "nickname", value: string) => {
     if (!value) return;
     try {
@@ -38,6 +42,7 @@ const MemberInviteForm: React.FC = () => {
         if (field === "nickname") setNicknameError(null);
       }
     } catch {
+      // 에러 무시
     }
   };
 
@@ -59,7 +64,7 @@ const MemberInviteForm: React.FC = () => {
     }
   };
 
-  // 검색 결과 선택 시
+  // 검색 결과에서 회사 선택 시
   const handleCompanySelect = (company: any) => {
     setCompanyName(company.company_name);
     setCompanyId(company.company_id);
@@ -67,9 +72,9 @@ const MemberInviteForm: React.FC = () => {
     setCompanyResults([]);
   };
 
-  // 전화번호 입력 핸들러
+  // 전화번호 입력 핸들러(숫자만 허용)
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/\D/g, ""); // 숫자만 허용
+    const value = e.target.value.replace(/\D/g, "");
     setPhone(value);
     if (value.length !== 10 && value.length !== 11) {
       setPhoneError("전화번호는 10자리 또는 11자리여야 합니다.");
@@ -78,12 +83,13 @@ const MemberInviteForm: React.FC = () => {
     }
   };
 
+  // 폼 제출 핸들러
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setMessage(null);
 
-    // 1. 서버에 중복 체크 한 번 더
+    // 서버에 중복 체크 한 번 더
     try {
       const [userIdRes, nicknameRes] = await Promise.all([
         axios.get(API_URLS.CHECK_DUPLICATE, { params: { field: "userId", value: userId, accountType } }),
@@ -103,7 +109,7 @@ const MemberInviteForm: React.FC = () => {
       // 에러 무시
     }
 
-    // 2. 중복이 없으면 회원 초대 진행
+    // 중복이 없으면 회원 초대 진행
     try {
       const payload: any = {
         userId,
@@ -123,7 +129,7 @@ const MemberInviteForm: React.FC = () => {
       setNickname("");
       setEmail("");
       setTeam("관리팀");
-      setPhone(""); // 입력값 초기화
+      setPhone("");
       setCompanyName("");
       setCompanyId("");
       setCompanyInput("");
@@ -137,6 +143,7 @@ const MemberInviteForm: React.FC = () => {
     }
   };
 
+  // 폼 렌더링
   return (
     <form onSubmit={handleSubmit} style={styles.card}>
       <div style={styles.title}>신규 계정 발급</div>

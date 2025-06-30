@@ -1,3 +1,6 @@
+// 사업팀 대시보드 그래프 이미지 뷰어 컴포넌트
+// 그래프 이미지 로딩, 에러처리, 확대 모달 등 지원
+
 import * as React from "react";
 import { API_URLS } from "../../../api/urls";
 import { businessGraphTypes } from "../../../constants/dataconfig";
@@ -5,12 +8,17 @@ import { businessGraphTypes } from "../../../constants/dataconfig";
 const BUSINESS_GRAPH_TYPES = businessGraphTypes;
 
 const BusinessGraphs: React.FC = () => {
+  // 각 그래프 이미지 로딩 상태
   const [imgLoaded, setImgLoaded] = React.useState<boolean[]>(Array(BUSINESS_GRAPH_TYPES.length).fill(false));
+  // 이미지 새로고침용 키
   const [imgKeys, setImgKeys] = React.useState<number[]>(BUSINESS_GRAPH_TYPES.map(() => Date.now()));
+  // 이미지 모달 상태
   const [modalImg, setModalImg] = React.useState<string | null>(null);
   const [modalAlt, setModalAlt] = React.useState<string>("");
+  // 이미지 src 배열
   const [imgSrcs, setImgSrcs] = React.useState<(string | null)[]>(Array(BUSINESS_GRAPH_TYPES.length).fill(null));
 
+  // 이미지 키 변경 시 src 갱신
   React.useEffect(() => {
     // 모든 이미지 src를 한 번에 할당
     setImgSrcs(
@@ -19,13 +27,16 @@ const BusinessGraphs: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [imgKeys]);
 
+  // 이미지 클릭 시 모달 오픈
   const handleImgClick = (src: string, alt: string) => {
     setModalImg(src);
     setModalAlt(alt);
   };
 
+  // 모달 닫기
   const closeModal = () => setModalImg(null);
 
+  // 이미지 로드 완료 처리
   const handleImgLoad = (idx: number) => {
     setImgLoaded((prev) => {
       const arr = [...prev];
@@ -34,6 +45,7 @@ const BusinessGraphs: React.FC = () => {
     });
   };
 
+  // 이미지 로드 실패 시 재시도
   const handleImgError = (idx: number) => {
     setImgKeys((prev) => {
       const arr = [...prev];

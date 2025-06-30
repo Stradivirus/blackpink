@@ -11,8 +11,10 @@ import {
   Legend,
 } from "chart.js";
 
+// Chart.js에서 사용할 요소 등록
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
+// 테이블 헤더 스타일
 const thStyle: React.CSSProperties = {
   padding: "8px 10px",
   fontWeight: 700,
@@ -20,19 +22,23 @@ const thStyle: React.CSSProperties = {
   background: "#f7f7f7",
 };
 
+// 테이블 데이터 셀 스타일
 const tdStyle: React.CSSProperties = {
   padding: "7px 10px",
   textAlign: "center",
 };
 
+// 한국 국가명 후보 리스트
 const KOREA_LABELS = ["Korea (Republic of)", "South Korea", "대한민국"];
 
+// 막대그래프 색상 반환 함수 (한국만 강조)
 function getBarColors(data: any[], baseColor: string, highlightColor: string) {
   return data.map(row =>
     KOREA_LABELS.includes(row.country) ? highlightColor : baseColor
   );
 }
 
+// 그래프 모드별 정의
 const GRAPH_MODES = [
   {
     label: "사이버 보안 지수 높은 순",
@@ -79,16 +85,19 @@ const GRAPH_MODES = [
   },
 ];
 
+// 표/그래프 모드 목록
 const DISPLAY_MODES = [
   { type: "table", label: "NCSI 순위 테이블" },
   ...GRAPH_MODES.map((g) => ({ type: "graph", label: g.label })),
 ];
 
+// NCSI 대시보드 메인 컴포넌트
 const NcsiDashboard: React.FC = () => {
-  const [ncsi, setNcsi] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [displayIdx, setDisplayIdx] = useState(0);
+  const [ncsi, setNcsi] = useState<any[]>([]); // NCSI 데이터
+  const [loading, setLoading] = useState(true); // 로딩 상태
+  const [displayIdx, setDisplayIdx] = useState(0); // 표시 모드 인덱스
 
+  // 데이터 fetch 및 상태 저장
   useEffect(() => {
     fetch(API_URLS.NCSI_TOP20)
       .then((res) => res.json())
@@ -98,7 +107,7 @@ const NcsiDashboard: React.FC = () => {
       });
   }, []);
 
-  // 8초마다 표/그래프 순환
+  // 8초마다 표/그래프 자동 순환
   useEffect(() => {
     const timer = setInterval(() => {
       setDisplayIdx((idx) => (idx + 1) % DISPLAY_MODES.length);
@@ -106,6 +115,7 @@ const NcsiDashboard: React.FC = () => {
     return () => clearInterval(timer);
   }, []);
 
+  // 요약 정보 계산
   const countryCount = ncsi.length;
   const avgSecurity = ncsi.length
     ? (ncsi.reduce((sum, row) => sum + (row.security_index || 0), 0) / ncsi.length).toFixed(2)
@@ -114,6 +124,7 @@ const NcsiDashboard: React.FC = () => {
     ? (ncsi.reduce((sum, row) => sum + (row.digital_level || 0), 0) / ncsi.length).toFixed(2)
     : "-";
 
+  // 요약 카드 스타일
   const summaryCardStyle: React.CSSProperties = {
     background: "rgba(30, 40, 55, 0.95)",
     borderRadius: "12px",
@@ -136,7 +147,7 @@ const NcsiDashboard: React.FC = () => {
   // 표/그래프 데이터 준비
   let content = null;
   if (DISPLAY_MODES[displayIdx].type === "table") {
-    // 표는 기본 security_index 내림차순(혹은 원하는 정렬)
+    // 표는 security_index 내림차순 정렬
     const sorted = [...ncsi].sort(GRAPH_MODES[0].sort);
     content = (
       <>
@@ -211,6 +222,7 @@ const NcsiDashboard: React.FC = () => {
     );
   }
 
+  // 전체 대시보드 렌더링
   return (
     <div style={{ width: "100%", maxWidth: 900, margin: "0 auto" }}>
       <h2 style={{ fontWeight: 700, fontSize: 28, marginBottom: 24, color: "#fff" }}>
@@ -258,7 +270,7 @@ const NcsiDashboard: React.FC = () => {
           </div>
         </div>
       </div>
-      {/* 이하 동일 */}
+      {/* 표 또는 그래프 영역 */}
       <div style={{ background: "#fff", borderRadius: 8, padding: 24, marginBottom: 32 }}>
         {DISPLAY_MODES[displayIdx].type === "graph" ? (
           React.cloneElement(content as React.ReactElement)

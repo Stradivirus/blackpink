@@ -1,3 +1,6 @@
+// 대시보드 요약 그래프 및 요약 카드 컴포넌트
+// 사업/개발/보안팀의 주요 지표와 증감 그래프를 시각화
+
 import React, { useEffect, useState } from "react";
 import { API_URLS } from "../../../api/urls";
 import {
@@ -20,6 +23,7 @@ import {
 } from "chart.js";
 import { Line } from "react-chartjs-2";
 
+// Chart.js에 필요한 요소 등록
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -30,10 +34,11 @@ ChartJS.register(
   Legend
 );
 
-// TeamInfoPanels를 별도 export
+// 팀별 요약 정보 패널 컴포넌트
 export const TeamInfoPanels: React.FC<{ summary: any }> = ({ summary }) => {
   return (
     <div className="team-info-panels">
+      {/* 사업팀 요약 */}
       <div className="team-info-panel">
         <div className="team-info-title">가입자 수</div>
         <div className="team-info-value">
@@ -49,6 +54,7 @@ export const TeamInfoPanels: React.FC<{ summary: any }> = ({ summary }) => {
           </div>
         )}
       </div>
+      {/* 개발팀 요약 */}
       <div className="team-info-panel">
         <div className="team-info-title">진행 중인 프로젝트</div>
         <div className="team-info-value">{summary?.dev?.total ?? 0}</div>
@@ -62,6 +68,7 @@ export const TeamInfoPanels: React.FC<{ summary: any }> = ({ summary }) => {
           </div>
         )}
       </div>
+      {/* 보안팀 요약 */}
       <div className="team-info-panel">
         <div className="team-info-title">보안사고</div>
         <div className="team-info-value">
@@ -83,10 +90,12 @@ export const TeamInfoPanels: React.FC<{ summary: any }> = ({ summary }) => {
   );
 };
 
+// 대시보드 요약 그래프 메인 컴포넌트
 const DashboardSummaryGraphs: React.FC = () => {
-  const [data, setData] = useState<any>(null);
-  const [loading, setLoading] = useState(false);
+  const [data, setData] = useState<any>(null); // 전체 데이터 상태
+  const [loading, setLoading] = useState(false); // 로딩 상태
 
+  // 데이터 fetch
   useEffect(() => {
     setLoading(true);
     fetch(API_URLS.DASHBOARD_SUMMARY_GRAPHS)
@@ -101,7 +110,7 @@ const DashboardSummaryGraphs: React.FC = () => {
   // summary 데이터 선언 (return문 위에서)
   const summary = data.summary;
 
-  // 중복 dash 처리 함수
+  // 중복 dash 처리 함수 (동일 데이터 라인 dash 처리)
   function makeDashDatasets(
     keys: string[],
     allDataArr: number[][],
@@ -153,6 +162,7 @@ const DashboardSummaryGraphs: React.FC = () => {
     labels: data.security.labels,
     datasets: makeDashDatasets(secLevelKeys as unknown as string[], secAllDataArr, riskColors)
   };
+  // 그래프 옵션
   const options = {
     responsive: true,
     maintainAspectRatio: false, // 그래프가 부모 높이에 맞게

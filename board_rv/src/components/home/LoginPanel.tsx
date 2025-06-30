@@ -1,6 +1,7 @@
 import React from "react";
 import AuthForm from "../../components/AuthForm";
 
+// 로그인 패널 props 타입 정의
 interface LoginPanelProps {
   titleStyle: React.CSSProperties;
   buttonStyle: React.CSSProperties;
@@ -17,6 +18,7 @@ interface LoginPanelProps {
   login: (token: string, user: any) => void;
 }
 
+// 로그인/게시판/자동로그인 버튼 및 AuthForm을 제공하는 패널
 const LoginPanel: React.FC<LoginPanelProps> = ({
   titleStyle,
   buttonStyle,
@@ -64,6 +66,7 @@ const LoginPanel: React.FC<LoginPanelProps> = ({
         </span>
         에 오신 것을 환영합니다.
       </p>
+      {/* 로그인 버튼 */}
       <button
         style={{
           ...buttonStyle,
@@ -75,6 +78,7 @@ const LoginPanel: React.FC<LoginPanelProps> = ({
       >
         로그인
       </button>
+      {/* 고객 게시판 버튼 */}
       <button
         style={{
           ...buttonStyle,
@@ -86,6 +90,7 @@ const LoginPanel: React.FC<LoginPanelProps> = ({
       >
         고객 게시판
       </button>
+      {/* 관리자 자동 로그인 버튼 */}
       <button
         style={{
           ...buttonStyle,
@@ -98,6 +103,7 @@ const LoginPanel: React.FC<LoginPanelProps> = ({
       >
         관리자 자동 로그인 (임시)
       </button>
+      {/* 사용자 자동 로그인 버튼 */}
       <button
         style={{
           ...buttonStyle,
@@ -140,11 +146,13 @@ const LoginPanel: React.FC<LoginPanelProps> = ({
       >
         사용자 자동 로그인 (임시)
       </button>
+      {/* 로그인 폼 렌더링 */}
       {authMode === "login" && (
         <div style={{ margin: "2rem auto", maxWidth: 400 }}>
           <AuthForm onSuccess={handleAuthSuccess} />
         </div>
       )}
+      {/* 에러 메시지 표시 */}
       {loginError && (
         <div
           style={{

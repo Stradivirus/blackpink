@@ -1,3 +1,6 @@
+// 개발팀 동적 폼 컴포넌트 (등록/수정 모달용)
+// 회사/운영체제/상태/담당자 등 입력 및 자동처리 지원
+
 import React, { useEffect, useState } from "react";
 import { columnsByTeam, selectOptions, statusOptions, osVersionMap } from "../../../constants/dataconfig";
 
@@ -6,6 +9,7 @@ interface DevFormProps {
   onChange: (data: Record<string, any>) => void;
 }
 
+// 오늘 날짜 반환 함수
 const getToday = () => {
   const d = new Date();
   const month = String(d.getMonth() + 1).padStart(2, "0");
@@ -14,9 +18,13 @@ const getToday = () => {
 };
 
 const DevFormDynamic: React.FC<DevFormProps> = ({ initialData = {}, onChange }) => {
+  // 개발팀 컬럼 정보
   const columns = columnsByTeam["dev"] || [];
+  // 회사 옵션 목록
   const [companyOptions, setCompanyOptions] = useState<{ label: string; value: string }[]>([]);
+  // 회사명 검색어 상태
   const [companySearch, setCompanySearch] = useState("");
+  // 폼 데이터 상태 (초기값: initialData 또는 기본값)
   const [formData, setFormData] = useState<Record<string, any>>(() => {
     const init: Record<string, any> = {};
     columns.forEach(({ key }) => {
@@ -85,6 +93,7 @@ const DevFormDynamic: React.FC<DevFormProps> = ({ initialData = {}, onChange }) 
     onChange(formData);
   }, [formData, onChange]);
 
+  // 폼 필드 값 변경 핸들러
   const handleChange = (key: string, value: any) => {
     setFormData(prev => ({ ...prev, [key]: value }));
   };
@@ -103,15 +112,6 @@ const DevFormDynamic: React.FC<DevFormProps> = ({ initialData = {}, onChange }) 
       return { ...prev, dev_status: value };
     });
   };
-
-  const processedData: any = {};
-  Object.entries(formData).forEach(([k, v]) => {
-    if (["maintenance", "error", "end_date_fin"].includes(k) && v === "") {
-      processedData[k] = null;
-    } else {
-      processedData[k] = v;
-    }
-  });
 
   // "에러" 필드: 수정 모드에서 비어 있으면 "에러 없음"으로 설정
   useEffect(() => {
@@ -163,6 +163,7 @@ const DevFormDynamic: React.FC<DevFormProps> = ({ initialData = {}, onChange }) 
 
   return (
     <div className="admin-modal-form-grid">
+      {/* 회사명 검색 입력 */}
       <div className="admin-modal-form-field">
         <label>회사명 검색</label>
         <input
@@ -173,6 +174,7 @@ const DevFormDynamic: React.FC<DevFormProps> = ({ initialData = {}, onChange }) 
           disabled={!!initialData && Object.keys(initialData).length > 0}
         />
       </div>
+      {/* 회사명/ID 선택 */}
       <div className="admin-modal-form-field">
         <label>회사 선택</label>
         {initialData && Object.keys(initialData).length > 0 ? (
@@ -196,11 +198,10 @@ const DevFormDynamic: React.FC<DevFormProps> = ({ initialData = {}, onChange }) 
                   setFormData(prev => ({
                     ...prev,
                     company_id: selected.value,
-                    company_name: selected.label,  // ✅ 정확히 일치하는 값만
+                    company_name: selected.label,  // 정확히 일치하는 값만
                   }));
                   setCompanySearch(selected.label); // UI상 입력된 값도 세팅
                 } else {
-                  // 선택 안된 경우 초기화
                   setFormData(prev => ({
                     ...prev,
                     company_id: "",
@@ -219,6 +220,7 @@ const DevFormDynamic: React.FC<DevFormProps> = ({ initialData = {}, onChange }) 
         )}
       </div>
 
+      {/* 운영체제 선택 */}
       <div className="admin-modal-form-field">
         <label>운영체제</label>
         <select
@@ -234,6 +236,7 @@ const DevFormDynamic: React.FC<DevFormProps> = ({ initialData = {}, onChange }) 
           ))}
         </select>
       </div>
+      {/* OS 버전 선택 */}
       <div className="admin-modal-form-field">
         <label>OS 버전</label>
         <select
@@ -248,6 +251,7 @@ const DevFormDynamic: React.FC<DevFormProps> = ({ initialData = {}, onChange }) 
         </select>
       </div>
 
+      {/* 시작일 입력 */}
       <div className="admin-modal-form-field">
         <label>시작일</label>
         <input
@@ -257,24 +261,24 @@ const DevFormDynamic: React.FC<DevFormProps> = ({ initialData = {}, onChange }) 
         />
       </div>
 
+      {/* 종료일 입력 */}
       <div className="admin-modal-form-field">
         <label>종료일</label>
         <input
           type="date"
           value={formData["end_date_fin"]}
           onChange={(e) => handleChange("end_date_fin", e.target.value)}
-          // 등록 모드: 항상 활성화, 수정 모드: 항상 활성화
           disabled={false}
           min={formData["start_date"] || undefined}
         />
       </div>
 
+      {/* 상태 선택 */}
       <div className="admin-modal-form-field">
         <label>상태</label>
         <select
           value={formData["dev_status"]}
           onChange={(e) => handleDevStatusChange(e.target.value)}
-          // 등록/수정 모두 활성화
           disabled={false}
         >
           <option value="">선택</option>
@@ -284,12 +288,13 @@ const DevFormDynamic: React.FC<DevFormProps> = ({ initialData = {}, onChange }) 
         </select>
       </div>
 
+      {/* 유지보수 선택 */}
       <div className="admin-modal-form-field">
         <label>유지보수</label>
         <select
           value={formData["maintenance"]}
           onChange={(e) => handleChange("maintenance", e.target.value)}
-          disabled={false} // 항상 선택 가능
+          disabled={false}
         >
           <option value="">선택</option>
           {(selectOptions["maintenance"] || []).map(opt => (
@@ -298,12 +303,12 @@ const DevFormDynamic: React.FC<DevFormProps> = ({ initialData = {}, onChange }) 
         </select>
       </div>
 
+      {/* 에러 선택 */}
       <div className="admin-modal-form-field">
         <label>에러</label>
         <select
           value={formData["error"]}
           onChange={(e) => handleChange("error", e.target.value)}
-          // 등록/수정 모두 활성화
           disabled={false}
         >
           <option value="">선택</option>
@@ -313,6 +318,7 @@ const DevFormDynamic: React.FC<DevFormProps> = ({ initialData = {}, onChange }) 
         </select>
       </div>
 
+      {/* 담당자 수 선택 */}
       <div className="admin-modal-form-field">
         <label>담당자 수</label>
         <select
