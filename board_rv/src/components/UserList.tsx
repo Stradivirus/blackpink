@@ -5,18 +5,18 @@ import styles from "./UserList.styles";
 type Column<T> = {
   label: string;
   render: (row: T) => React.ReactNode;
-  hidden?: boolean; // 칼럼 숨김 여부 추가
+  hidden?: boolean;
 };
 
 interface UserListProps<T> {
   title: string;
   columns: Column<T>[];
   data: T[];
-  setData: React.Dispatch<React.SetStateAction<T[]>>; // 추가
+  setData: React.Dispatch<React.SetStateAction<T[]>>;
   loading: boolean;
   accountType: "member" | "admin";
   onAfterNicknameUpdate?: (id: string, nickname: string) => void;
-  // onAfterDelete는 제거 (내부에서 직접 처리)
+  showCompanySearch?: boolean; // 회사명 검색창 표시 여부 (기본 true)
 }
 
 function UserList<T extends { id: string; nickname: string; userId?: string; company_name?: string }>(
@@ -28,6 +28,7 @@ function UserList<T extends { id: string; nickname: string; userId?: string; com
     loading,
     accountType,
     onAfterNicknameUpdate,
+    showCompanySearch = true,
   }: UserListProps<T>
 ) {
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -72,7 +73,7 @@ function UserList<T extends { id: string; nickname: string; userId?: string; com
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          userId: user?.userId, // userId(로그인ID)로 전송
+          userId: user?.userId,
           new_nickname: nickname,
           accountType,
         }),
@@ -147,7 +148,7 @@ function UserList<T extends { id: string; nickname: string; userId?: string; com
 
   // '탈퇴' 컬럼을 맨 뒤에 추가
   const columnsWithDelete: Column<T>[] = [
-    ...columns, // 기존 컬럼 먼저
+    ...columns,
     {
       label: "탈퇴",
       render: (row: T) => (
@@ -167,44 +168,46 @@ function UserList<T extends { id: string; nickname: string; userId?: string; com
 
   return (
     <div style={styles.card}>
-      {/* 타이틀 + 검색창 */}
+      {/* 타이틀 + (회사명 검색창) */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 28 }}>
         <div style={styles.title}>{title}</div>
-        <div style={{ display: "flex", gap: 6 }}>
-          <input
-            type="text"
-            placeholder="회사명 검색"
-            value={companySearch}
-            onChange={e => setCompanySearch(e.target.value)}
-            style={{
-              border: "1.5px solid #d0d7de",
-              borderRadius: 8,
-              padding: "7px 12px",
-              fontSize: 15,
-              background: "#f8fafc",
-              outline: "none",
-            }}
-            onKeyDown={e => { if (e.key === "Enter") handleCompanySearch(); }}
-          />
-          <button
-            type="button"
-            onClick={handleCompanySearch}
-            style={{
-              background: "#2563eb",
-              color: "#fff",
-              border: "none",
-              borderRadius: 8,
-              padding: "7px 16px",
-              fontWeight: 600,
-              fontSize: 15,
-              cursor: "pointer",
-            }}
-          >
-            검색
-          </button>
-        </div>
+        {showCompanySearch && (
+          <div style={{ display: "flex", gap: 6 }}>
+            <input
+              type="text"
+              placeholder="회사명 검색"
+              value={companySearch}
+              onChange={e => setCompanySearch(e.target.value)}
+              style={{
+                border: "1.5px solid #d0d7de",
+                borderRadius: 8,
+                padding: "7px 12px",
+                fontSize: 15,
+                background: "#f8fafc",
+                outline: "none",
+              }}
+              onKeyDown={e => { if (e.key === "Enter") handleCompanySearch(); }}
+            />
+            <button
+              type="button"
+              onClick={handleCompanySearch}
+              style={{
+                background: "#2563eb",
+                color: "#fff",
+                border: "none",
+                borderRadius: 8,
+                padding: "7px 16px",
+                fontWeight: 600,
+                fontSize: 15,
+                cursor: "pointer",
+              }}
+            >
+              검색
+            </button>
+          </div>
+        )}
       </div>
-      {/* 이하 기존 테이블 렌더링 */}
+      {/* 테이블 렌더링 */}
       {loading ? (
         <div style={styles.loading}>로딩 중...</div>
       ) : (filteredData ?? data).length === 0 ? (

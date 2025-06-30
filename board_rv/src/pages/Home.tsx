@@ -5,7 +5,6 @@ import { API_URLS } from "../api/urls";
 import NcsiDashboard from "../components/home/NcsiDashboard";
 import LoginPanel from "../components/home/LoginPanel";
 
-// 스타일 객체 정의
 const titleStyle: React.CSSProperties = {
   color: "#00ffe7",
   fontSize: "3rem",
@@ -42,7 +41,7 @@ const Home: React.FC = () => {
   const [hoveredBtn, setHoveredBtn] = useState<string | null>(null);
   const [loginError, setLoginError] = useState<string>("");
 
-  // 관리자 자동 로그인 처리
+  // 관리자 자동 로그인
   const handleAdminAutoLogin = async () => {
     setLoginError("");
     try {
@@ -70,6 +69,7 @@ const Home: React.FC = () => {
     }
   };
 
+  // 로그인/회원가입 성공 시 이동
   const handleAuthSuccess = (user: any) => {
     setAuthMode(null);
     if (user.type === "admin") {

@@ -21,7 +21,7 @@ export const threatTypes = [
 // 각 팀별 컬럼 정의
 export const columnsByTeam: Record<string, { key: string; label: string }[]> = {
   biz: [
-    { key: "company_id", label: "회사코드" }, // 기존 label : "company_id" > "회사코드"
+    { key: "company_id", label: "회사코드" },
     { key: "company_name", label: "회사명" },
     { key: "industry", label: "업종" },
     { key: "plan", label: "플랜" },
@@ -92,7 +92,6 @@ export const teamLabelMap: Record<string, string> = {
   "개발팀": "개발팀",
   "사업팀": "사업팀",
   "관리팀": "관리팀",
-  // 필요시 추가
 };
 
 export const serverTypes = [

@@ -1,33 +1,45 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import type { Admin } from "../../types/users";
 import { API_URLS } from "../../api/urls";
 import UserList from "../../components/UserList";
+import { teamLabelMap } from "../../constants/dataconfig";
 
-const teamLabels = ["관리팀", "보안팀", "사업팀", "개발팀"];
+// 팀 필터용 라벨
+const teamLabels = Object.values(teamLabelMap);
 
+// 관리자 테이블 컬럼 정의
 const columns = [
   { label: "ID", render: (m: Admin) => m.id, hidden: true },
   { label: "관리자 ID", render: (m: Admin) => m.userId },
   { label: "이름", render: (m: Admin) => m.nickname },
   { label: "팀", render: (m: Admin) => m.team },
-  { label: "전화번호", render: (m: Admin) => m.phone || "-" }, // 전화번호 컬럼 추가
+  { label: "전화번호", render: (m: Admin) => m.phone || "-" },
 ];
 
-const AdminsList: React.FC = () => {
-  const [admins, setAdmins] = useState<Admin[]>([]);
-  const [selectedTeam, setSelectedTeam] = useState<string>("전체");
-  const [loading, setLoading] = useState(true);
+// 공통 데이터 fetch 훅 (리스트 데이터/로딩 관리)
+function useUserListData<T>(url: string) {
+  const [data, setData] = React.useState<T[]>([]);
+  const [loading, setLoading] = React.useState(true);
 
-  useEffect(() => {
-    fetch(API_URLS.ADMIN_LIST)
+  React.useEffect(() => {
+    fetch(url)
       .then((res) => res.json())
       .then((data) => {
-        setAdmins(data);
+        setData(data);
         setLoading(false);
       })
       .catch(() => setLoading(false));
-  }, []);
+  }, [url]);
 
+  return { data, setData, loading };
+}
+
+const AdminsList: React.FC = () => {
+  // 관리자 데이터 및 로딩 상태 관리
+  const { data: admins, setData: setAdmins, loading } = useUserListData<Admin>(API_URLS.ADMIN_LIST);
+  const [selectedTeam, setSelectedTeam] = useState<string>("전체");
+
+  // 팀 필터링
   const filteredAdmins =
     selectedTeam === "전체"
       ? admins
@@ -48,6 +60,7 @@ const AdminsList: React.FC = () => {
         >
           관리자 목록
         </div>
+        {/* 팀 필터 버튼 */}
         <div
           style={{
             marginBottom: 20,
@@ -106,6 +119,7 @@ const AdminsList: React.FC = () => {
           loading={loading}
           accountType="admin"
           setData={setAdmins}
+          // 닉네임 변경 후 상태 업데이트
           onAfterNicknameUpdate={(id, nickname) =>
             setAdmins((admins) =>
               admins.map((a) => (a.id === id ? { ...a, nickname } : a))

@@ -1,5 +1,4 @@
 const API_BASE = "/api";
-// const API_BASE = "http://localhost:8000/api";
 export const API_URLS = {
     // 게시판
     POSTS: `${API_BASE}/posts`,
@@ -36,6 +35,7 @@ export const API_URLS = {
     NCSI_TOP20: `${API_BASE}/ncsi/top20`,
 };
 
+// 선택된 팀에 따라 CRUD 엔드포인트 URL을 반환합니다.
 export const getCrudEndpoint = (selectedTeam: string): string => {
     switch (selectedTeam) {
         case "dev":

@@ -5,51 +5,54 @@ import ChangePasswordForm from "../../components/ChangePasswordForm";
 import Modal from "../../components/Modal";
 import { teamList, teamLabelMap } from "../../constants/dataconfig";
 
+// 어드민 메뉴 항목 정의
 const menuItems = [
   { label: "대시보드", path: "/admin", isParent: true, children: [] },
   { label: "데이터", path: "/admin/data", isParent: true, children: [] },
   { label: "신규 계정 발급", path: "/admin/invite", isParent: false },
-  { label: "관리자 목록", path: "/admin/admins", isParent: false }, // 추가
+  { label: "관리자 목록", path: "/admin/admins", isParent: false },
   { label: "가입된 사람 목록", path: "/admin/members", isParent: false },
   { label: "고객 게시판", path: "/postpage", isParent: false },
 ];
 
 const AdminLayout: React.FC = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const [dashboardOpen, setDashboardOpen] = React.useState(false);
-  const [dataOpen, setDataOpen] = React.useState(false);
-  const { user, logout } = useAuth();
-  const [pwModalOpen, setPwModalOpen] = React.useState(false);
+  const location = useLocation(); // 현재 라우트 정보
+  const navigate = useNavigate(); // 라우터 이동 함수
+  const [dashboardOpen, setDashboardOpen] = React.useState(false); // 대시보드 아코디언 상태
+  const [dataOpen, setDataOpen] = React.useState(false);           // 데이터 아코디언 상태
+  const { user, logout } = useAuth();                              // 유저 정보, 로그아웃
+  const [pwModalOpen, setPwModalOpen] = React.useState(false);     // 비밀번호 변경 모달
 
   // 팀명과 닉네임 표시용
   const teamName = user?.team ? teamLabelMap[user.team] || user.team : "";
   const nickname = user?.nickname || "";
 
+  // 라우트 변경 시 아코디언 자동 열기
   React.useEffect(() => {
-    // 대시보드 탭이 활성화되면 자동으로 아코디언 펼침
     if (location.pathname === "/admin") {
       setDashboardOpen(true);
     }
-
-    // 데이터 탭이 활성화되면 자동으로 아코디언 펼침
     if (location.pathname.startsWith("/admin/data")) {
       setDataOpen(true);
     }
   }, [location.pathname]);
 
+  // 대시보드 아코디언 토글
   const handleDashboardClick = () => {
     setDashboardOpen((prev) => !prev);
   };
 
+  // 데이터 아코디언 토글
   const handleDataClick = () => {
     setDataOpen((prev) => !prev);
   };
 
+  // 팀 탭 클릭 시 이동
   const handleTeamClick = (menuPath: string, teamKey: string) => {
     navigate(`${menuPath}?team=${teamKey}`);
   };
 
+  // 현재 팀 탭 활성화 여부
   const isTeamActive = (teamKey: string, menuBasePath: string) =>
     location.pathname === menuBasePath &&
     new URLSearchParams(location.search).get("team") === teamKey;
@@ -73,9 +76,9 @@ const AdminLayout: React.FC = () => {
           minWidth: 120,
         }}
       >
-        {/* 팀명 | 닉네임 + 버튼 */}
+        {/* 상단: 팀명/닉네임/버튼 */}
         {user && (
-          <div style={{ fontSize: 20,marginBottom: 28, fontWeight: "bold", color: "#1976d2" }}>
+          <div style={{ fontSize: 20, marginBottom: 28, fontWeight: "bold", color: "#1976d2" }}>
             <span>
               {teamName && `${teamName} | `}{nickname} 님
             </span>
@@ -102,7 +105,7 @@ const AdminLayout: React.FC = () => {
           </div>
         )}
         <ul style={{ listStyle: "none", padding: 0 }}>
-          {/* 대시보드 메뉴 */}
+          {/* 대시보드 메뉴 (아코디언) */}
           <li style={{ marginBottom: 20 }}>
             <div
               style={{
@@ -122,12 +125,12 @@ const AdminLayout: React.FC = () => {
                 alignItems: "center",
                 justifyContent: "space-between",
               }}
-              onClick={handleDashboardClick} // 아코디언 토글만 담당
+              onClick={handleDashboardClick}
             >
               <span
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleTeamClick("/admin", "dashboard"); // 대시보드 이동만 담당
+                  handleTeamClick("/admin", "dashboard");
                 }}
                 style={{ flex: 1, cursor: "pointer" }}
               >
@@ -160,7 +163,7 @@ const AdminLayout: React.FC = () => {
             )}
           </li>
 
-          {/* 데이터 메뉴 (아코디언 형식) */}
+          {/* 데이터 메뉴 (아코디언) */}
           <li style={{ marginBottom: 20 }}>
             <div
               style={{
@@ -197,7 +200,7 @@ const AdminLayout: React.FC = () => {
             )}
           </li>
 
-          {/* 나머지 메뉴 아이템 (신규 계정 발급, 고객 게시판) */}
+          {/* 기타 메뉴 (신규 계정 발급, 관리자/멤버/게시판) */}
           {menuItems
             .filter((item) => !item.isParent)
             .map((item) => (
@@ -216,7 +219,7 @@ const AdminLayout: React.FC = () => {
             ))}
         </ul>
       </nav>
-      {/* 우측 컨텐츠 */}
+      {/* 우측 컨텐츠 영역 */}
       <section style={{ flex: 8, padding: "2rem" }}>
         <Outlet />
       </section>

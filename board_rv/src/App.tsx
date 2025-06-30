@@ -2,40 +2,35 @@ import React, { Suspense, lazy, useEffect, useRef } from "react";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
 import BoardHeader from "./components/CustomerBoard/BoardHeader";
-// 홈 페이지
+// 홈 페이지 컴포넌트
 import Home from "./pages/Home";
-// 게시판 페이지
+// 게시판 상세/작성/수정/목록 컴포넌트
 import PostPage from "./pages/CustomerBoard/PostPage";
 import PostNewPage from "./pages/CustomerBoard/PostNewPage";
 import PostForm from "./components/CustomerBoard/PostForm";
 import PostList from "./components/CustomerBoard/PostList"; 
-// 어드민 페이지
+// 어드민 관련 컴포넌트
 import { AuthProvider } from "./context/AuthContext";
 import AdminLayout from "./pages/Admin/AdminLayout";
 import AdminDataPage from "./pages/Admin/AdminDataPage";
 import MembersList from "./pages/Admin/MembersList";
 import AdminsList from "./pages/Admin/AdminsList";
 import MemberInvitePage from "./pages/Admin/MemberInvitePage";
-import BusinessGraphs from "./components/Admin/AdminDashBoard/BusinessGraphs";
-import SysDevGraphs from "./components/Admin/AdminDashBoard/SysDevGraphs";
 
-// AdminDashboard 컴포넌트는 지연로딩(lazy loading)으로 불러옵니다.
-// 지연로딩이란, 애플리케이션에서 필요한 리소스(컴포넌트, 이미지, 데이터 등)를
-// 처음부터 모두 불러오지 않고, 실제로 필요할 때(사용자가 해당 기능이나 페이지에 접근할 때)
-// 동적으로 불러오는 기법입니다.
-// React에서는 React.lazy와 Suspense를 사용해 컴포넌트 단위로 지연로딩을 구현할 수 있습니다.
+// AdminDashboard는 필요할 때만 불러오는 지연 로딩(lazy loading) 방식입니다.
+// (앱 초기 로딩 속도 향상, 코드 분할)
 const AdminDashboard = lazy(() => import("./pages/Admin/AdminDashboard"));
 
-const INACTIVITY_LIMIT = 5 * 60 * 1000;
+const INACTIVITY_LIMIT = 5 * 60 * 1000; // 5분 비활동 시 자동 로그아웃
 
 const AppContent: React.FC = () => {
-  const location = useLocation();
-  const isHome = location.pathname === "/";
-  const isAdmin = location.pathname.startsWith("/admin");
-  const { isLoggedIn, logout } = useAuth();
-  const timerRef = useRef<number | null>(null);
+  const location = useLocation(); // 현재 라우트 정보
+  const isHome = location.pathname === "/"; // 홈 여부
+  const isAdmin = location.pathname.startsWith("/admin"); // 어드민 여부
+  const { isLoggedIn, logout } = useAuth(); // 인증 상태 및 로그아웃 함수
+  const timerRef = useRef<number | null>(null); // 비활동 타이머 ref
 
-  // 사용자 활동 감지 및 타이머 리셋
+  // 비활동 감지 및 자동 로그아웃
   useEffect(() => {
     if (!isLoggedIn) return;
 
@@ -47,11 +42,12 @@ const AppContent: React.FC = () => {
       }, INACTIVITY_LIMIT);
     };
 
-    // 활동 이벤트 종류
+    // 사용자 활동 이벤트 등록
     const events = ["mousemove", "mousedown", "keydown", "touchstart", "scroll"];
     events.forEach(event => window.addEventListener(event, resetTimer));
     resetTimer();
 
+    // 언마운트 시 이벤트 해제 및 타이머 정리
     return () => {
       events.forEach(event => window.removeEventListener(event, resetTimer));
       if (timerRef.current) clearTimeout(timerRef.current);
@@ -60,6 +56,7 @@ const AppContent: React.FC = () => {
 
   return (
     <>
+      {/* 홈/어드민이 아닐 때만 게시판 헤더 표시 */}
       {!isHome && !isAdmin && <BoardHeader />}
       <main>
         <Routes>
@@ -82,8 +79,6 @@ const AppContent: React.FC = () => {
             <Route path="data" element={<AdminDataPage />} />
             <Route path="admins" element={<AdminsList />} />
             <Route path="members" element={<MembersList />} />
-            <Route path="business-graphs" element={<BusinessGraphs />} />
-            <Route path="sys-dev-graphs" element={<SysDevGraphs />} />
           </Route>
         </Routes>
       </main>
@@ -91,6 +86,7 @@ const AppContent: React.FC = () => {
   );
 };
 
+// 인증 컨텍스트와 라우터로 앱 전체 감싸기
 const App: React.FC = () => (
   <AuthProvider>
     <BrowserRouter>

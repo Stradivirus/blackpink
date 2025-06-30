@@ -1,6 +1,7 @@
 // src/utils/dataHelpers.ts
-// 유틸 함수
-// 드롭다운 창에 보여줄 필터 옵션 (고유값)
+// 데이터 필터/드롭다운용 간단 유틸 함수
+
+// 특정 컬럼의 고유값(중복X) 배열 반환
 export const getUniqueValues = (data: any[], columnKey: string): string[] => {
   const values = new Set<string>();
   data.forEach((row) => {
@@ -8,7 +9,6 @@ export const getUniqueValues = (data: any[], columnKey: string): string[] => {
       values.add(row[columnKey].toString());
     }
   });
-
   const numberColumns = ["handler_count", "처리인원수"];
   if (numberColumns.includes(columnKey)) {
     return Array.from(values).sort((a, b) => Number(a) - Number(b));
@@ -16,27 +16,24 @@ export const getUniqueValues = (data: any[], columnKey: string): string[] => {
   return Array.from(values).sort();
 };
 
-// ✅ 월별 필터용 함수 추가
+// 월별(YYYY-MM) 고유값 배열 반환
 export const getUniqueMonths = (data: any[], columnKey: string): string[] => {
   const values = new Set<string>();
   data.forEach((row) => {
     const val = row[columnKey];
-    if (!val) return; // ✅ null, undefined, 빈값은 제외
-
+    if (!val) return;
     const date = new Date(val);
     if (!isNaN(date.getTime())) {
       const ym = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
       values.add(ym);
     }
   });
-
   return Array.from(values).sort();
 };
 
-// 연 월 필터용 함수
+// 연도별 고유값 배열 반환
 export const getAvailableYears = (data: any[], colKey: string): string[] => {
   const years = new Set<string>();
-
   data.forEach((row) => {
     const raw = row[colKey];
     if (!raw) return;
@@ -45,6 +42,5 @@ export const getAvailableYears = (data: any[], colKey: string): string[] => {
       years.add(d.getFullYear().toString());
     }
   });
-
-  return Array.from(years).sort(); // 오름차순 정렬
+  return Array.from(years).sort();
 };
