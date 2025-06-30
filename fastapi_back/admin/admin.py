@@ -20,7 +20,7 @@ def generate_temp_password(length=10):
 
 # 이메일 발송 함수
 # - SMTP를 이용해 임시 비밀번호 안내 메일 발송
-# - 실제 서비스에서는 보안상 앱 비밀번호 등 환경변수로 관리 필요
+# - 개발 종료 후 보안상 앱 비밀번호 등 환경변수로 관리 필요
 # - 네이버 SMTP 예시
 def send_email(to_email: str, user_id: str, temp_password: str):
     smtp_server = "smtp.naver.com"
