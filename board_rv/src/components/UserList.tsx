@@ -32,7 +32,6 @@ function UserList<T extends { id: string; nickname: string; userId?: string; com
 ) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [nicknameValue, setNicknameValue] = useState<string>("");
-  // 회사명 검색 상태 추가
   const [companySearch, setCompanySearch] = useState("");
   const [filteredData, setFilteredData] = useState<T[] | null>(null);
 
