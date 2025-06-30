@@ -96,7 +96,7 @@ const LoginPanel: React.FC<LoginPanelProps> = ({
         }}
         onClick={handleAdminAutoLogin}
       >
-        관리자 자동 로그인
+        관리자 자동 로그인 (임시)
       </button>
       <button
         style={{
@@ -138,7 +138,7 @@ const LoginPanel: React.FC<LoginPanelProps> = ({
           }
         }}
       >
-        사용자 자동 로그인
+        사용자 자동 로그인 (임시)
       </button>
       {authMode === "login" && (
         <div style={{ margin: "2rem auto", maxWidth: 400 }}>

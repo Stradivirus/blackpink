@@ -196,9 +196,7 @@ def member_delete(req: UserIdRequest):
 
 @router.get("/api/company/search")
 async def search_company(keyword: str = Query(...)):
-    """
-    회사명 또는 회사코드로 부분 검색 (프론트 검색창 대응)
-    """
+    # 회사명 또는 회사코드로 부분 검색 (프론트 검색창 대응)
     query = {
         "$or": [
             {"company_name": {"$regex": keyword, "$options": "i"}},
