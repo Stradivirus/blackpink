@@ -42,7 +42,8 @@ def create_member(
     accountType: str = "member",
     team: str = None,
     company_id: str = None,
-    company_name: str = None
+    company_name: str = None,
+    phone: str = None,
 ):
     # 아이디 중복 체크
     if admin_collection.find_one({"userId": userId}) or member_collection.find_one({"userId": userId}):
@@ -58,15 +59,30 @@ def create_member(
         "company_id": company_id,
         "company_name": company_name,
     }
+    
+    def format_phone_number(phone: str) -> str:
+        if len(phone) == 10:
+            # 3-3-4 형태 (예: 02-123-4567 또는 010-123-4567 → 일반전화)
+            return f"{phone[:3]}-{phone[3:6]}-{phone[6:]}"
+        elif len(phone) == 11:
+            # 3-4-4 형태 (예: 010-1234-5678 → 휴대폰)
+            return f"{phone[:3]}-{phone[3:7]}-{phone[7:]}"
+        else:
+            return phone  # 그대로 저장
+    
     if accountType == "admin":
         collection = admin_collection
         if team:
             member["team"] = team
+        if phone:
+            member["phone"] = format_phone_number(phone)
     else:
         collection = member_collection
     collection.insert_one(member)
     send_email(email, userId, temp_password)
     return member
+
+
 
 # 관리자 회원가입 엔드포인트 (중복 체크 및 해시 저장)
 @router.post("/admin/join", response_model=AdminResponse)
@@ -116,10 +132,11 @@ def admin_member_invite(
     accountType: str = Body("member"),
     team: str = Body(None),
     company_id: str = Body(None),
-    company_name: str = Body(None)
+    company_name: str = Body(None),
+    phone: str = Body(None)
 ):
     try:
-        member = create_member(userId, nickname, email, accountType, team, company_id, company_name)
+        member = create_member(userId, nickname, email, accountType, team, company_id, company_name, phone)
         return {"message": "임시 비밀번호가 이메일로 발송되었습니다.", "userId": userId}
     except ValueError as e:
         raise HTTPException(400, str(e))
