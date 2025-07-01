@@ -119,8 +119,6 @@ const AdminsList: React.FC = () => {
           loading={loading}
           accountType="admin"
           setData={setAdmins}
-          showCompanySearch={false} // 회사명 검색창 숨김
-          // 닉네임 변경 후 상태 업데이트
           onAfterNicknameUpdate={(id, nickname) =>
             setAdmins((admins) =>
               admins.map((a) => (a.id === id ? { ...a, nickname } : a))
