@@ -20,7 +20,7 @@ const SecurityFormDynamic: React.FC<SecurityFormProps> = ({ initialData = {}, on
   // 보안팀 컬럼 정보
   const columns = columnsByTeam["security"] || [];
   // 회사 옵션(현재 미사용)
-  const [companyOptions] = useState<{ label: string; value: string }[]>([]);
+  const [companyOptions, setCompanyOptions] = useState<{ label: string; value: string }[]>([]);
   // 회사명 검색어 상태
   const [companySearch, setCompanySearch] = useState("");
 
@@ -67,6 +67,22 @@ const SecurityFormDynamic: React.FC<SecurityFormProps> = ({ initialData = {}, on
       setFormData(init);
     }
   }, [initialData]);
+
+  // 회사명 목록 fetch
+  useEffect(() => {
+    fetch("/api/biz")
+      .then((res) => res.json())
+      .then((data) => {
+        setCompanyOptions(
+          (data.biz || [])
+            .filter((c: any) => typeof c.company_name === "string" && typeof c.company_id === "string")
+            .map((c: any) => ({
+              label: c.company_name,  
+              value: c.company_id,
+            }))
+        );
+      });
+  }, []);
 
   // formData 변경 시 상위로 전달
   useEffect(() => {
