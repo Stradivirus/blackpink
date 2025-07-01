@@ -225,6 +225,6 @@ def create_business_plot(graph_type):
 
 # 그래프 이미지 반환 엔드포인트
 @router.get("/business/graph/{graph_type}")
-def plot_business_graph(graph_type: str):
+async def plot_business_graph(graph_type: str):
     img_data = create_business_plot(graph_type)
     return image_response(img_data)
