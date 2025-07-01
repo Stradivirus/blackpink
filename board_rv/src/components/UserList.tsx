@@ -178,7 +178,7 @@ function UserList<T extends { id: string; nickname: string; userId?: string; com
       {/* 타이틀 + (회사명 검색창) */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 28 }}>
         <div style={styles.title}>{title}</div>
-        {showCompanySearch && (
+        {showCompanySearch && accountType !== "admin" && (
           <div style={{ display: "flex", gap: 6 }}>
             <input
               type="text"
