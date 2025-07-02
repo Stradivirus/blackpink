@@ -5,14 +5,12 @@ import ChangePasswordForm from "../../components/ChangePasswordForm";
 import Modal from "../../components/Modal";
 import { teamList, teamLabelMap } from "../../constants/dataconfig";
 
-// 어드민 메뉴 항목 정의
-const menuItems = [
-  { label: "대시보드", path: "/admin", isParent: true, children: [] },
-  { label: "데이터", path: "/admin/data", isParent: true, children: [] },
-  { label: "신규 계정 발급", path: "/admin/invite", isParent: false },
-  { label: "관리자 목록", path: "/admin/admins", isParent: false },
-  { label: "가입된 사람 목록", path: "/admin/members", isParent: false },
-  { label: "고객 게시판", path: "/postpage", isParent: false },
+// 기타 메뉴 항목 정의 (아코디언이 아닌 단순 링크들)
+const otherMenuItems = [
+  { label: "신규 계정 발급", path: "/admin/invite" },
+  { label: "관리자 목록", path: "/admin/admins" },
+  { label: "가입된 사람 목록", path: "/admin/members" },
+  { label: "고객 게시판", path: "/postpage" },
 ];
 
 const AdminLayout: React.FC = () => {
@@ -201,22 +199,20 @@ const AdminLayout: React.FC = () => {
           </li>
 
           {/* 기타 메뉴 (신규 계정 발급, 관리자/멤버/게시판) */}
-          {menuItems
-            .filter((item) => !item.isParent)
-            .map((item) => (
-              <li key={item.path} style={{ marginBottom: 20 }}>
-                <Link
-                  to={item.path}
-                  style={{
-                    color: location.pathname === item.path ? "#1976d2" : "#333",
-                    fontWeight: location.pathname === item.path ? "bold" : "normal",
-                    textDecoration: "none",
-                  }}
-                >
-                  {item.label}
-                </Link>
-              </li>
-            ))}
+          {otherMenuItems.map((item) => (
+            <li key={item.path} style={{ marginBottom: 20 }}>
+              <Link
+                to={item.path}
+                style={{
+                  color: location.pathname === item.path ? "#1976d2" : "#333",
+                  fontWeight: location.pathname === item.path ? "bold" : "normal",
+                  textDecoration: "none",
+                }}
+              >
+                {item.label}
+              </Link>
+            </li>
+          ))}
         </ul>
       </nav>
       {/* 우측 컨텐츠 영역 */}
