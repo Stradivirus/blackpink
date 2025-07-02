@@ -3,7 +3,6 @@ from fastapi.responses import JSONResponse
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
-from matplotlib import font_manager as fm
 import networkx as nx
 from db import incident_collection
 from .graph_utils import set_plot_style, image_response, save_fig_to_png
