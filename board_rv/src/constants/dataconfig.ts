@@ -46,7 +46,7 @@ export const columnsByTeam: Record<string, { key: string; label: string }[]> = {
     { key: "company_id", label: "회사 코드" },
     { key: "company_name", label: "회사명" },
     { key: "os", label: "운영체제" },
-    { key: "os_versions", label: "OS 버전" },
+    { key: "os_version", label: "OS 버전" },
     { key: "start_date", label: "시작일" },
     { key: "end_date_fin", label: "최종 종료일" },
     { key: "dev_status", label: "상태" },

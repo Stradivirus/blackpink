@@ -122,7 +122,7 @@ class Project(BaseModel):
     company_id: str  # 회사 고유 ID
     company_name: str  # 회사 이름
     os: str  # 운영체제
-    os_versions: str  # 운영체제 버전
+    os_version: str  # 운영체제 버전
     start_date: date  # 프로젝트 시작일
     end_date: date  # 프로젝트 종료 예정일
     end_date_fin: Optional[date] = None  # 실제 종료일(선택)

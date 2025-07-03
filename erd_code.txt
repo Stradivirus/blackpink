@@ -1,0 +1,126 @@
+Table MEMBER {
+  id varchar(50) [primary key]
+  userId varchar(100) [not null, unique]
+  nickname varchar(100) [not null]
+  password varchar(255) [not null]
+  email varchar(200) [not null]
+  joinedAt datetime [not null]
+  company_id varchar(50)
+}
+
+Table ADMIN {
+  id varchar(50) [primary key]
+  userId varchar(100) [not null, unique]
+  nickname varchar(100) [not null]
+  password varchar(255) [not null]
+  team varchar(100) [note: "팀구분: business/dev/security"]
+  phone varchar(20)
+}
+
+Table COMPANY {
+  company_id varchar(50) [primary key, note: "회사코드"]
+  company_name varchar(200) [not null, note: "회사명"]
+  industry varchar(100) [note: "업종"]
+  address varchar(500) [note: "주소"]
+  phone varchar(20) [note: "대표전화"]
+  email varchar(200) [note: "대표이메일"]
+  created_date date [note: "등록일"]  
+}
+
+Table CONTRACT {
+  contract_id varchar(50) [primary key, note: "계약코드"]
+  company_id varchar(50) [not null, note: "회사코드"]
+  plan varchar(50) [note: "플랜"]
+  contract_start date [note: "계약 시작일"]
+  contract_end date [note: "계약 종료일"]
+  status varchar(50) [note: "계약상태"]
+  manager_name varchar(100) [note: "담당자명"]
+  manager_contact varchar(100) [note: "담당자 연락처"]
+  admin_id varchar(50) [note: "담당 관리자 ID"]
+  created_date date [note: "계약체결일"]
+}
+
+Table DEV_PROJECT {
+  Dev_id varchar(50) [primary key]
+  company_id varchar(50) [note: "회사코드"]
+  contract_id varchar(50) [note: "계약코드"]
+  os varchar(100) [note: "운영체제"]
+  os_versions varchar(100) [note: "OS 버전"]
+  start_date date [note: "시작일"]
+  end_date date [note: "최종 종료일"]
+  dev_days int [note: "개발기간(일)"]
+  status varchar(50) [note: "상태"]
+  maintenance varchar(50) [note: "유지보수"]
+  error varchar(200) [note: "에러"]
+  manager_name varchar(100) [note: "담당자명"]
+  handler_count int [note: "담당자 수"]
+  admin_id varchar(50) [note: "담당 관리자 ID"]
+}
+
+Table INCIDENT {
+  Incident_id varchar(50) [primary key]
+  company_id varchar(50) [note: "회사코드"]
+  contract_id varchar(50) [note: "계약코드"]
+  threat_type varchar(100) [note: "위협 유형"]
+  risk_level varchar(50) [note: "위험 등급"]
+  server_type varchar(100) [note: "서버 종류"]
+  incident_date date [note: "사건 일자"]
+  handled_date date [note: "처리 일자"]
+  status varchar(50) [note: "상태"]
+  action varchar(200) [note: "조치"]
+  manager_name varchar(100) [note: "담당자명"]
+  handler_count int [note: "처리 인원 수"]
+  admin_id varchar(50) [note: "담당 관리자 ID"]
+}
+
+Table BOARD {
+  id varchar(50) [primary key]
+  title varchar(500) [not null]
+  content text [not null]
+  writerId varchar(50) [note: "작성자 ID"]
+  writerNickname varchar(100) [not null]
+  createdDate varchar(20) [not null]
+  createdTime varchar(20) [not null]
+  viewCount int [default: 0]
+  isNotice boolean [default: false]
+  isAnswered boolean [default: false]
+  deleted boolean [default: false]
+  deletedDate varchar(20)
+  deletedTime varchar(20)
+}
+
+Table COMMENT {
+  id varchar(50) [primary key]
+  postId varchar(50) [not null]
+  writerId varchar(50) [note: "작성자 ID"]
+  writerNickname varchar(100) [not null]
+  content text [not null]
+  createdDate varchar(20) [not null]
+  createdTime varchar(20) [not null]
+  team varchar(100)
+  deleted boolean [default: false]
+  deletedDate varchar(20)
+  deletedTime varchar(20)
+}
+
+// 기본 회사 관계
+Ref: COMPANY.company_id < CONTRACT.company_id
+Ref: COMPANY.company_id < MEMBER.company_id
+Ref: COMPANY.company_id < DEV_PROJECT.company_id
+Ref: COMPANY.company_id < INCIDENT.company_id
+
+// 계약 관계
+Ref: CONTRACT.contract_id < DEV_PROJECT.contract_id
+Ref: CONTRACT.contract_id < INCIDENT.contract_id
+
+// 관리자 담당 관계
+Ref: CONTRACT.admin_id > ADMIN.id
+Ref: DEV_PROJECT.admin_id > ADMIN.id
+Ref: INCIDENT.admin_id > ADMIN.id
+
+// 게시판 관계
+Ref: BOARD.writerId > MEMBER.id
+Ref: BOARD.writerId > ADMIN.id
+Ref: COMMENT.postId > BOARD.id
+Ref: COMMENT.writerId > MEMBER.id
+Ref: COMMENT.writerId > ADMIN.id

@@ -7,6 +7,7 @@ uri = "mongodb+srv://stradivirus:1q2w3e4r@cluster0.e7rvfpz.mongodb.net/?retryWri
 client = MongoClient(uri)
 db = client["blackpink"]
 company_collection = db["companies"]
+admin_collection = db["admins"]  # admin 컬렉션 추가
 
 faker = Faker("ko_KR")
 
@@ -19,30 +20,49 @@ industry_prefix = {
 }
 plans = ["베이직", "프로", "엔터프라이즈"]
 
-# 담당자 10명 생성
-manager_list = []
-for _ in range(10):
-    name = faker.name()
-    phone = faker.phone_number()
-    manager_list.append({"name": name, "phone": phone})
+# admin 컬렉션에서 team이 "사업팀"인 담당자들 가져오기
+biz_team_managers = list(admin_collection.find({"team": "사업팀"}))
+print(f"사업팀 담당자 {len(biz_team_managers)}명 발견")
+
+if not biz_team_managers:
+    print("사업팀 담당자가 없습니다. 기존 방식으로 더미 데이터 생성합니다.")
+    # 담당자 10명 생성 (기존 방식)
+    manager_list = []
+    for _ in range(10):
+        name = faker.name()
+        phone = faker.phone_number()
+        manager_list.append({"name": name, "phone": phone})
+else:
+    # 사업팀 담당자들을 manager_list 형태로 변환
+    manager_list = []
+    for manager in biz_team_managers:
+        manager_list.append({
+            "name": manager["nickname"],
+            "phone": manager.get("phone", faker.phone_number())  # phone이 없으면 더미 생성
+        })
+    print(f"사업팀 담당자 {len(manager_list)}명을 담당자로 배정합니다.")
 
 # 업종별 일련번호 카운터
 industry_counter = {k: 1 for k in industries}
 
-# 회사 250개 생성
+# 회사 200개 생성
 companies = []
-for idx in range(1, 251):
+for idx in range(1, 201):
     industry = random.choice(industries)
     prefix = industry_prefix[industry]
     company_id = f"{prefix}{industry_counter[industry]:05d}"
     industry_counter[industry] += 1
+    
+    # 담당자를 순환하면서 배정
+    manager = manager_list[idx % len(manager_list)]
+    
     company = {
         "company_id": company_id,
         "company_name": faker.company(),
         "industry": industry,
         "plan": random.choice(plans),
-        "manager_name": manager_list[idx % 10]["name"],
-        "manager_phone": manager_list[idx % 10]["phone"]
+        "manager_name": manager["name"],
+        "manager_phone": manager["phone"]
     }
     companies.append(company)
 
@@ -55,8 +75,8 @@ def random_date(start, end):
     random_days = random.randint(0, delta.days)
     return start + timedelta(days=random_days)
 
-# 예시: 2023년 1월 1일 ~ 2025년 7월 1일 사이 랜덤 계약 시작일
-today = datetime(2025, 7, 1)
+# 예시: 2023년 1월 1일 ~ 2026년 1월 1일 사이 랜덤 계약 시작일
+today = datetime(2026, 1, 1)
 start_date = datetime(2023, 1, 1)
 end_date = today
 
@@ -101,4 +121,5 @@ for company in companies:
 
 company_collection.delete_many({})
 company_collection.insert_many(companies)
-print("회사 250개 저장 완료")
+print("회사 200개 저장 완료")
+print(f"사용된 담당자: {len(set([c['manager_name'] for c in companies]))}명")

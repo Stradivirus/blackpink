@@ -32,7 +32,7 @@ def get_dataframe():
 # OS별 버전 분포(스택 바차트)
 def plot_os_version_by_os(df, font_prop):
     fig, ax = plt.subplots(figsize=(10, 6))
-    version_counts = df.groupby(['os', 'os_versions']).size().unstack(fill_value=0)
+    version_counts = df.groupby(['os', 'os_version']).size().unstack(fill_value=0)
     version_counts = version_counts.sort_index()
     version_counts.plot(kind='bar', stacked=True, ax=ax)
     ax.set_title("OS별 버전 분포", fontproperties=font_prop)

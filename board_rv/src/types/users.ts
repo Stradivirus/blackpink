@@ -31,5 +31,5 @@ export interface Member {
   nickname: string;
   email: string;
   joinedAt: string;
-  company_name?: string; // ← 이 줄 추가
+  company_name?: string;
 }

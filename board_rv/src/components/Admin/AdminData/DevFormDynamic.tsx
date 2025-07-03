@@ -227,7 +227,7 @@ const DevFormDynamic: React.FC<DevFormProps> = ({ initialData = {}, onChange }) 
           value={formData["os"]}
           onChange={(e) => {
             handleChange("os", e.target.value);
-            handleChange("os_versions", "");
+            handleChange("os_version", ""); // os_versions -> os_version으로 변경
           }}
         >
           <option value="">선택</option>
@@ -240,8 +240,8 @@ const DevFormDynamic: React.FC<DevFormProps> = ({ initialData = {}, onChange }) 
       <div className="admin-modal-form-field">
         <label>OS 버전</label>
         <select
-          value={formData["os_versions"]}
-          onChange={(e) => handleChange("os_versions", e.target.value)}
+          value={formData["os_version"]} // os_versions -> os_version으로 변경
+          onChange={(e) => handleChange("os_version", e.target.value)} // os_versions -> os_version으로 변경
           disabled={!formData["os"]}
         >
           <option value="">선택</option>
