@@ -1,13 +1,12 @@
-from pymongo import MongoClient
 from faker import Faker
 import random
 from datetime import datetime, timedelta
+from db_connection import get_collections
 
-uri = "mongodb+srv://stradivirus:1q2w3e4r@cluster0.e7rvfpz.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
-client = MongoClient(uri)
-db = client["blackpink"]
-company_collection = db["companies"]
-admin_collection = db["admins"]  # admin 컬렉션 추가
+# DB 컬렉션 가져오기
+collections = get_collections()
+company_collection = collections["companies"]
+admin_collection = collections["admins"]
 
 faker = Faker("ko_KR")
 

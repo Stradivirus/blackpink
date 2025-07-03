@@ -1,12 +1,10 @@
 from datetime import datetime, timedelta
-from pymongo import MongoClient
 from faker import Faker
 import random
+from db_connection import get_db_connection
 
-uri = "mongodb+srv://stradivirus:1q2w3e4r@cluster0.e7rvfpz.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
-client = MongoClient(uri)
-db = client["blackpink"]
-
+# DB 연결
+db = get_db_connection()
 incident_collection = db["incident_logs"]
 
 # 회사 목록을 DB에서 불러오기 (company_id와 company_name 포함)

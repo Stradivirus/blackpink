@@ -1,12 +1,9 @@
-from pymongo import MongoClient
-import certifi
 from faker import Faker
 import hashlib
+from db_connection import get_db_connection
 
 # DB 연결
-uri = "mongodb+srv://stradivirus:1q2w3e4r@cluster0.e7rvfpz.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
-client = MongoClient(uri, tlsCAFile=certifi.where())
-db = client["blackpink"]
+db = get_db_connection()
 admin_collection = db["admins"]
 
 teams = [

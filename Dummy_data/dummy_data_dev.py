@@ -1,17 +1,14 @@
 import random
 from datetime import datetime, timedelta
-from pymongo import MongoClient
 from faker import Faker
+from db_connection import get_db_connection
 
 fake = Faker()
 
-
-uri = "mongodb+srv://stradivirus:1q2w3e4r@cluster0.e7rvfpz.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
-client = MongoClient(uri)
-db = client["blackpink"]
-
+# DB 연결
+db = get_db_connection()
 system_collection = db["sys_dev"]
-admin_collection = db["admins"]  # admin 컬렉션 추가
+admin_collection = db["admins"]
 
 # 회사 목록을 DB에서 불러오기
 companies = list(db["companies"].find({}))
