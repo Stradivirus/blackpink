@@ -1,5 +1,5 @@
 from faker import Faker
-import hashlib
+from passlib.hash import bcrypt  # hashlib 대신 bcrypt 사용
 from db_connection import get_db_connection
 
 # DB 연결
@@ -19,7 +19,7 @@ teams = [
 fake = Faker("ko_KR")
 
 def hash_password(password: str) -> str:
-    return hashlib.sha256(password.encode()).hexdigest()
+    return bcrypt.hash(password)  # bcrypt 해싱 사용
 
 # 최고관리자(admin/1q2w3e4r) 계정 생성
 super_admin = {
